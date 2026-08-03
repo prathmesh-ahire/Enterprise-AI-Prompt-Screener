@@ -17,3 +17,7 @@ app:
     email: ${ADMIN_EMAIL}
   seed:
     default-model: ${OLLAMA_MODEL:llama3.2}
+  jwt:
+    secret: ${JWT_SECRET}
+  cors:
+    frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
