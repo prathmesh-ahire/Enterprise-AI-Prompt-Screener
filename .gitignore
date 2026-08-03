@@ -1,0 +1,18 @@
+# Secrets
+.env
+
+# Backend (Java/Maven)
+target/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+
+# Frontend (Node)
+node_modules/
+dist/
+
+# IDE
+.idea/
+.vscode/
+
+# Local-only planning/notes (see docs/AGENTS.md)
+docs/
