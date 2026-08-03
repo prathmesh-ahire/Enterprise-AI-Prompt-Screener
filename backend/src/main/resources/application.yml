@@ -21,3 +21,6 @@ app:
     secret: ${JWT_SECRET}
   cors:
     frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+  rate-limit:
+    prompt-per-minute: 10
+    auth-per-minute: 5

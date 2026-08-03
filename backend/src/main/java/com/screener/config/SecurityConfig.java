@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final RateLimitFilter rateLimitFilter;
 
     @Value("${app.cors.frontend-origin}")
     private String frontendOrigin;
@@ -42,7 +43,8 @@ public class SecurityConfig {
                     response.getWriter().write(
                             "{\"message\":\"Authentication required\",\"status\":401}");
                 }))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(rateLimitFilter, JwtAuthFilter.class);
 
         return http.build();
     }
