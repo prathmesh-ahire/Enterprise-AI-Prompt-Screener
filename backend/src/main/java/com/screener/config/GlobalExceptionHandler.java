@@ -31,6 +31,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, message.isBlank() ? "Validation failed" : message);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler({AccessDeniedException.class, DisabledException.class})
     public ResponseEntity<ErrorResponse> handleForbidden(Exception ex) {
         return build(HttpStatus.FORBIDDEN, ex.getMessage());
