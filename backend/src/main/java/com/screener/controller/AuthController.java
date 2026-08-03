@@ -1,8 +1,11 @@
 package com.screener.controller;
 
 import com.screener.dto.AuthResponse;
+import com.screener.dto.ForgotPasswordRequest;
 import com.screener.dto.LoginRequest;
+import com.screener.dto.MessageResponse;
 import com.screener.dto.RegisterRequest;
+import com.screener.dto.ResetPasswordRequest;
 import com.screener.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
+    private static final String FORGOT_PASSWORD_GENERIC_MESSAGE =
+            "If that email exists, a password reset token has been generated and logged.";
 
     private final AuthService authService;
 
@@ -37,5 +43,17 @@ public class AuthController {
             authService.logout(userDetails.getUsername());
         }
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.email());
+        return ResponseEntity.ok(new MessageResponse(FORGOT_PASSWORD_GENERIC_MESSAGE));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok(new MessageResponse("Password has been reset successfully."));
     }
 }
