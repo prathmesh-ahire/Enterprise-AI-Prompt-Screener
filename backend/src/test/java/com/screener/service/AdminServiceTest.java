@@ -9,7 +9,6 @@ import com.screener.dto.OrgTermDto;
 import com.screener.dto.RetentionDto;
 import com.screener.model.AccountStatus;
 import com.screener.model.ApprovedModel;
-import com.screener.model.OrgConfidentialTerm;
 import com.screener.model.Role;
 import com.screener.model.SystemConfig;
 import com.screener.model.User;
