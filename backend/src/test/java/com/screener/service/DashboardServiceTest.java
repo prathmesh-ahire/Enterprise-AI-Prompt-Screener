@@ -165,6 +165,39 @@ class DashboardServiceTest {
         assertEquals(List.of(new RepeatedViolationDto(42L, 5L)), result);
     }
 
+    @Test
+    void summaryForRangeUsesTheBetweenQueryAndSameMapping() {
+        when(screeningDecisionRepository.countByDecisionBetween(any(), any())).thenReturn(List.of(
+                new Object[]{Decision.ALLOW, 2L},
+                new Object[]{Decision.BLOCK, 1L}));
+
+        DashboardSummaryDto summary = dashboardService.getSummaryForRange(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
+
+        assertEquals(3, summary.total());
+        assertEquals(2, summary.allowed());
+        assertEquals(1, summary.blocked());
+    }
+
+    @Test
+    void riskDistributionForRangeMapsEachBand() {
+        when(screeningDecisionRepository.countByDecisionBetween(any(), any()))
+                .thenReturn(List.<Object[]>of(new Object[]{Decision.MASK, 4L}));
+
+        List<RiskBandStatDto> distribution = dashboardService.getRiskDistributionForRange(null, null);
+
+        assertEquals(List.of(new RiskBandStatDto("MASK", 4L)), distribution);
+    }
+
+    @Test
+    void entityStatsForRangeMapsEachRow() {
+        when(detectionFindingRepository.countGroupedByEntityTypeBetween(any(), any()))
+                .thenReturn(List.<Object[]>of(new Object[]{EntityType.PAYMENT_CARD, 3L}));
+
+        List<EntityStatDto> stats = dashboardService.getEntityStatsForRange(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
+
+        assertEquals(List.of(new EntityStatDto("PAYMENT_CARD", 3L)), stats);
+    }
+
     private DetectionFinding finding(EntityType type) {
         DetectionFinding finding = new DetectionFinding();
         finding.setEntityType(type);

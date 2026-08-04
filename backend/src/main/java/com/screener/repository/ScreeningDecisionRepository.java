@@ -24,6 +24,11 @@ public interface ScreeningDecisionRepository extends JpaRepository<ScreeningDeci
     @Query("SELECT sd.decision, COUNT(sd) FROM ScreeningDecision sd WHERE sd.timestamp >= :since GROUP BY sd.decision")
     List<Object[]> countByDecisionSince(@Param("since") LocalDateTime since);
 
+    // 22.2/22.3: same shape as countByDecisionSince, but bounded on both ends for a
+    // caller-selected report date range instead of an open-ended "since".
+    @Query("SELECT sd.decision, COUNT(sd) FROM ScreeningDecision sd WHERE sd.timestamp BETWEEN :from AND :to GROUP BY sd.decision")
+    List<Object[]> countByDecisionBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
     // 21.4: last N BLOCK decisions, newest first - a bounded LIMIT query, not a full scan.
     List<ScreeningDecision> findTop10ByDecisionOrderByTimestampDesc(com.screener.model.Decision decision);
 

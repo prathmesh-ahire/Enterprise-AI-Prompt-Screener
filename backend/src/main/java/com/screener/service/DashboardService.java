@@ -73,13 +73,36 @@ public class DashboardService {
 
     // 21.5 - defaults to the last 7 days when the caller doesn't select a period.
     public ProcessingTimeStatsDto getProcessingTimeStats(LocalDate from, LocalDate to) {
-        LocalDateTime rangeStart = (from != null ? from : LocalDate.now().minusDays(LOOKBACK_DAYS)).atStartOfDay();
-        LocalDateTime rangeEnd = (to != null ? to : LocalDate.now()).atTime(LocalTime.MAX);
-
-        Object[] row = screeningDecisionRepository.processingTimeStatsBetween(rangeStart, rangeEnd).get(0);
+        Object[] row = screeningDecisionRepository.processingTimeStatsBetween(rangeStart(from), rangeEnd(to)).get(0);
         Double average = row[0] != null ? ((Number) row[0]).doubleValue() : null;
         Long max = row[1] != null ? ((Number) row[1]).longValue() : null;
         return new ProcessingTimeStatsDto(average, max);
+    }
+
+    // 22.2/22.3: report-export variants of 21.1/21.2/21.3, bounded to a caller-selected date
+    // range (rather than "today"/"last 7 days") - same defaulting convention as 21.5 above.
+    public DashboardSummaryDto getSummaryForRange(LocalDate from, LocalDate to) {
+        return toSummary(screeningDecisionRepository.countByDecisionBetween(rangeStart(from), rangeEnd(to)));
+    }
+
+    public List<RiskBandStatDto> getRiskDistributionForRange(LocalDate from, LocalDate to) {
+        return screeningDecisionRepository.countByDecisionBetween(rangeStart(from), rangeEnd(to)).stream()
+                .map(row -> new RiskBandStatDto(((Decision) row[0]).name(), (Long) row[1]))
+                .toList();
+    }
+
+    public List<EntityStatDto> getEntityStatsForRange(LocalDate from, LocalDate to) {
+        return detectionFindingRepository.countGroupedByEntityTypeBetween(rangeStart(from), rangeEnd(to)).stream()
+                .map(row -> new EntityStatDto(((EntityType) row[0]).name(), (Long) row[1]))
+                .toList();
+    }
+
+    private LocalDateTime rangeStart(LocalDate from) {
+        return (from != null ? from : LocalDate.now().minusDays(LOOKBACK_DAYS)).atStartOfDay();
+    }
+
+    private LocalDateTime rangeEnd(LocalDate to) {
+        return (to != null ? to : LocalDate.now()).atTime(LocalTime.MAX);
     }
 
     // 21.6
