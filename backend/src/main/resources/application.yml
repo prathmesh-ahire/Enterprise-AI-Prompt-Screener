@@ -9,8 +9,16 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL}
+      chat:
+        model: ${OLLAMA_MODEL}
 
 app:
+  ai-gateway:
+    timeout-ms: ${AI_GATEWAY_TIMEOUT_MS:30000}
+    max-response-tokens: 500
   admin:
     username: ${ADMIN_USERNAME}
     password: ${ADMIN_PASSWORD}
