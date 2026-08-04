@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 
 // todo.md Phase 24.3 - JWT is read from localStorage on every request and the user is
 // bounced to /login on any 401 (expired/invalid token, disabled account, etc.). Storing
@@ -29,3 +29,12 @@ apiClient.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+
+// Every backend error body is {message, status} (GlobalExceptionHandler) - field-level
+// validation errors are already joined into one string server-side ("field: msg; field: msg").
+export function extractErrorMessage(error: unknown): string {
+  if (error instanceof AxiosError && typeof error.response?.data?.message === 'string') {
+    return error.response.data.message
+  }
+  return 'Something went wrong. Please try again.'
+}
