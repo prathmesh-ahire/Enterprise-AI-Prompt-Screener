@@ -30,7 +30,9 @@ public class DetectionEngine {
 
     // Priority order for tie-breaking overlapping findings of equal confidence — most
     // severe first, so e.g. PRIVATE_KEY always wins over a lower-severity overlap.
-    private static final List<EntityType> SEVERITY_ORDER = List.of(
+    // Public: DashboardService (Phase 21.4) reuses this same ordering to pick a single
+    // "triggering" entity type when a blocked request has more than one finding.
+    public static final List<EntityType> SEVERITY_ORDER = List.of(
             EntityType.PRIVATE_KEY,
             EntityType.API_KEY,
             EntityType.PASSWORD_SECRET,
