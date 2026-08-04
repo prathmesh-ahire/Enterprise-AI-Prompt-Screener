@@ -76,6 +76,7 @@ public class PromptService {
     private final MaskingService maskingService;
     private final AiGatewayService aiGatewayService;
     private final ResponseSafetyChecker responseSafetyChecker;
+    private final AuditService auditService;
 
     public PromptResponseDto processPrompt(String rawText, Long userId) {
         String normalised = normalise(rawText);
@@ -120,6 +121,14 @@ public class PromptService {
         saveSignals(requestId, signals);
         saveDecision(requestId, decisionResult, processingTimeMs);
 
+        // 17.2: one event for the intake itself, one for the decision outcome. The
+        // decision's action is always decision.name() (ALLOW/MASK/CONFIRM/REVIEW/BLOCK) -
+        // this is what satisfies 17.2's "prompt blocked"/"prompt masked" as well as the
+        // BLOCK/REVIEW literals Phase 10.8's repeated-attack-pattern query depends on,
+        // without special-casing any one decision.
+        auditService.log(userId, "SUBMITTED", requestId, decisionResult.decision().name());
+        auditService.log(userId, decisionResult.decision().name(), requestId, decisionResult.decision().name());
+
         // 13.5b: ALLOW forwards the unmodified text immediately, in this same call - not
         // deferred to /confirm. If AiGatewayService throws, it propagates uncaught (13.8):
         // the row above is already saved as ALLOWED, but never advances to COMPLETED.
@@ -163,6 +172,7 @@ public class PromptService {
     private void sendToAiAndComplete(PromptRequest promptRequest, String textToSend,
                                       List<DetectionFinding> findings, String riskBand) {
         String aiResponse = aiGatewayService.send(textToSend);
+        auditService.log(promptRequest.getUserId(), "SENT_TO_AI", promptRequest.getRequestId(), riskBand);
 
         SafetyCheckResult safetyResult = responseSafetyChecker.check(
                 aiResponse, promptRequest.getPromptText(), findings,

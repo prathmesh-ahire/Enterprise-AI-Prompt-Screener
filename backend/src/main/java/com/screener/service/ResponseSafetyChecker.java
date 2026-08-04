@@ -1,13 +1,10 @@
 package com.screener.service;
 
 import com.screener.detection.DetectionEngine;
-import com.screener.model.AuditEvent;
 import com.screener.model.DetectionFinding;
-import com.screener.repository.AuditEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,11 +13,9 @@ import java.util.UUID;
  * (todo.md Phase 16). Two independent checks (16.2/16.3), either one withholds the
  * response.
  *
- * <p>16.5 asks to save the SAFE/WITHHELD result to {@code AuditEvent} — the full
- * {@code AuditService} (login/logout/etc.) isn't built until Phase 17, so this writes
- * directly via the already-existing {@code AuditEventRepository} rather than waiting on
- * that service. Phase 17.2 can fold this into a shared helper once `AuditService` exists;
- * see docs/NOTE.md.
+ * <p>16.5's SAFE/WITHHELD audit write now goes through {@link AuditService} (Phase 17.1)
+ * — this used to write {@code AuditEvent} rows directly since {@code AuditService} didn't
+ * exist yet when Phase 16 was built; see docs/NOTE.md.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,7 +28,7 @@ public class ResponseSafetyChecker {
                     + "Please contact your reviewer.";
 
     private final DetectionEngine detectionEngine;
-    private final AuditEventRepository auditEventRepository;
+    private final AuditService auditService;
 
     public SafetyCheckResult check(String responseText, String originalPromptText,
                                     List<DetectionFinding> originalFindings, UUID requestId, Long userId,
@@ -41,7 +36,7 @@ public class ResponseSafetyChecker {
         boolean unsafe = responseContainsNewSensitiveData(responseText)
                 || responseReproducesAMaskedValue(responseText, originalPromptText, originalFindings);
 
-        saveAuditEvent(userId, unsafe ? WITHHELD_ACTION : SAFE_ACTION, requestId, riskBand);
+        auditService.log(userId, unsafe ? WITHHELD_ACTION : SAFE_ACTION, requestId, riskBand);
 
         return unsafe ? new SafetyCheckResult(false, WITHHELD_MESSAGE)
                 : new SafetyCheckResult(true, responseText);
@@ -65,15 +60,5 @@ public class ResponseSafetyChecker {
             }
         }
         return false;
-    }
-
-    private void saveAuditEvent(Long userId, String action, UUID requestId, String riskBand) {
-        AuditEvent event = new AuditEvent();
-        event.setUserId(userId);
-        event.setAction(action);
-        event.setRequestId(requestId);
-        event.setRiskBand(riskBand);
-        event.setCreatedAt(LocalDateTime.now());
-        auditEventRepository.save(event);
     }
 }

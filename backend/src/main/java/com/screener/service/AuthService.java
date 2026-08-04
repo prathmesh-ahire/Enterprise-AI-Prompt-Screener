@@ -5,12 +5,10 @@ import com.screener.dto.LoginRequest;
 import com.screener.dto.RegisterRequest;
 import com.screener.config.JwtUtil;
 import com.screener.model.AccountStatus;
-import com.screener.model.AuditEvent;
 import com.screener.model.PasswordResetToken;
 import com.screener.model.Role;
 import com.screener.model.User;
 import com.screener.model.UserRole;
-import com.screener.repository.AuditEventRepository;
 import com.screener.repository.PasswordResetTokenRepository;
 import com.screener.repository.RoleRepository;
 import com.screener.repository.UserRepository;
@@ -37,7 +35,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final AuditEventRepository auditEventRepository;
+    private final AuditService auditService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -75,6 +73,8 @@ public class AuthService {
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
 
+        auditService.log(user.getId(), "LOGIN", null, null);
+
         String token = jwtUtil.generateToken(user.getUsername());
         return new AuthResponse(token, user.getUsername(), resolveRole(user.getId()));
     }
@@ -84,11 +84,7 @@ public class AuthService {
                 .map(User::getId)
                 .orElse(null);
 
-        AuditEvent event = new AuditEvent();
-        event.setUserId(userId);
-        event.setAction("LOGOUT");
-        event.setCreatedAt(LocalDateTime.now());
-        auditEventRepository.save(event);
+        auditService.log(userId, "LOGOUT", null, null);
     }
 
     public void forgotPassword(String email) {
@@ -111,6 +107,8 @@ public class AuthService {
         // exception to the "never log secrets" rule (todo.md 5.2.1 / AGENTS.md).
         log.info("Password reset requested for userId={} — token={} (expires {})",
                 user.getId(), resetToken.getToken(), resetToken.getExpiresAt());
+
+        auditService.log(user.getId(), "PASSWORD_RESET_REQUESTED", null, null);
     }
 
     public void resetPassword(String token, String newPassword) {

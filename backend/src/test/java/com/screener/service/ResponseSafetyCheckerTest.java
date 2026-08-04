@@ -1,14 +1,11 @@
 package com.screener.service;
 
 import com.screener.detection.DetectionEngine;
-import com.screener.model.AuditEvent;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
-import com.screener.repository.AuditEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,6 +15,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,13 +27,13 @@ class ResponseSafetyCheckerTest {
     private DetectionEngine detectionEngine;
 
     @Mock
-    private AuditEventRepository auditEventRepository;
+    private AuditService auditService;
 
     private ResponseSafetyChecker checker;
 
     @BeforeEach
     void setUp() {
-        checker = new ResponseSafetyChecker(detectionEngine, auditEventRepository);
+        checker = new ResponseSafetyChecker(detectionEngine, auditService);
     }
 
     @Test
@@ -86,9 +85,7 @@ class ResponseSafetyCheckerTest {
     }
 
     private void verifyAuditAction(String expectedAction) {
-        ArgumentCaptor<AuditEvent> captor = ArgumentCaptor.forClass(AuditEvent.class);
-        verify(auditEventRepository).save(captor.capture());
-        assertEquals(expectedAction, captor.getValue().getAction());
+        verify(auditService).log(any(), eq(expectedAction), any(), any());
     }
 
     private DetectionFinding finding(EntityType type, int start, int end) {

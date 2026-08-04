@@ -61,6 +61,7 @@ class PromptServiceTest {
     @Mock private MaskingService maskingService;
     @Mock private AiGatewayService aiGatewayService;
     @Mock private ResponseSafetyChecker responseSafetyChecker;
+    @Mock private AuditService auditService;
 
     private PromptService promptService;
 
@@ -73,7 +74,7 @@ class PromptServiceTest {
                 detectionFindingRepository, riskSignalRepository, screeningDecisionRepository,
                 userRoleRepository, roleRepository, detectionEngine, riskAnalysisEngine,
                 riskSubScoreCalculator, riskScorer, policyDecisionEngine, maskingService,
-                aiGatewayService, responseSafetyChecker);
+                aiGatewayService, responseSafetyChecker, auditService);
 
         lenient().when(userRoleRepository.findByUserId(USER_ID)).thenReturn(List.of());
         lenient().when(riskAnalysisEngine.analyze(anyString(), eq(USER_ID))).thenReturn(List.of());
