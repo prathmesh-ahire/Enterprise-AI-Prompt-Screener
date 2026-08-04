@@ -1,0 +1,92 @@
+package com.screener.detection;
+
+import com.screener.model.Decision;
+import com.screener.model.DetectionFinding;
+import com.screener.model.EntityType;
+import com.screener.model.SignalType;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Maps a numeric risk score to one of the 5 policy bands (todo.md 11.2.2), then applies
+ * the 3 hard override rules (11.2.3) that can escalate — never downgrade — the band
+ * regardless of the numeric score.
+ *
+ * <p>The REVIEW/CONFIRM split at 65 is this project's own implementation choice — the
+ * source project document only specifies one combined "High 50-74 -> Confirm or Review"
+ * band. Say so at viva, don't present it as taken directly from the doc.
+ */
+@Component
+public class PolicyDecisionEngine {
+
+    private static final Map<Decision, String> EXPLANATIONS = Map.of(
+            Decision.ALLOW,
+            "This prompt appears safe. It was sent to the AI model without any changes.",
+            Decision.MASK,
+            "This prompt contains sensitive information that has been automatically masked. "
+                    + "Please review the masked version before it is sent to the AI model.",
+            Decision.CONFIRM,
+            "This prompt has an elevated risk score. Please review it and confirm before it is sent "
+                    + "to the AI model.",
+            Decision.REVIEW,
+            "This prompt has been flagged for human review due to a possible policy violation or "
+                    + "prompt-injection attempt. A reviewer will assess it before anything is sent to the AI model.",
+            Decision.BLOCK,
+            "This prompt was blocked because it contains a critical secret (such as a private key or "
+                    + "API key) or was assessed as too high-risk to proceed. Please remove the sensitive "
+                    + "content and try again.");
+
+    private static final Map<Decision, String> SAFE_ACTIONS = Map.of(
+            Decision.ALLOW, "Sent to the AI model automatically.",
+            Decision.MASK, "Awaiting your confirmation to send the masked version.",
+            Decision.CONFIRM, "Awaiting your confirmation to send.",
+            Decision.REVIEW, "Sent to a human reviewer.",
+            Decision.BLOCK, "Not sent anywhere.");
+
+    public DecisionResult decide(double riskScore, List<DetectionFinding> findings, List<RiskSignalResult> signals) {
+        Decision decision = bandFor(riskScore);
+
+        Set<EntityType> entityTypes = findings.stream()
+                .map(DetectionFinding::getEntityType)
+                .collect(Collectors.toSet());
+        Set<SignalType> signalTypes = signals.stream()
+                .map(RiskSignalResult::type)
+                .collect(Collectors.toSet());
+
+        if (entityTypes.contains(EntityType.PRIVATE_KEY) || entityTypes.contains(EntityType.API_KEY)) {
+            decision = atLeast(decision, Decision.BLOCK);
+        }
+        if (signalTypes.contains(SignalType.INSTRUCTION_OVERRIDE) || signalTypes.contains(SignalType.POLICY_BYPASS)) {
+            decision = atLeast(decision, Decision.REVIEW);
+        }
+        if (entityTypes.contains(EntityType.PASSWORD_SECRET)) {
+            decision = atLeast(decision, Decision.MASK);
+        }
+
+        return new DecisionResult(decision, riskScore, EXPLANATIONS.get(decision), SAFE_ACTIONS.get(decision));
+    }
+
+    private Decision bandFor(double riskScore) {
+        if (riskScore >= 75) {
+            return Decision.BLOCK;
+        }
+        if (riskScore >= 65) {
+            return Decision.REVIEW;
+        }
+        if (riskScore >= 50) {
+            return Decision.CONFIRM;
+        }
+        if (riskScore >= 25) {
+            return Decision.MASK;
+        }
+        return Decision.ALLOW;
+    }
+
+    private Decision atLeast(Decision current, Decision floor) {
+        return current.ordinal() >= floor.ordinal() ? current : floor;
+    }
+}
