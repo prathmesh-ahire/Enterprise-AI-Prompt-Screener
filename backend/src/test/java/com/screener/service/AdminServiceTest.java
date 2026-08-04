@@ -6,7 +6,6 @@ import com.screener.dto.AdminPolicyDto;
 import com.screener.dto.AdminUserDto;
 import com.screener.dto.ApprovedModelDto;
 import com.screener.dto.OrgTermDto;
-import com.screener.dto.RetentionDto;
 import com.screener.model.AccountStatus;
 import com.screener.model.ApprovedModel;
 import com.screener.model.Role;
@@ -220,7 +219,7 @@ class AdminServiceTest {
 
     @Test
     void updateRetentionPersistsAndLogs() {
-        RetentionDto result = adminService.updateRetention(30, ADMIN_ID);
+        adminService.updateRetention(30, ADMIN_ID);
 
         ArgumentCaptor<SystemConfig> captor = ArgumentCaptor.forClass(SystemConfig.class);
         verify(systemConfigRepository).save(captor.capture());
