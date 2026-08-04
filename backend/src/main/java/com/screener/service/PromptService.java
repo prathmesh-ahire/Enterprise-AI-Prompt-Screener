@@ -162,6 +162,49 @@ public class PromptService {
         return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation());
     }
 
+    // 18.3: reviewer approves (or marks FALSE_POSITIVE) a PENDING_REVIEW prompt. Forwards
+    // the masked text, same as /confirm (13.7) - except when there are no findings at all
+    // to mask (13.1 only masks when findings exist), in which case the raw text is safe
+    // to forward as-is since nothing sensitive was ever detected in it. This is the one
+    // case where todo.md 18.3's "the already-masked text ... now guarantees it exists"
+    // doesn't literally hold - see docs/NOTE.md.
+    public PromptResponseDto approveFromReview(UUID requestId) {
+        PromptRequest promptRequest = requirePendingReview(requestId);
+        ScreeningDecision decision = requireDecision(requestId);
+        List<DetectionFinding> findings = detectionFindingRepository.findByRequestId(requestId);
+
+        String textToSend = promptRequest.getMaskedText() != null
+                ? promptRequest.getMaskedText() : promptRequest.getPromptText();
+        sendToAiAndComplete(promptRequest, textToSend, findings, decision.getDecision().name());
+
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation());
+    }
+
+    // 18.3: reviewer rejects (or requests correction) - never reaches AiGatewayService.
+    public PromptResponseDto rejectFromReview(UUID requestId) {
+        PromptRequest promptRequest = requirePendingReview(requestId);
+        ScreeningDecision decision = requireDecision(requestId);
+
+        promptRequest.setStatus(PromptStatus.BLOCKED);
+        promptRequestRepository.save(promptRequest);
+
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation());
+    }
+
+    private PromptRequest requirePendingReview(UUID requestId) {
+        PromptRequest promptRequest = promptRequestRepository.findByRequestId(requestId)
+                .orElseThrow(() -> new NoSuchElementException("Prompt request not found"));
+        if (promptRequest.getStatus() != PromptStatus.PENDING_REVIEW) {
+            throw new IllegalStateException("Prompt request is not awaiting review");
+        }
+        return promptRequest;
+    }
+
+    private ScreeningDecision requireDecision(UUID requestId) {
+        return screeningDecisionRepository.findByRequestId(requestId)
+                .orElseThrow(() -> new NoSuchElementException("Screening decision not found"));
+    }
+
     private void sendToAiAndComplete(PromptRequest promptRequest, List<DetectionFinding> findings, String riskBand) {
         sendToAiAndComplete(promptRequest, promptRequest.getPromptText(), findings, riskBand);
     }
