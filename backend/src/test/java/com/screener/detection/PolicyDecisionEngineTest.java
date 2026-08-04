@@ -4,15 +4,35 @@ import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
 import com.screener.model.SignalType;
+import com.screener.repository.SystemConfigRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class PolicyDecisionEngineTest {
 
-    private final PolicyDecisionEngine engine = new PolicyDecisionEngine();
+    @Mock private SystemConfigRepository systemConfigRepository;
+
+    private PolicyDecisionEngine engine;
+
+    // Empty repo -> every threshold falls back to its default (25/50/65/75), matching
+    // the behaviour before thresholds became system_config-driven (20.3).
+    @BeforeEach
+    void setUp() {
+        engine = new PolicyDecisionEngine(systemConfigRepository);
+        lenient().when(systemConfigRepository.findByConfigKey(anyString())).thenReturn(Optional.empty());
+    }
 
     @Test
     void mapsScoreToEachOfTheFiveBandsWhenNoOverridesApply() {

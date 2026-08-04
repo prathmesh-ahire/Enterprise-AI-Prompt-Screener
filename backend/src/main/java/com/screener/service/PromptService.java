@@ -52,10 +52,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PromptService {
 
-    private static final String MAX_LENGTH_CONFIG_KEY = "max_prompt_length";
-    private static final int DEFAULT_MAX_LENGTH = 2000;
-    private static final String POLICY_VERSION_CONFIG_KEY = "policy_version";
-    private static final int DEFAULT_POLICY_VERSION = 1;
+    // Public: AdminService (Phase 20.3) reads/writes these same keys and defaults.
+    public static final String MAX_LENGTH_CONFIG_KEY = "max_prompt_length";
+    public static final int DEFAULT_MAX_LENGTH = 2000;
+    public static final String POLICY_VERSION_CONFIG_KEY = "policy_version";
+    public static final int DEFAULT_POLICY_VERSION = 1;
 
     // Most-privileged-first, for resolving policyContextScore's role baseline (11.1.4)
     // when a user somehow holds more than one role.

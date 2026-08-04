@@ -4,6 +4,9 @@ import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
 import com.screener.model.SignalType;
+import com.screener.model.SystemConfig;
+import com.screener.repository.SystemConfigRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,9 +22,26 @@ import java.util.stream.Collectors;
  * <p>The REVIEW/CONFIRM split at 65 is this project's own implementation choice — the
  * source project document only specifies one combined "High 50-74 -> Confirm or Review"
  * band. Say so at viva, don't present it as taken directly from the doc.
+ *
+ * <p>The 4 band boundaries are read from {@code system_config} (falling back to the
+ * defaults above) so Phase 20.3's admin policy PUT can actually change them, same
+ * pattern as {@code DetectionEngine}'s per-detector toggle.
  */
 @Component
+@RequiredArgsConstructor
 public class PolicyDecisionEngine {
+
+    // Public: AdminService (Phase 20.3) reads/writes these same keys and defaults.
+    public static final String MASK_THRESHOLD_KEY = "risk_threshold_mask";
+    public static final String CONFIRM_THRESHOLD_KEY = "risk_threshold_confirm";
+    public static final String REVIEW_THRESHOLD_KEY = "risk_threshold_review";
+    public static final String BLOCK_THRESHOLD_KEY = "risk_threshold_block";
+    public static final int DEFAULT_MASK_THRESHOLD = 25;
+    public static final int DEFAULT_CONFIRM_THRESHOLD = 50;
+    public static final int DEFAULT_REVIEW_THRESHOLD = 65;
+    public static final int DEFAULT_BLOCK_THRESHOLD = 75;
+
+    private final SystemConfigRepository systemConfigRepository;
 
     private static final Map<Decision, String> EXPLANATIONS = Map.of(
             Decision.ALLOW,
@@ -71,19 +91,26 @@ public class PolicyDecisionEngine {
     }
 
     private Decision bandFor(double riskScore) {
-        if (riskScore >= 75) {
+        if (riskScore >= resolveThreshold(BLOCK_THRESHOLD_KEY, DEFAULT_BLOCK_THRESHOLD)) {
             return Decision.BLOCK;
         }
-        if (riskScore >= 65) {
+        if (riskScore >= resolveThreshold(REVIEW_THRESHOLD_KEY, DEFAULT_REVIEW_THRESHOLD)) {
             return Decision.REVIEW;
         }
-        if (riskScore >= 50) {
+        if (riskScore >= resolveThreshold(CONFIRM_THRESHOLD_KEY, DEFAULT_CONFIRM_THRESHOLD)) {
             return Decision.CONFIRM;
         }
-        if (riskScore >= 25) {
+        if (riskScore >= resolveThreshold(MASK_THRESHOLD_KEY, DEFAULT_MASK_THRESHOLD)) {
             return Decision.MASK;
         }
         return Decision.ALLOW;
+    }
+
+    private int resolveThreshold(String key, int defaultValue) {
+        return systemConfigRepository.findByConfigKey(key)
+                .map(SystemConfig::getConfigValue)
+                .map(Integer::parseInt)
+                .orElse(defaultValue);
     }
 
     private Decision atLeast(Decision current, Decision floor) {

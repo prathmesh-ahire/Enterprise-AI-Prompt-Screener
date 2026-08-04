@@ -8,4 +8,7 @@ import java.util.UUID;
 
 public interface DetectionFindingRepository extends JpaRepository<DetectionFinding, Long> {
     List<DetectionFinding> findByRequestId(UUID requestId);
+
+    // 20.6b: retention cleanup job.
+    void deleteByRequestIdIn(List<UUID> requestIds);
 }

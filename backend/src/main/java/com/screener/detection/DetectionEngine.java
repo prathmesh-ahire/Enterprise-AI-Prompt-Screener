@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DetectionEngine {
 
-    private static final String DISABLED_DETECTORS_CONFIG_KEY = "disabled_detectors";
+    // Public: AdminService (Phase 20.3) reads/writes this same key.
+    public static final String DISABLED_DETECTORS_CONFIG_KEY = "disabled_detectors";
 
     // Priority order for tie-breaking overlapping findings of equal confidence — most
     // severe first, so e.g. PRIVATE_KEY always wins over a lower-severity overlap.

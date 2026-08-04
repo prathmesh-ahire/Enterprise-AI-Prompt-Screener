@@ -12,4 +12,7 @@ public interface ScreeningDecisionRepository extends JpaRepository<ScreeningDeci
 
     // 19.1: batch lookup for a page of history items, avoids one query per row.
     List<ScreeningDecision> findByRequestIdIn(List<UUID> requestIds);
+
+    // 20.6b: retention cleanup job.
+    void deleteByRequestIdIn(List<UUID> requestIds);
 }
