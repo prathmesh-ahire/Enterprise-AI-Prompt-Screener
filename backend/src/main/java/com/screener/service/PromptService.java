@@ -8,6 +8,7 @@ import com.screener.detection.RiskScorer;
 import com.screener.detection.RiskSignalResult;
 import com.screener.detection.RiskSubScoreCalculator;
 import com.screener.detection.RiskSubScores;
+import com.screener.dto.PromptHistoryItemDto;
 import com.screener.dto.PromptResponseDto;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
@@ -26,6 +27,8 @@ import com.screener.repository.ScreeningDecisionRepository;
 import com.screener.repository.SystemConfigRepository;
 import com.screener.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
@@ -189,6 +193,42 @@ public class PromptService {
         promptRequestRepository.save(promptRequest);
 
         return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation());
+    }
+
+    // 19.1: paginated, masked-text-only history for the caller's own prompts. Batches the
+    // ScreeningDecision lookup for the whole page instead of one query per row.
+    public Page<PromptHistoryItemDto> getMyHistory(Long userId, Pageable pageable) {
+        Page<PromptRequest> page = promptRequestRepository.findByUserId(userId, pageable);
+        List<UUID> requestIds = page.getContent().stream().map(PromptRequest::getRequestId).toList();
+        Map<UUID, ScreeningDecision> decisionsByRequestId = screeningDecisionRepository.findByRequestIdIn(requestIds)
+                .stream()
+                .collect(Collectors.toMap(ScreeningDecision::getRequestId, decision -> decision));
+        return page.map(promptRequest -> toHistoryItem(promptRequest, decisionsByRequestId.get(promptRequest.getRequestId())));
+    }
+
+    // 19.2: ownership-checked single lookup - reuses PromptResponseDto, which already
+    // never carries raw prompt text (same shape /submit and /confirm return).
+    public PromptResponseDto getMyPromptDetails(UUID requestId, Long userId) {
+        PromptRequest promptRequest = promptRequestRepository.findByRequestId(requestId)
+                .orElseThrow(() -> new NoSuchElementException("Prompt request not found"));
+        if (!promptRequest.getUserId().equals(userId)) {
+            throw new AccessDeniedException("You do not have access to this prompt request");
+        }
+        ScreeningDecision decision = screeningDecisionRepository.findByRequestId(requestId).orElse(null);
+        String decisionName = decision != null ? decision.getDecision().name() : null;
+        String explanation = decision != null ? decision.getExplanation() : null;
+        return toDto(promptRequest, decisionName, explanation);
+    }
+
+    private PromptHistoryItemDto toHistoryItem(PromptRequest promptRequest, ScreeningDecision decision) {
+        return new PromptHistoryItemDto(
+                promptRequest.getRequestId(),
+                promptRequest.getSubmittedAt(),
+                promptRequest.getStatus().name(),
+                decision != null ? decision.getDecision().name() : null,
+                decision != null ? decision.getRiskScore() : null,
+                decision != null ? decision.getExplanation() : null,
+                promptRequest.getMaskedText());
     }
 
     private PromptRequest requirePendingReview(UUID requestId) {

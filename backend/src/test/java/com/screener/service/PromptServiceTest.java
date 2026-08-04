@@ -7,6 +7,7 @@ import com.screener.detection.RiskAnalysisEngine;
 import com.screener.detection.RiskScorer;
 import com.screener.detection.RiskSubScoreCalculator;
 import com.screener.detection.RiskSubScores;
+import com.screener.dto.PromptHistoryItemDto;
 import com.screener.dto.PromptResponseDto;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
@@ -27,13 +28,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -306,6 +312,77 @@ class PromptServiceTest {
         when(promptRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(promptRequest));
 
         assertThrows(IllegalStateException.class, () -> promptService.confirmAndSend(requestId, USER_ID));
+    }
+
+    @Test
+    void getMyHistoryReturnsMaskedTextAndTheMatchingDecisionForEachRow() {
+        UUID requestId1 = UUID.randomUUID();
+        UUID requestId2 = UUID.randomUUID();
+        PromptRequest request1 = new PromptRequest();
+        request1.setRequestId(requestId1);
+        request1.setUserId(USER_ID);
+        request1.setStatus(PromptStatus.COMPLETED);
+        request1.setSubmittedAt(LocalDateTime.now());
+        request1.setMaskedText("Email me at [EMAIL]");
+        PromptRequest request2 = new PromptRequest();
+        request2.setRequestId(requestId2);
+        request2.setUserId(USER_ID);
+        request2.setStatus(PromptStatus.ALLOWED);
+        request2.setSubmittedAt(LocalDateTime.now());
+
+        ScreeningDecision decision1 = new ScreeningDecision();
+        decision1.setRequestId(requestId1);
+        decision1.setDecision(Decision.MASK);
+        decision1.setRiskScore(30.0);
+        decision1.setExplanation("masked");
+
+        Pageable pageable = PageRequest.of(0, 10);
+        when(promptRequestRepository.findByUserId(USER_ID, pageable))
+                .thenReturn(new PageImpl<>(List.of(request1, request2), pageable, 2));
+        when(screeningDecisionRepository.findByRequestIdIn(List.of(requestId1, requestId2)))
+                .thenReturn(List.of(decision1));
+
+        List<PromptHistoryItemDto> items = promptService.getMyHistory(USER_ID, pageable).getContent();
+
+        assertEquals(2, items.size());
+        assertEquals("MASK", items.get(0).decision());
+        assertEquals("Email me at [EMAIL]", items.get(0).maskedText());
+        assertNull(items.get(1).decision());
+    }
+
+    @Test
+    void getMyPromptDetailsReturnsOwnRequest() {
+        UUID requestId = UUID.randomUUID();
+        PromptRequest promptRequest = new PromptRequest();
+        promptRequest.setRequestId(requestId);
+        promptRequest.setUserId(USER_ID);
+        promptRequest.setStatus(PromptStatus.COMPLETED);
+        promptRequest.setMaskedText("Email me at [EMAIL]");
+
+        ScreeningDecision decision = new ScreeningDecision();
+        decision.setRequestId(requestId);
+        decision.setDecision(Decision.MASK);
+        decision.setExplanation("masked");
+
+        when(promptRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(promptRequest));
+        when(screeningDecisionRepository.findByRequestId(requestId)).thenReturn(Optional.of(decision));
+
+        PromptResponseDto result = promptService.getMyPromptDetails(requestId, USER_ID);
+
+        assertEquals("MASK", result.decision());
+        assertEquals("Email me at [EMAIL]", result.maskedText());
+    }
+
+    @Test
+    void getMyPromptDetailsRejectsACallerWhoDoesNotOwnTheRequest() {
+        UUID requestId = UUID.randomUUID();
+        PromptRequest promptRequest = new PromptRequest();
+        promptRequest.setRequestId(requestId);
+        promptRequest.setUserId(999L);
+
+        when(promptRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(promptRequest));
+
+        assertThrows(AccessDeniedException.class, () -> promptService.getMyPromptDetails(requestId, USER_ID));
     }
 
     private DetectionFinding finding(EntityType type) {
