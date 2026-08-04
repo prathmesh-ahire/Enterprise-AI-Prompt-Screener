@@ -1,6 +1,7 @@
 package com.screener.config;
 
 import com.screener.dto.ErrorResponse;
+import com.screener.service.AiGatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -59,6 +60,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({IllegalStateException.class, DataIntegrityViolationException.class})
     public ResponseEntity<ErrorResponse> handleConflict(Exception ex) {
         return build(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    // 13.8: Ollama unreachable/timed out — the caller (PromptService) never marks the
+    // prompt COMPLETED when this is thrown, so the request row is left exactly where it
+    // was (ALLOWED-but-not-yet-sent, or still MASKED/PENDING_CONFIRM) for a retry.
+    @ExceptionHandler(AiGatewayException.class)
+    public ResponseEntity<ErrorResponse> handleAiGatewayUnavailable(AiGatewayException ex) {
+        return build(HttpStatus.SERVICE_UNAVAILABLE, "AI model is currently unavailable");
     }
 
     @ExceptionHandler(Exception.class)
