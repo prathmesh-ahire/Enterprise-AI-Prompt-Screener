@@ -707,3 +707,10 @@ code {
   background: var(--bg);
   color: var(--text-h);
 }
+
+/* Phase 32+ model configuration: status row */
+.model-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

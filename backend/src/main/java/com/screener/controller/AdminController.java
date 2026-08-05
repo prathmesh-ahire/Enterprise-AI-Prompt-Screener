@@ -5,6 +5,7 @@ import com.screener.dto.AdminUserDto;
 import com.screener.dto.ApprovedModelCreateRequest;
 import com.screener.dto.ApprovedModelDto;
 import com.screener.dto.ApprovedModelUpdateRequest;
+import com.screener.dto.OllamaStatusDto;
 import com.screener.dto.OrgTermCreateRequest;
 import com.screener.dto.OrgTermDto;
 import com.screener.dto.PromptHistoryItemDto;
@@ -13,6 +14,7 @@ import com.screener.model.AccountStatus;
 import com.screener.model.User;
 import com.screener.repository.UserRepository;
 import com.screener.service.AdminService;
+import com.screener.service.AiGatewayService;
 import com.screener.service.PromptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,7 @@ public class AdminController {
     private final AdminService adminService;
     private final UserRepository userRepository;
     private final PromptService promptService;
+    private final AiGatewayService aiGatewayService;
 
     @GetMapping("/users")
     public ResponseEntity<Page<AdminUserDto>> users(Pageable pageable) {
@@ -119,6 +122,13 @@ public class AdminController {
                                                                     @Valid @RequestBody ApprovedModelUpdateRequest request,
                                                                     @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(adminService.updateApprovedModel(id, request.active(), adminId(userDetails)));
+    }
+
+    // 32.2 - lets the Model Configuration page show a live Online/Unavailable indicator
+    // without sending an actual chat prompt through the gateway.
+    @GetMapping("/ollama-status")
+    public ResponseEntity<OllamaStatusDto> ollamaStatus() {
+        return ResponseEntity.ok(new OllamaStatusDto(aiGatewayService.isReachable()));
     }
 
     @GetMapping("/retention")

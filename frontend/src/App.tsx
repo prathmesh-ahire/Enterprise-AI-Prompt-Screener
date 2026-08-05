@@ -15,9 +15,8 @@ import { PolicyManagementPage } from './pages/PolicyManagementPage'
 import { ModelConfigPage } from './pages/ModelConfigPage'
 
 // todo.md Phase 24.2/24.5 (ProtectedRoute: authenticated-vs-not) + Phase 29.1
-// (RoleProtectedRoute: REVIEWER/ADMIN on /review) + Phase 30.1/31.1 (ADMIN-only on
-// /admin, /admin/policy). /admin/models still gets the same guard from Phase 32.1,
-// which builds that page.
+// (RoleProtectedRoute: REVIEWER/ADMIN on /review) + Phase 30.1/31.1/32.1 (ADMIN-only on
+// /admin, /admin/policy, /admin/models).
 function App() {
   return (
     <BrowserRouter>
@@ -38,8 +37,8 @@ function App() {
             <Route element={<RoleProtectedRoute allow={['ADMIN']} />}>
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/admin/policy" element={<PolicyManagementPage />} />
+              <Route path="/admin/models" element={<ModelConfigPage />} />
             </Route>
-            <Route path="/admin/models" element={<ModelConfigPage />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
