@@ -456,3 +456,91 @@ code {
   border: 1px solid var(--border);
   color: var(--text-h);
 }
+
+/* Phase 28+ history table, pagination, decision badges */
+.badge-band-green {
+  background: rgba(42, 157, 92, 0.12);
+  border: 1px solid rgba(42, 157, 92, 0.4);
+  color: #2a9d5c;
+}
+
+.badge-band-yellow {
+  background: rgba(230, 184, 0, 0.12);
+  border: 1px solid rgba(230, 184, 0, 0.4);
+  color: #a37f00;
+}
+
+.badge-band-orange {
+  background: rgba(230, 126, 23, 0.12);
+  border: 1px solid rgba(230, 126, 23, 0.4);
+  color: #e67e17;
+}
+
+.badge-band-red {
+  background: rgba(211, 51, 51, 0.12);
+  border: 1px solid rgba(211, 51, 51, 0.4);
+  color: #d33;
+}
+
+.history-filter {
+  max-width: 260px;
+  margin-bottom: 16px;
+}
+
+.history-filter select {
+  font: inherit;
+  font-size: 15px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.history-table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.history-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-row {
+  cursor: pointer;
+}
+
+.history-row:hover {
+  background: var(--code-bg);
+}
+
+.history-detail-row td {
+  background: var(--code-bg);
+}
+
+.history-detail {
+  padding: 8px 4px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.pagination-label {
+  font-size: 14px;
+  color: var(--text);
+}
