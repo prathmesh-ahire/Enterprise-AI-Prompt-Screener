@@ -7,11 +7,13 @@ import com.screener.dto.ApprovedModelDto;
 import com.screener.dto.ApprovedModelUpdateRequest;
 import com.screener.dto.OrgTermCreateRequest;
 import com.screener.dto.OrgTermDto;
+import com.screener.dto.PromptHistoryItemDto;
 import com.screener.dto.RetentionDto;
 import com.screener.model.AccountStatus;
 import com.screener.model.User;
 import com.screener.repository.UserRepository;
 import com.screener.service.AdminService;
+import com.screener.service.PromptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,10 +47,20 @@ public class AdminController {
 
     private final AdminService adminService;
     private final UserRepository userRepository;
+    private final PromptService promptService;
 
     @GetMapping("/users")
     public ResponseEntity<Page<AdminUserDto>> users(Pageable pageable) {
         return ResponseEntity.ok(adminService.getUsers(pageable));
+    }
+
+    // Phase 30.5 - lets the admin dashboard's Repeated Violations panel link through to a
+    // flagged user's history. Reuses PromptService.getMyHistory verbatim (same
+    // masked-text-only PromptHistoryItemDto a user gets for their own history) - the only
+    // difference is the userId comes from the path instead of the caller's own JWT.
+    @GetMapping("/users/{id}/history")
+    public ResponseEntity<Page<PromptHistoryItemDto>> userHistory(@PathVariable Long id, Pageable pageable) {
+        return ResponseEntity.ok(promptService.getMyHistory(id, pageable));
     }
 
     @PostMapping("/users/{id}/enable")

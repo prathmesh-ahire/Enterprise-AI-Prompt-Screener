@@ -573,3 +573,81 @@ code {
   flex-wrap: wrap;
   margin-top: 8px;
 }
+
+/* Phase 30+ admin dashboard */
+.page-content-wide {
+  max-width: 960px;
+}
+
+.admin-section {
+  margin: 32px 0;
+}
+
+.admin-section h2 {
+  margin-bottom: 12px;
+}
+
+.stat-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stat-card {
+  flex: 1 1 120px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  text-align: center;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.stat-card-label {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.bar-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+}
+
+.bar-count {
+  font-size: 13px;
+  color: var(--text);
+  text-align: right;
+}

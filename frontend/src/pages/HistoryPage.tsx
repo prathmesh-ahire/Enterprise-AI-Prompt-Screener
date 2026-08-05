@@ -2,6 +2,8 @@ import { Fragment, useEffect, useState } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
 import { EntityChips } from '../components/EntityChips'
+import { decisionBadgeClass } from '../components/decisionBadge'
+import type { PageResponse } from '../api/types'
 
 const PAGE_SIZE = 10
 
@@ -26,15 +28,6 @@ interface PromptDetail {
   entityTypes: string[]
 }
 
-interface PageResponse<T> {
-  content: T[]
-  totalElements: number
-  totalPages: number
-  number: number
-  first: boolean
-  last: boolean
-}
-
 // 28.4's filter is by *decision*, not the literal `status` values todo.md named
 // (ALLOWED/MASKED/BLOCKED/PENDING_REVIEW). Once a prompt actually gets an AI reply its
 // `status` moves on to COMPLETED (PromptService.sendToAiAndComplete) - so filtering on
@@ -52,23 +45,6 @@ const DECISION_FILTERS: { value: string; label: string }[] = [
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
-}
-
-// Coloured by the *decision* itself, not the row's raw score - an 11.2.3 hard override
-// (e.g. a REVIEW forced by an injection phrase on an otherwise low-scoring prompt) needs
-// to still read as elevated here, since that's exactly the case a score-coloured badge
-// would misrepresent as "safe." Same 4-colour language as RiskScoreBar/EntityChips, reused
-// as a mapping of a different key (decision, not score).
-const DECISION_BAND: Record<string, 'green' | 'yellow' | 'orange' | 'red'> = {
-  ALLOW: 'green',
-  MASK: 'yellow',
-  CONFIRM: 'orange',
-  REVIEW: 'orange',
-  BLOCK: 'red',
-}
-
-function decisionBadgeClass(decision: string): string {
-  return `badge-band-${DECISION_BAND[decision] ?? 'green'}`
 }
 
 export function HistoryPage() {
