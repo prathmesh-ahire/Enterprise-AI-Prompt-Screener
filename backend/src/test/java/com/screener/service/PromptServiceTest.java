@@ -135,6 +135,29 @@ class PromptServiceTest {
         verify(aiGatewayService, never()).send(any());
     }
 
+    // 36.5: full-pipeline test with all detectors/engines mocked, verifying the entity
+    // actually persisted to screeningDecisionRepository (not just the returned DTO)
+    // matches what PolicyDecisionEngine decided.
+    @Test
+    void fullPipelinePersistsScreeningDecisionMatchingThePolicyEngineOutput() {
+        DetectionFinding emailFinding = finding(EntityType.PERSONAL_EMAIL);
+        when(detectionEngine.detectAll(anyString())).thenReturn(List.of(emailFinding));
+        when(maskingService.getMaskedPreview(anyString(), any())).thenReturn("Email me at [EMAIL]");
+        when(riskScorer.score(any())).thenReturn(30.0);
+        when(policyDecisionEngine.decide(eq(30.0), any(), any()))
+                .thenReturn(new DecisionResult(Decision.MASK, 30.0, "masked explanation", "awaiting confirm"));
+
+        promptService.processPrompt("Email me at a@b.com", USER_ID);
+
+        ArgumentCaptor<ScreeningDecision> captor = ArgumentCaptor.forClass(ScreeningDecision.class);
+        verify(screeningDecisionRepository).save(captor.capture());
+        ScreeningDecision saved = captor.getValue();
+        assertEquals(Decision.MASK, saved.getDecision());
+        assertEquals(30.0, saved.getRiskScore());
+        assertEquals("masked explanation", saved.getExplanation());
+        assertEquals(PromptService.DEFAULT_POLICY_VERSION, saved.getPolicyVersion());
+    }
+
     @Test
     void reviewDecisionKeepsMaskedTextEvenThoughItIsNotSentToAi() {
         when(detectionEngine.detectAll(anyString())).thenReturn(List.of(finding(EntityType.PERSONAL_EMAIL)));
