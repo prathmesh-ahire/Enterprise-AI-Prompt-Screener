@@ -22,6 +22,8 @@ import com.screener.repository.SystemConfigRepository;
 import com.screener.repository.UserRepository;
 import com.screener.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdminService {
 
+    private static final Logger log = LoggerFactory.getLogger(AdminService.class);
+
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
@@ -60,6 +64,7 @@ public class AdminService {
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
         user.setAccountStatus(status);
         userRepository.save(user);
+        log.info("Admin {} set user {} account status to {}", adminId, userId, status);
         auditService.log(adminId, "ADMIN_USER_" + status.name(), null, null);
         return toUserDto(user);
     }
@@ -91,6 +96,7 @@ public class AdminService {
         int newVersion = resolveInt(PromptService.POLICY_VERSION_CONFIG_KEY, PromptService.DEFAULT_POLICY_VERSION) + 1;
         saveConfig(PromptService.POLICY_VERSION_CONFIG_KEY, String.valueOf(newVersion));
 
+        log.info("Admin {} updated the screening policy (new policyVersion={})", adminId, newVersion);
         auditService.log(adminId, "ADMIN_POLICY_UPDATED", null, null);
         return getPolicy();
     }
@@ -106,6 +112,8 @@ public class AdminService {
         entity.setAddedBy(adminId);
         entity.setActive(true);
         orgConfidentialTermRepository.save(entity);
+        // Term value never logged - it's confidential business terminology by definition.
+        log.info("Admin {} added org-confidential term id={}", adminId, entity.getId());
         auditService.log(adminId, "ADMIN_ORG_TERM_ADDED", null, null);
         return toTermDto(entity);
     }
@@ -115,6 +123,7 @@ public class AdminService {
             throw new NoSuchElementException("Org confidential term not found");
         }
         orgConfidentialTermRepository.deleteById(id);
+        log.info("Admin {} deleted org-confidential term id={}", adminId, id);
         auditService.log(adminId, "ADMIN_ORG_TERM_DELETED", null, null);
     }
 
@@ -129,6 +138,7 @@ public class AdminService {
         model.setActive(true);
         model.setAddedAt(LocalDateTime.now());
         approvedModelRepository.save(model);
+        log.info("Admin {} added approved model {}", adminId, modelName);
         auditService.log(adminId, "ADMIN_MODEL_ADDED", null, null);
         return toModelDto(model);
     }
@@ -138,6 +148,7 @@ public class AdminService {
                 .orElseThrow(() -> new NoSuchElementException("Approved model not found"));
         model.setActive(active);
         approvedModelRepository.save(model);
+        log.info("Admin {} set approved model {} active={}", adminId, model.getModelName(), active);
         auditService.log(adminId, active ? "ADMIN_MODEL_ACTIVATED" : "ADMIN_MODEL_DEACTIVATED", null, null);
         return toModelDto(model);
     }
@@ -149,6 +160,7 @@ public class AdminService {
 
     public RetentionDto updateRetention(int retentionDays, Long adminId) {
         saveConfig(RetentionCleanupJob.RETENTION_DAYS_KEY, String.valueOf(retentionDays));
+        log.info("Admin {} updated retention period to {} days", adminId, retentionDays);
         auditService.log(adminId, "ADMIN_RETENTION_UPDATED", null, null);
         return getRetention();
     }

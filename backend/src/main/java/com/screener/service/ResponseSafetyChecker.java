@@ -3,6 +3,8 @@ package com.screener.service;
 import com.screener.detection.DetectionEngine;
 import com.screener.model.DetectionFinding;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ResponseSafetyChecker {
 
+    private static final Logger log = LoggerFactory.getLogger(ResponseSafetyChecker.class);
+
     static final String SAFE_ACTION = "SAFE";
     static final String WITHHELD_ACTION = "WITHHELD";
     static final String WITHHELD_MESSAGE =
@@ -36,6 +40,11 @@ public class ResponseSafetyChecker {
         boolean unsafe = responseContainsNewSensitiveData(responseText)
                 || responseReproducesAMaskedValue(responseText, originalPromptText, originalFindings);
 
+        if (unsafe) {
+            log.warn("AI response for prompt {} withheld - contained sensitive data", requestId);
+        } else {
+            log.debug("AI response for prompt {} passed the safety check", requestId);
+        }
         auditService.log(userId, unsafe ? WITHHELD_ACTION : SAFE_ACTION, requestId, riskBand);
 
         return unsafe ? new SafetyCheckResult(false, WITHHELD_MESSAGE)

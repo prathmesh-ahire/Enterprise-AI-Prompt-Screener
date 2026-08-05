@@ -1,5 +1,7 @@
 package com.screener.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,8 @@ import java.util.concurrent.TimeoutException;
  */
 @Service
 public class AiGatewayService {
+
+    private static final Logger log = LoggerFactory.getLogger(AiGatewayService.class);
 
     // Fixed, secret-free system instruction (15.6b-c). No tool/file/internet access is
     // configured on this ChatClient at all, so "no access to tools" is true by
@@ -84,17 +88,25 @@ public class AiGatewayService {
     // HTTP call, it doesn't cancel Ollama's own generation — acceptable here since this
     // gateway only ever talks to one local, single-tenant Ollama instance.
     public String send(String text) {
+        // Never log prompt/response content here - it's already screened text by the time
+        // it reaches this class, but length only keeps this safe regardless.
+        log.debug("Sending request to AI model (length={} chars)", text.length());
         CompletableFuture<String> future =
                 CompletableFuture.supplyAsync(() -> chatClient.prompt().user(text).call().content());
         try {
-            return future.get(timeoutMs, TimeUnit.MILLISECONDS);
+            String response = future.get(timeoutMs, TimeUnit.MILLISECONDS);
+            log.debug("AI model responded (length={} chars)", response.length());
+            return response;
         } catch (TimeoutException e) {
             future.cancel(true);
+            log.warn("AI model request timed out after {} ms", timeoutMs);
             throw new AiGatewayException("AI model request timed out", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            log.warn("AI model request was interrupted");
             throw new AiGatewayException("AI model request was interrupted", e);
         } catch (ExecutionException e) {
+            log.warn("AI model is currently unavailable: {}", e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             throw new AiGatewayException("AI model is currently unavailable", e.getCause());
         }
     }

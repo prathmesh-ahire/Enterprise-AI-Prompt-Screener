@@ -15,6 +15,8 @@ import com.screener.repository.ReviewRecordRepository;
 import com.screener.repository.RiskSignalRepository;
 import com.screener.repository.ScreeningDecisionRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -40,6 +42,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
+
+    private static final Logger log = LoggerFactory.getLogger(ReviewService.class);
 
     private static final Set<ReviewAction> APPROVING_ACTIONS = Set.of(ReviewAction.APPROVE, ReviewAction.FALSE_POSITIVE);
 
@@ -75,6 +79,8 @@ public class ReviewService {
     }
 
     public PromptResponseDto decide(UUID requestId, Long reviewerId, ReviewAction action, String reason) {
+        log.info("Reviewer {} decided {} on prompt {}", reviewerId, action, requestId);
+
         PromptResponseDto result = APPROVING_ACTIONS.contains(action)
                 ? promptService.approveFromReview(requestId)
                 : promptService.rejectFromReview(requestId);

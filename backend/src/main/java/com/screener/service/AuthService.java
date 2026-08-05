@@ -62,6 +62,7 @@ public class AuthService {
         userRoleLink.setRoleId(userRole.getId());
         userRoleRepository.save(userRoleLink);
 
+        log.info("New user registered: username={}", user.getUsername());
         String token = jwtUtil.generateToken(user.getUsername());
         return new AuthResponse(token, user.getUsername(), userRole.getName());
     }
@@ -73,6 +74,7 @@ public class AuthService {
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
 
+        log.info("User {} logged in", user.getUsername());
         auditService.log(user.getId(), "LOGIN", null, null);
 
         String token = jwtUtil.generateToken(user.getUsername());
@@ -84,6 +86,7 @@ public class AuthService {
                 .map(User::getId)
                 .orElse(null);
 
+        log.info("User {} logged out", username);
         auditService.log(userId, "LOGOUT", null, null);
     }
 

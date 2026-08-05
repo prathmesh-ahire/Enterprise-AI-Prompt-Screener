@@ -27,6 +27,8 @@ import com.screener.repository.ScreeningDecisionRepository;
 import com.screener.repository.SystemConfigRepository;
 import com.screener.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -51,6 +53,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PromptService {
+
+    private static final Logger log = LoggerFactory.getLogger(PromptService.class);
 
     // Public: AdminService (Phase 20.3) reads/writes these same keys and defaults.
     public static final String MAX_LENGTH_CONFIG_KEY = "max_prompt_length";
@@ -107,6 +111,7 @@ public class PromptService {
         double riskScore = riskScorer.score(subScores);
         DecisionResult decisionResult = policyDecisionEngine.decide(riskScore, findings, signals);
         long processingTimeMs = System.currentTimeMillis() - pipelineStartMs;
+        logDecisionOutcome(requestId, decisionResult, findings.size(), signals.size(), processingTimeMs);
 
         // 13.1: mask whenever there are any findings at all, regardless of decision, so a
         // REVIEW/BLOCK prompt still has a masked copy for the reviewer/audit trail.
@@ -159,6 +164,8 @@ public class PromptService {
                 .orElseThrow(() -> new NoSuchElementException("Screening decision not found"));
         List<DetectionFinding> findings = detectionFindingRepository.findByRequestId(requestId);
 
+        log.info("Prompt {} confirmed by user {}, forwarding masked text to AI gateway", requestId, userId);
+
         // 13.7: the masked text, not the raw text, is what gets forwarded here - ALLOW is
         // the only decision that ever sends unmodified text (13.5b), and ALLOW never
         // reaches this endpoint since it's never left in a confirmable status.
@@ -178,6 +185,8 @@ public class PromptService {
         ScreeningDecision decision = requireDecision(requestId);
         List<DetectionFinding> findings = detectionFindingRepository.findByRequestId(requestId);
 
+        log.info("Prompt {} approved from review, forwarding to AI gateway", requestId);
+
         String textToSend = promptRequest.getMaskedText() != null
                 ? promptRequest.getMaskedText() : promptRequest.getPromptText();
         sendToAiAndComplete(promptRequest, textToSend, findings, decision.getDecision().name());
@@ -190,6 +199,7 @@ public class PromptService {
         PromptRequest promptRequest = requirePendingReview(requestId);
         ScreeningDecision decision = requireDecision(requestId);
 
+        log.warn("Prompt {} rejected from review, marking BLOCKED", requestId);
         promptRequest.setStatus(PromptStatus.BLOCKED);
         promptRequestRepository.save(promptRequest);
 
@@ -256,6 +266,7 @@ public class PromptService {
     // COMPLETED (13.8).
     private void sendToAiAndComplete(PromptRequest promptRequest, String textToSend,
                                       List<DetectionFinding> findings, String riskBand) {
+        log.debug("Prompt {} forwarding to AI gateway (riskBand={})", promptRequest.getRequestId(), riskBand);
         String aiResponse = aiGatewayService.send(textToSend);
         auditService.log(promptRequest.getUserId(), "SENT_TO_AI", promptRequest.getRequestId(), riskBand);
 
@@ -267,6 +278,21 @@ public class PromptService {
         promptRequest.setStatus(PromptStatus.COMPLETED);
         promptRequest.setCompletedAt(LocalDateTime.now());
         promptRequestRepository.save(promptRequest);
+    }
+
+    // 40.2: entity/signal counts and the decision only - never the prompt text or any
+    // finding value. WARN for the two decisions that stop a prompt from reaching the AI
+    // model unmodified (BLOCK/REVIEW), INFO for the rest.
+    private void logDecisionOutcome(UUID requestId, DecisionResult decisionResult, int findingCount,
+                                     int signalCount, long processingTimeMs) {
+        Decision decision = decisionResult.decision();
+        String message = "Prompt {} screened: decision={} riskScore={} findings={} signals={} tookMs={}";
+        Object[] args = {requestId, decision, decisionResult.riskScore(), findingCount, signalCount, processingTimeMs};
+        if (decision == Decision.BLOCK || decision == Decision.REVIEW) {
+            log.warn(message, args);
+        } else {
+            log.info(message, args);
+        }
     }
 
     private void saveFindings(UUID requestId, List<DetectionFinding> findings) {

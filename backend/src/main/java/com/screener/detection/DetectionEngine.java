@@ -5,6 +5,8 @@ import com.screener.model.EntityType;
 import com.screener.model.SystemConfig;
 import com.screener.repository.SystemConfigRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class DetectionEngine {
+
+    private static final Logger log = LoggerFactory.getLogger(DetectionEngine.class);
 
     // Public: AdminService (Phase 20.3) reads/writes this same key.
     public static final String DISABLED_DETECTORS_CONFIG_KEY = "disabled_detectors";
@@ -56,7 +60,11 @@ public class DetectionEngine {
             }
             findings.addAll(detector.detect(text));
         }
-        return resolveOverlaps(findings);
+        List<DetectionFinding> resolved = resolveOverlaps(findings);
+        // Entity types and count only - never the matched value itself.
+        log.debug("Detection engine found {} finding(s): {}", resolved.size(),
+                resolved.stream().map(f -> f.getEntityType().name()).distinct().toList());
+        return resolved;
     }
 
     private Set<EntityType> loadDisabledDetectors() {

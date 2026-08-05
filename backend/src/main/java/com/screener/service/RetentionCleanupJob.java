@@ -8,6 +8,8 @@ import com.screener.repository.RiskSignalRepository;
 import com.screener.repository.ScreeningDecisionRepository;
 import com.screener.repository.SystemConfigRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RetentionCleanupJob {
 
+    private static final Logger log = LoggerFactory.getLogger(RetentionCleanupJob.class);
+
     // Public: AdminService (Phase 20.6) reads/writes this same key and default.
     public static final String RETENTION_DAYS_KEY = "retention_days";
     public static final int DEFAULT_RETENTION_DAYS = 90;
@@ -43,6 +47,7 @@ public class RetentionCleanupJob {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(resolveRetentionDays());
         List<PromptRequest> expired = promptRequestRepository.findBySubmittedAtBefore(cutoff);
         if (expired.isEmpty()) {
+            log.debug("Retention cleanup: nothing older than cutoff {}", cutoff);
             return;
         }
 
@@ -51,6 +56,7 @@ public class RetentionCleanupJob {
         riskSignalRepository.deleteByRequestIdIn(requestIds);
         screeningDecisionRepository.deleteByRequestIdIn(requestIds);
         promptRequestRepository.deleteAll(expired);
+        log.info("Retention cleanup purged {} prompt request(s) older than cutoff {}", expired.size(), cutoff);
     }
 
     private int resolveRetentionDays() {

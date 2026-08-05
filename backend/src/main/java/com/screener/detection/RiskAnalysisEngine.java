@@ -3,6 +3,8 @@ package com.screener.detection;
 import com.screener.model.SignalType;
 import com.screener.repository.AuditEventRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,8 @@ import java.util.regex.Pattern;
 @Component
 @RequiredArgsConstructor
 public class RiskAnalysisEngine {
+
+    private static final Logger log = LoggerFactory.getLogger(RiskAnalysisEngine.class);
 
     private static final String INSTRUCTION_OVERRIDE_DESC =
             "This prompt attempts to override or cancel the AI's existing instructions.";
@@ -83,6 +87,9 @@ public class RiskAnalysisEngine {
                 SUSPICIOUS_ROLE_PLAY_PHRASES));
         signals.addAll(checkObfuscationSignal(text));
         signals.addAll(checkRepeatedAttackPattern(userId));
+        // Signal types and count only - never the matched phrase/evidence text.
+        log.debug("Risk analysis found {} signal(s): {}", signals.size(),
+                signals.stream().map(s -> s.type().name()).distinct().toList());
         return signals;
     }
 
