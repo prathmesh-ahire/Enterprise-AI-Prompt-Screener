@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
+import { EntityChips, entityLabel } from '../components/EntityChips'
+import { RiskScoreBar } from '../components/RiskScoreBar'
 
 const MAX_LENGTH = 2000
 
@@ -11,11 +13,13 @@ interface PromptResult {
   explanation: string | null
   maskedText: string | null
   aiResponse: string | null
+  riskScore: number | null
+  entityTypes: string[]
 }
 
-// todo.md Phase 26. Handles the 3 decisions this phase names (ALLOW/MASK+CONFIRM/BLOCK).
-// REVIEW isn't in scope here - Phase 27.1 adds its own alert box; until then it falls
-// through to the generic "sent for review" case below the named ones.
+// todo.md Phase 26 (ALLOW/MASK+CONFIRM/BLOCK) + Phase 27 (REVIEW, CONFIRM's own
+// Cancel button, entity chips, risk score bar). REVIEW and CONFIRM used to share Phase
+// 26's generic fallback / plain "Confirm & Send" - both are now fully specialised here.
 export function PromptPage() {
   const [text, setText] = useState('')
   const [result, setResult] = useState<PromptResult | null>(null)
@@ -54,8 +58,18 @@ export function PromptPage() {
     }
   }
 
+  // 27.2: CONFIRM's Cancel button. No backend "cancel" endpoint exists - the request just
+  // sits server-side in PENDING_CONFIRM until confirmed, so cancelling is purely a client-
+  // side abandon: clear the result so the user can edit the text and resubmit if they want.
+  const handleCancel = () => {
+    setError(null)
+    setResult(null)
+  }
+
   const awaitingConfirm = result !== null && result.status !== 'COMPLETED' && result.status !== 'BLOCKED'
     && (result.decision === 'MASK' || result.decision === 'CONFIRM')
+  const pendingReview = result !== null && result.decision === 'REVIEW'
+    && result.status !== 'COMPLETED' && result.status !== 'BLOCKED'
 
   return (
     <div className="page-content">
@@ -95,17 +109,50 @@ export function PromptPage() {
             <div className="alert-block">{result.explanation}</div>
           )}
 
-          {awaitingConfirm && result.maskedText && (
+          {/* 27.1: yellow "sent for review" alert, with the requestId for tracking. */}
+          {pendingReview && (
+            <div className="alert-review">
+              <p>This prompt has been sent for human review.</p>
+              <p className="request-id-line">Tracking ID: <span className="request-id">{result.requestId}</span></p>
+            </div>
+          )}
+
+          {/* 27.3/27.4/27.5: score bar + explanation + entity chips, shown for every
+              still-pending state (MASK/CONFIRM's preview below, or REVIEW's alert above). */}
+          {(awaitingConfirm || pendingReview) && (
             <>
-              <p>{result.explanation}</p>
-              <MaskedText text={result.maskedText} />
-              <button type="button" className="btn" onClick={handleConfirm} disabled={confirming}>
-                {confirming ? 'Sending…' : 'Confirm & Send'}
-              </button>
+              <RiskScoreBar score={result.riskScore} />
+              {result.explanation && <p className="explanation-text">{result.explanation}</p>}
+              <EntityChips entityTypes={result.entityTypes} />
             </>
           )}
 
-          {result.status !== 'COMPLETED' && result.decision !== 'BLOCK' && !awaitingConfirm && (
+          {awaitingConfirm && result.maskedText && (
+            <>
+              {/* 27.2: CONFIRM gets its own plain-English summary line, on top of the
+                  entity chips above - MASK keeps the plain Confirm & Send flow from 26.4. */}
+              {result.decision === 'CONFIRM' && (
+                <p className="summary-text">
+                  {result.entityTypes.length > 0
+                    ? `We found: ${result.entityTypes.map(entityLabel).join(', ')}. Review the masked preview below before sending.`
+                    : 'This prompt needs your confirmation before it is sent. Review the masked preview below.'}
+                </p>
+              )}
+              <MaskedText text={result.maskedText} />
+              <div className="btn-row">
+                <button type="button" className="btn" onClick={handleConfirm} disabled={confirming}>
+                  {confirming ? 'Sending…' : 'Confirm & Send'}
+                </button>
+                {result.decision === 'CONFIRM' && (
+                  <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={confirming}>
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+
+          {result.status !== 'COMPLETED' && result.decision !== 'BLOCK' && !awaitingConfirm && !pendingReview && (
             <p>{result.explanation ?? `Status: ${result.status}`}</p>
           )}
         </div>

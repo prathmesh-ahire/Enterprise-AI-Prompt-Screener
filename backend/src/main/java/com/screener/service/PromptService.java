@@ -141,7 +141,7 @@ public class PromptService {
             sendToAiAndComplete(promptRequest, findings, decisionResult.decision().name());
         }
 
-        return toDto(promptRequest, decisionResult.decision().name(), decisionResult.explanation());
+        return toDto(promptRequest, decisionResult.decision().name(), decisionResult.explanation(), riskScore);
     }
 
     public PromptResponseDto confirmAndSend(UUID requestId, Long userId) {
@@ -164,7 +164,7 @@ public class PromptService {
         // reaches this endpoint since it's never left in a confirmable status.
         sendToAiAndComplete(promptRequest, promptRequest.getMaskedText(), findings, decision.getDecision().name());
 
-        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation());
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
     }
 
     // 18.3: reviewer approves (or marks FALSE_POSITIVE) a PENDING_REVIEW prompt. Forwards
@@ -182,7 +182,7 @@ public class PromptService {
                 ? promptRequest.getMaskedText() : promptRequest.getPromptText();
         sendToAiAndComplete(promptRequest, textToSend, findings, decision.getDecision().name());
 
-        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation());
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
     }
 
     // 18.3: reviewer rejects (or requests correction) - never reaches AiGatewayService.
@@ -193,7 +193,7 @@ public class PromptService {
         promptRequest.setStatus(PromptStatus.BLOCKED);
         promptRequestRepository.save(promptRequest);
 
-        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation());
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
     }
 
     // 19.1: paginated, masked-text-only history for the caller's own prompts. Batches the
@@ -218,7 +218,8 @@ public class PromptService {
         ScreeningDecision decision = screeningDecisionRepository.findByRequestId(requestId).orElse(null);
         String decisionName = decision != null ? decision.getDecision().name() : null;
         String explanation = decision != null ? decision.getExplanation() : null;
-        return toDto(promptRequest, decisionName, explanation);
+        Double riskScore = decision != null ? decision.getRiskScore() : null;
+        return toDto(promptRequest, decisionName, explanation, riskScore);
     }
 
     private PromptHistoryItemDto toHistoryItem(PromptRequest promptRequest, ScreeningDecision decision) {
@@ -320,14 +321,28 @@ public class PromptService {
         return ROLE_PRIORITY.stream().filter(roleNames::contains).findFirst().orElse(DEFAULT_ROLE);
     }
 
-    private PromptResponseDto toDto(PromptRequest promptRequest, String decisionName, String explanation) {
+    // Phase 27.3/27.4: riskScore and entityTypes ride along on every PromptResponseDto so
+    // the frontend result screen can render the score bar + entity chips regardless of
+    // which call site produced the response (submit/confirm/review-decide/history-detail).
+    private PromptResponseDto toDto(PromptRequest promptRequest, String decisionName, String explanation, Double riskScore) {
         return new PromptResponseDto(
                 promptRequest.getRequestId(),
                 promptRequest.getStatus().name(),
                 decisionName,
                 explanation,
                 promptRequest.getMaskedText(),
-                promptRequest.getAiResponse());
+                promptRequest.getAiResponse(),
+                riskScore,
+                entityTypesFor(promptRequest.getRequestId()));
+    }
+
+    // Entity type labels only - never raw values, matching ReviewDetailsDto's (18.5) same
+    // pattern of exposing what was found without exposing the sensitive value itself.
+    private List<String> entityTypesFor(UUID requestId) {
+        return detectionFindingRepository.findByRequestId(requestId).stream()
+                .map(finding -> finding.getEntityType().name())
+                .distinct()
+                .toList();
     }
 
     private String normalise(String text) {
