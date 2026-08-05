@@ -25,4 +25,18 @@ class EmailDetectorTest {
         List<DetectionFinding> findings = detector.detect("reach user@ex..com if needed");
         assertTrue(findings.isEmpty());
     }
+
+    @Test
+    void findsNothingWhenNoEmailIsPresent() {
+        List<DetectionFinding> findings = detector.detect("This message has no address in it at all");
+        assertTrue(findings.isEmpty());
+    }
+
+    @Test
+    void detectsMultipleDistinctEmails() {
+        List<DetectionFinding> findings = detector.detect("Send to alice@example.com and bob@example.org please");
+        assertEquals(2, findings.size());
+        assertEquals(EntityType.PERSONAL_EMAIL, findings.get(0).getEntityType());
+        assertEquals(EntityType.PERSONAL_EMAIL, findings.get(1).getEntityType());
+    }
 }

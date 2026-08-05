@@ -25,4 +25,10 @@ class PhoneDetectorTest {
         List<DetectionFinding> findings = detector.detect("Reference code 19876543210 on file");
         assertTrue(findings.isEmpty());
     }
+
+    @Test
+    void rejectsTooShortNumber() {
+        List<DetectionFinding> findings = detector.detect("Call me on 987654321 today");
+        assertTrue(findings.isEmpty());
+    }
 }

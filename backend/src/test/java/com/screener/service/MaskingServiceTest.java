@@ -14,6 +14,22 @@ class MaskingServiceTest {
     private final MaskingService maskingService = new MaskingService();
 
     @Test
+    void masksASingleFinding() {
+        String text = "My email is a@b.com today";
+        int start = text.indexOf("a@b.com");
+        int end = start + "a@b.com".length();
+
+        String masked = maskingService.getMaskedPreview(text, List.of(finding(EntityType.PERSONAL_EMAIL, start, end)));
+
+        assertEquals("My email is [EMAIL] today", masked);
+    }
+
+    // Phase 35.6's "overlapping findings" case, per docs/NOTE.md: two separate positions
+    // sharing the same underlying value (this project's established meaning for
+    // "overlapping" since Phase 12.6), not two findings whose character ranges genuinely
+    // intersect - MaskingService documents (see its own class comment) that it relies on
+    // DetectionEngine to have already resolved true overlaps before findings reach here.
+    @Test
     void masksTheSameValueAppearingTwiceInTheText() {
         String text = "Email me at a@b.com or backup a@b.com if that fails";
         int firstStart = text.indexOf("a@b.com");
