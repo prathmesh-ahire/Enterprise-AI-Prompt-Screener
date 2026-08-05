@@ -544,3 +544,32 @@ code {
   font-size: 14px;
   color: var(--text);
 }
+
+/* Phase 29+ review queue: danger button, risk-signal chips */
+.btn-danger {
+  background: #d33;
+  color: #fff;
+}
+
+.signal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 16px;
+}
+
+.signal-chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+.review-actions {
+  flex-wrap: wrap;
+  margin-top: 8px;
+}

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { RoleProtectedRoute } from './components/RoleProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
@@ -13,9 +14,9 @@ import { AdminPage } from './pages/AdminPage'
 import { PolicyManagementPage } from './pages/PolicyManagementPage'
 import { ModelConfigPage } from './pages/ModelConfigPage'
 
-// todo.md Phase 24.2/24.5. Role-based restriction within the protected area (e.g.
-// REVIEWER/ADMIN-only on /review, ADMIN-only on /admin/*) is left to Phase 29/31/32,
-// which build those pages - this phase only guards authenticated-vs-not.
+// todo.md Phase 24.2/24.5 (ProtectedRoute: authenticated-vs-not) + Phase 29.1
+// (RoleProtectedRoute: REVIEWER/ADMIN on /review). ADMIN-only on /admin/* is still left to
+// Phase 31.1/32.1, which build those pages.
 function App() {
   return (
     <BrowserRouter>
@@ -30,7 +31,9 @@ function App() {
             <Route path="/dashboard" element={<DashboardRedirectPage />} />
             <Route path="/prompt" element={<PromptPage />} />
             <Route path="/history" element={<HistoryPage />} />
-            <Route path="/review" element={<ReviewQueuePage />} />
+            <Route element={<RoleProtectedRoute allow={['REVIEWER', 'ADMIN']} />}>
+              <Route path="/review" element={<ReviewQueuePage />} />
+            </Route>
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/policy" element={<PolicyManagementPage />} />
             <Route path="/admin/models" element={<ModelConfigPage />} />

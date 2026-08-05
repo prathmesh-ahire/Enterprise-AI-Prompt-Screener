@@ -63,10 +63,7 @@ public class ReviewService {
         ScreeningDecision decision = screeningDecisionRepository.findByRequestId(requestId)
                 .orElseThrow(() -> new NoSuchElementException("Screening decision not found"));
 
-        List<String> entityTypes = detectionFindingRepository.findByRequestId(requestId).stream()
-                .map(finding -> finding.getEntityType().name())
-                .distinct()
-                .toList();
+        List<String> entityTypes = entityTypesFor(requestId);
         List<String> matchedSignals = riskSignalRepository.findByRequestId(requestId).stream()
                 .map(RiskSignal::getSignalType)
                 .map(Enum::name)
@@ -111,6 +108,13 @@ public class ReviewService {
         Double riskScore = decision != null ? decision.getRiskScore() : null;
         String explanation = decision != null ? decision.getExplanation() : null;
         return new ReviewQueueItemDto(promptRequest.getRequestId(), promptRequest.getUserId(),
-                promptRequest.getSubmittedAt(), riskScore, explanation);
+                promptRequest.getSubmittedAt(), riskScore, explanation, entityTypesFor(promptRequest.getRequestId()));
+    }
+
+    private List<String> entityTypesFor(UUID requestId) {
+        return detectionFindingRepository.findByRequestId(requestId).stream()
+                .map(finding -> finding.getEntityType().name())
+                .distinct()
+                .toList();
     }
 }
