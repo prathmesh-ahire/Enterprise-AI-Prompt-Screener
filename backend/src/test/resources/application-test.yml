@@ -1,0 +1,36 @@
+# todo.md Phase 34.1 - "test" profile used by CI (and any local run that activates it) so
+# the test suite doesn't need a real MySQL/Ollama instance. All values below are dummy/local
+# placeholders, never real secrets - this file is committed to the repo.
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: llama3.2
+
+app:
+  ai-gateway:
+    timeout-ms: 30000
+    max-response-tokens: 500
+  admin:
+    username: testadmin
+    password: TestAdmin@123
+    email: testadmin@example.com
+  seed:
+    default-model: llama3.2
+  jwt:
+    secret: ci-test-only-secret-not-a-real-key-do-not-use-in-any-real-environment
+  cors:
+    frontend-origin: http://localhost:5173
+  rate-limit:
+    prompt-per-minute: 10
+    auth-per-minute: 5
