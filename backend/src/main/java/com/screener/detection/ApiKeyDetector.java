@@ -19,8 +19,14 @@ import java.util.regex.Pattern;
 @Component
 public class ApiKeyDetector implements Detector {
 
+    // Leading boundary is a negative lookbehind (not \b) so a keyword still counts when
+    // it's glued to a prefix by an underscore (e.g. "test_api_key=...", a common env-var
+    // naming style) - \b alone treats '_' as a word character, so "test_api_key" would
+    // never be seen as starting a new word and the whole match would silently fail.
+    // Minimum candidate length lowered from 20 to 16: 20 excluded real-shaped short keys
+    // (e.g. "sk-12345abcdefghijk", 19 chars) that still clear the entropy check below.
     private static final Pattern CANDIDATE_PATTERN = Pattern.compile(
-            "(?i)\\b(?:api[_-]?key|apikey|bearer|token)\\b\\s*[:=]?\\s*([A-Za-z0-9_\\-.]{20,})");
+            "(?i)(?<![A-Za-z0-9])(?:api[_-]?key|apikey|bearer|token)\\b\\s*[:=]?\\s*([A-Za-z0-9_\\-.]{16,})");
 
     private static final double ENTROPY_THRESHOLD = 3.5;
     private static final double CONFIDENCE = 0.8;
