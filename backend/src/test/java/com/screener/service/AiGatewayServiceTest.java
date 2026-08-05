@@ -73,7 +73,7 @@ class AiGatewayServiceTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("rawtypes")
     void isReachableReturnsTrueWhenOllamaResponds() {
         ChatClient.Builder chatBuilder = fluentBuilderMock();
         RestClient.RequestHeadersUriSpec uriSpec = mock(RestClient.RequestHeadersUriSpec.class);
@@ -88,7 +88,7 @@ class AiGatewayServiceTest {
     }
 
     @Test
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("rawtypes")
     void isReachableReturnsFalseWhenOllamaCallFails() {
         ChatClient.Builder chatBuilder = fluentBuilderMock();
         RestClient.RequestHeadersUriSpec uriSpec = mock(RestClient.RequestHeadersUriSpec.class);
@@ -114,7 +114,6 @@ class AiGatewayServiceTest {
     // builder with wildcards hits Java's wildcard-capture rules on the chained
     // when(...).thenReturn(uriSpec) calls; raw types sidestep that at the cost of an
     // unchecked-warning, same tradeoff Spring's own RestClient tests make.
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private RestClient.Builder fluentRestBuilderMock() {
         return fluentRestBuilderMock(mock(RestClient.RequestHeadersUriSpec.class));
     }
