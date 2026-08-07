@@ -9,7 +9,6 @@ import com.screener.detection.RiskScorer;
 import com.screener.detection.RiskSignalResult;
 import com.screener.detection.RiskSubScoreCalculator;
 import com.screener.detection.RiskSubScores;
-import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
