@@ -53,9 +53,14 @@ BEGIN
             ('demo_user3', 'demo.user3@example.com',
              '$2a$10$TKXHbseg2NefFiPCCOOvx.E6zcTve931A5HmoxvPxaNxzo6GWHZpa', 'ACTIVE', NOW() - INTERVAL 10 DAY);
 
+        -- 41.3: demo_reviewer holds USER as well as REVIEWER. Roles are exclusive, not
+        -- cumulative, and PromptController/AuditController are hasRole('USER') - so without
+        -- this the reviewer gets 403 on the Prompt and History pages the navbar links them
+        -- to. Same reasoning as DataSeeder granting the admin USER alongside ADMIN.
         INSERT INTO user_roles (user_id, role_id)
         VALUES
             ((SELECT id FROM users WHERE username = 'demo_reviewer'), (SELECT id FROM roles WHERE name = 'REVIEWER')),
+            ((SELECT id FROM users WHERE username = 'demo_reviewer'), (SELECT id FROM roles WHERE name = 'USER')),
             ((SELECT id FROM users WHERE username = 'demo_user1'), (SELECT id FROM roles WHERE name = 'USER')),
             ((SELECT id FROM users WHERE username = 'demo_user2'), (SELECT id FROM roles WHERE name = 'USER')),
             ((SELECT id FROM users WHERE username = 'demo_user3'), (SELECT id FROM roles WHERE name = 'USER'));
@@ -236,3 +241,19 @@ DELIMITER ;
 
 CALL seed_demo_data();
 DROP PROCEDURE seed_demo_data;
+
+-- ============================================================
+-- 41.3 repair step - deliberately OUTSIDE the early-exit guard above.
+--
+-- The guard skips the whole procedure body once demo_user1 exists, so a database that was
+-- seeded before this fix would never pick up demo_reviewer's new USER role. This statement
+-- runs on every execution and grants the role only if it is missing, so simply re-running
+-- this script repairs an already-seeded database. Harmless on a fresh one: the procedure
+-- has just inserted the same row, and the NOT EXISTS check makes this a no-op.
+-- ============================================================
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id
+FROM users u
+         JOIN roles r ON r.name = 'USER'
+WHERE u.username = 'demo_reviewer'
+  AND NOT EXISTS (SELECT 1 FROM user_roles ur WHERE ur.user_id = u.id AND ur.role_id = r.id);

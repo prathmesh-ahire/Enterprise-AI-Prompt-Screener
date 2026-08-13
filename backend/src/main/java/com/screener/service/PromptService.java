@@ -62,12 +62,12 @@ public class PromptService {
     public static final String POLICY_VERSION_CONFIG_KEY = "policy_version";
     public static final int DEFAULT_POLICY_VERSION = 1;
 
-    // Most-privileged-first, for resolving policyContextScore's role baseline (11.1.4)
-    // when a user somehow holds more than one role.
-    private static final List<String> ROLE_PRIORITY = List.of("ADMIN", "REVIEWER", "USER");
-    private static final String DEFAULT_ROLE = "USER";
-
-    private static final Set<PromptStatus> CONFIRMABLE_STATUSES = Set.of(PromptStatus.MASKED, PromptStatus.PENDING_CONFIRM);
+    // 41.5: ALLOWED is confirmable so a prompt whose AI call failed can be retried. A
+    // successful ALLOW advances to COMPLETED immediately (13.5b), so the only rows left
+    // sitting in ALLOWED are ones whose gateway call threw - exactly the rows 13.8 intended
+    // to leave "where they were ... for a retry", which until now no code path could finish.
+    private static final Set<PromptStatus> CONFIRMABLE_STATUSES =
+            Set.of(PromptStatus.MASKED, PromptStatus.PENDING_CONFIRM, PromptStatus.ALLOWED);
 
     private final PromptRequestRepository promptRequestRepository;
     private final SystemConfigRepository systemConfigRepository;
@@ -164,12 +164,18 @@ public class PromptService {
                 .orElseThrow(() -> new NoSuchElementException("Screening decision not found"));
         List<DetectionFinding> findings = detectionFindingRepository.findByRequestId(requestId);
 
-        log.info("Prompt {} confirmed by user {}, forwarding masked text to AI gateway", requestId, userId);
+        log.info("Prompt {} confirmed by user {}, forwarding to AI gateway", requestId, userId);
 
-        // 13.7: the masked text, not the raw text, is what gets forwarded here - ALLOW is
-        // the only decision that ever sends unmodified text (13.5b), and ALLOW never
-        // reaches this endpoint since it's never left in a confirmable status.
-        sendToAiAndComplete(promptRequest, promptRequest.getMaskedText(), findings, decision.getDecision().name());
+        // 13.7: MASK/CONFIRM forward the masked text, never the raw text.
+        // 41.5: an ALLOWED row only reaches this endpoint because its original AI call failed.
+        // It forwards the same raw text the ALLOW path itself would have sent (13.5b) - note
+        // an ALLOW prompt can still carry findings and therefore a non-null maskedText (13.1
+        // masks whenever there is any finding, whatever the decision), so reusing the masked
+        // branch here would silently send different text on the retry than on the first try.
+        String textToSend = promptRequest.getStatus() == PromptStatus.ALLOWED
+                ? promptRequest.getPromptText()
+                : textToForward(promptRequest);
+        sendToAiAndComplete(promptRequest, textToSend, findings, decision.getDecision().name());
 
         return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
     }
@@ -187,11 +193,21 @@ public class PromptService {
 
         log.info("Prompt {} approved from review, forwarding to AI gateway", requestId);
 
-        String textToSend = promptRequest.getMaskedText() != null
-                ? promptRequest.getMaskedText() : promptRequest.getPromptText();
-        sendToAiAndComplete(promptRequest, textToSend, findings, decision.getDecision().name());
+        sendToAiAndComplete(promptRequest, textToForward(promptRequest), findings, decision.getDecision().name());
 
         return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
+    }
+
+    // 41.1: masked text is null whenever DetectionEngine found zero entities - which happens
+    // even on MASK/CONFIRM/REVIEW, since those can be reached by risk score or by a hard
+    // override (11.2.3) with no finding to mask. Forwarding it unguarded put a null into
+    // AiGatewayService.send and 500'd, stranding the prompt with no way to proceed. Falling
+    // back to the raw text is safe by construction: "no masked version exists" and "nothing
+    // sensitive was detected to mask" are the same condition.
+    private String textToForward(PromptRequest promptRequest) {
+        return promptRequest.getMaskedText() != null
+                ? promptRequest.getMaskedText()
+                : promptRequest.getPromptText();
     }
 
     // 18.3: reviewer rejects (or requests correction) - never reaches AiGatewayService.
@@ -344,7 +360,7 @@ public class PromptService {
                 .map(java.util.Optional::get)
                 .map(Role::getName)
                 .collect(Collectors.toSet());
-        return ROLE_PRIORITY.stream().filter(roleNames::contains).findFirst().orElse(DEFAULT_ROLE);
+        return Role.mostPrivileged(roleNames);
     }
 
     // Phase 27.3/27.4: riskScore and entityTypes ride along on every PromptResponseDto so

@@ -63,6 +63,7 @@ public class ReportService {
         appendCsvRow(csv, "Total", String.valueOf(data.summary().total()));
         appendCsvRow(csv, "Allowed", String.valueOf(data.summary().allowed()));
         appendCsvRow(csv, "Masked", String.valueOf(data.summary().masked()));
+        appendCsvRow(csv, "Confirm", String.valueOf(data.summary().confirm()));
         appendCsvRow(csv, "Blocked", String.valueOf(data.summary().blocked()));
         appendCsvRow(csv, "Pending Review", String.valueOf(data.summary().pendingReview()));
         csv.append('\n');
@@ -108,6 +109,7 @@ public class ReportService {
                     List.of("Total", String.valueOf(data.summary().total())),
                     List.of("Allowed", String.valueOf(data.summary().allowed())),
                     List.of("Masked", String.valueOf(data.summary().masked())),
+                    List.of("Confirm", String.valueOf(data.summary().confirm())),
                     List.of("Blocked", String.valueOf(data.summary().blocked())),
                     List.of("Pending Review", String.valueOf(data.summary().pendingReview())))));
             document.add(Chunk.NEWLINE);

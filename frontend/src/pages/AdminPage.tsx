@@ -9,6 +9,7 @@ interface Summary {
   total: number
   allowed: number
   masked: number
+  confirm: number
   blocked: number
   pendingReview: number
 }
@@ -32,6 +33,7 @@ interface ProcessingTimeStats {
 
 interface RepeatedViolation {
   userId: number
+  username: string
   violationCount: number
 }
 
@@ -208,6 +210,12 @@ export function AdminPage() {
                 <div className="stat-card-value">{summary.masked}</div>
                 <div className="stat-card-label">Masked</div>
               </div>
+              {/* 41.6: Total has always counted CONFIRM decisions, but no card reported
+                  them - so the cards could not be reconciled against the Total beside them. */}
+              <div className="stat-card">
+                <div className="stat-card-value">{summary.confirm}</div>
+                <div className="stat-card-label">Confirm</div>
+              </div>
               <div className="stat-card">
                 <div className="stat-card-value">{summary.blocked}</div>
                 <div className="stat-card-label">Blocked</div>
@@ -268,7 +276,10 @@ export function AdminPage() {
               <table className="history-table">
                 <thead>
                   <tr>
-                    <th>User ID</th>
+                    {/* 41.7: this panel exists to answer "who keeps tripping the screener",
+                        and used to answer it with a bare numeric id - leaving an admin to
+                        query the database by hand to find out who that actually was. */}
+                    <th>User</th>
                     <th>Violation Count (7d)</th>
                     <th></th>
                   </tr>
@@ -277,7 +288,7 @@ export function AdminPage() {
                   {repeatedViolations.map((v) => (
                     <Fragment key={v.userId}>
                       <tr>
-                        <td>{v.userId}</td>
+                        <td>{v.username}</td>
                         <td>{v.violationCount}</td>
                         <td>
                           <button type="button" className="btn-link" onClick={() => handleToggleUserHistory(v.userId)}>

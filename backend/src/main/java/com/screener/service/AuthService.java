@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -130,13 +132,16 @@ public class AuthService {
         passwordResetTokenRepository.save(resetToken);
     }
 
+    // 41.2: picks the most-privileged role the user holds, matching PromptService. This used
+    // to be findFirst() over an unordered repository result, so a multi-role account's login
+    // response - and therefore its navbar and landing page - was effectively arbitrary.
     private String resolveRole(Long userId) {
-        return userRoleRepository.findByUserId(userId).stream()
+        Set<String> roleNames = userRoleRepository.findByUserId(userId).stream()
                 .map(UserRole::getRoleId)
                 .map(roleRepository::findById)
                 .flatMap(Optional::stream)
                 .map(Role::getName)
-                .findFirst()
-                .orElse("USER");
+                .collect(Collectors.toSet());
+        return Role.mostPrivileged(roleNames);
     }
 }

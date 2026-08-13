@@ -110,7 +110,7 @@ public class DashboardService {
         LocalDateTime since = LocalDateTime.now().minusDays(LOOKBACK_DAYS);
         return auditEventRepository.findUserIdsWithActionCountAtLeast(VIOLATION_ACTIONS, since, REPEATED_VIOLATION_MIN_COUNT)
                 .stream()
-                .map(row -> new RepeatedViolationDto((Long) row[0], (Long) row[1]))
+                .map(row -> new RepeatedViolationDto((Long) row[0], (String) row[1], (Long) row[2]))
                 .toList();
     }
 
@@ -122,6 +122,7 @@ public class DashboardService {
                 total,
                 counts.getOrDefault(Decision.ALLOW, 0L),
                 counts.getOrDefault(Decision.MASK, 0L),
+                counts.getOrDefault(Decision.CONFIRM, 0L),
                 counts.getOrDefault(Decision.BLOCK, 0L),
                 counts.getOrDefault(Decision.REVIEW, 0L));
     }

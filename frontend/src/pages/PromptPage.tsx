@@ -127,18 +127,32 @@ export function PromptPage() {
             </>
           )}
 
-          {awaitingConfirm && result.maskedText && (
+          {/* 41.4: this block used to be gated on `awaitingConfirm && result.maskedText`, so a
+              MASK/CONFIRM decision reached with no detection finding to mask (by risk score
+              alone, or by a hard override) rendered the backend's "review the masked version"
+              explanation with no masked version shown and no Confirm button at all - a dead
+              end the prompt could never leave. Only the preview is conditional now; the action
+              row always renders, and 41.1 makes confirming actually work in that case. */}
+          {awaitingConfirm && (
             <>
               {/* 27.2: CONFIRM gets its own plain-English summary line, on top of the
                   entity chips above - MASK keeps the plain Confirm & Send flow from 26.4. */}
               {result.decision === 'CONFIRM' && (
                 <p className="summary-text">
                   {result.entityTypes.length > 0
-                    ? `We found: ${result.entityTypes.map(entityLabel).join(', ')}. Review the masked preview below before sending.`
-                    : 'This prompt needs your confirmation before it is sent. Review the masked preview below.'}
+                    ? `We found: ${result.entityTypes.map(entityLabel).join(', ')}. Review it below before sending.`
+                    : 'This prompt needs your confirmation before it is sent.'}
                 </p>
               )}
-              <MaskedText text={result.maskedText} />
+              {result.maskedText
+                ? <MaskedText text={result.maskedText} />
+                : (
+                  <p className="summary-text">
+                    No masked preview: this prompt was held by its overall risk score rather than by a
+                    specific piece of sensitive data, so there was nothing to mask. It will be sent to
+                    the AI model exactly as you wrote it.
+                  </p>
+                )}
               <div className="btn-row">
                 <button type="button" className="btn" onClick={handleConfirm} disabled={confirming}>
                   {confirming ? 'Sending…' : 'Confirm & Send'}

@@ -30,15 +30,28 @@ interface Retention {
   retentionDays: number
 }
 
+// 41.8: an empty <input type="number"> reports value '', and Number('') is 0 - so binding
+// these fields straight through `setX(Number(e.target.value))` wrote a 0 straight back into
+// the box the instant it was cleared, and whatever the admin typed next was appended to that
+// stray zero ("25" came out as "025"). Holding '' as a distinct state lets the field actually
+// be empty while it is being retyped; blanks are caught and reported at save time instead.
+type NumberField = number | ''
+
+const toNumberField = (raw: string): NumberField => (raw === '' ? '' : Number(raw))
+
+// Returns the labels of any fields left blank, so the message can name them.
+const blankFields = (fields: Record<string, NumberField>): string[] =>
+  Object.entries(fields).filter(([, value]) => value === '').map(([label]) => label)
+
 // todo.md Phase 31. ADMIN only (enforced by RoleProtectedRoute in App.tsx).
 export function PolicyManagementPage() {
   const [policy, setPolicy] = useState<AdminPolicy | null>(null)
   const [disabled, setDisabled] = useState<Set<string>>(new Set())
-  const [maxPromptLength, setMaxPromptLength] = useState(2000)
-  const [maskThreshold, setMaskThreshold] = useState(25)
-  const [confirmThreshold, setConfirmThreshold] = useState(50)
-  const [reviewThreshold, setReviewThreshold] = useState(65)
-  const [blockThreshold, setBlockThreshold] = useState(75)
+  const [maxPromptLength, setMaxPromptLength] = useState<NumberField>(2000)
+  const [maskThreshold, setMaskThreshold] = useState<NumberField>(25)
+  const [confirmThreshold, setConfirmThreshold] = useState<NumberField>(50)
+  const [reviewThreshold, setReviewThreshold] = useState<NumberField>(65)
+  const [blockThreshold, setBlockThreshold] = useState<NumberField>(75)
   const [policyLoading, setPolicyLoading] = useState(true)
   const [policyError, setPolicyError] = useState<string | null>(null)
   const [policySaving, setPolicySaving] = useState(false)
@@ -50,7 +63,7 @@ export function PolicyManagementPage() {
   const [addingTerm, setAddingTerm] = useState(false)
   const [deletingTermId, setDeletingTermId] = useState<number | null>(null)
 
-  const [retentionDays, setRetentionDays] = useState(90)
+  const [retentionDays, setRetentionDays] = useState<NumberField>(90)
   const [retentionLoading, setRetentionLoading] = useState(true)
   const [retentionError, setRetentionError] = useState<string | null>(null)
   const [retentionSaving, setRetentionSaving] = useState(false)
@@ -104,9 +117,25 @@ export function PolicyManagementPage() {
   }
 
   const handleSavePolicy = async () => {
-    setPolicySaving(true)
     setPolicyError(null)
     setPolicySuccess(null)
+
+    // 41.8: reconcile the possibly-empty fields back to numbers before sending. Refusing the
+    // save with a message that names the empty boxes is better than silently submitting a 0,
+    // which the backend's ascending-threshold validation would reject with a vaguer error.
+    const blank = blankFields({
+      'Max prompt length': maxPromptLength,
+      'Mask threshold': maskThreshold,
+      'Confirm threshold': confirmThreshold,
+      'Review threshold': reviewThreshold,
+      'Block threshold': blockThreshold,
+    })
+    if (blank.length > 0) {
+      setPolicyError(`Please enter a value for: ${blank.join(', ')}.`)
+      return
+    }
+
+    setPolicySaving(true)
     try {
       const response = await apiClient.put<AdminPolicy>('/api/admin/policy', {
         maxPromptLength,
@@ -155,9 +184,15 @@ export function PolicyManagementPage() {
   }
 
   const handleSaveRetention = async () => {
-    setRetentionSaving(true)
     setRetentionError(null)
     setRetentionSuccess(null)
+
+    if (retentionDays === '') {
+      setRetentionError('Please enter a retention period in days.')
+      return
+    }
+
+    setRetentionSaving(true)
     try {
       const response = await apiClient.put<Retention>('/api/admin/retention', { retentionDays })
       setRetentionDays(response.data.retentionDays)
@@ -192,7 +227,7 @@ export function PolicyManagementPage() {
                 type="number"
                 min={1}
                 value={maxPromptLength}
-                onChange={(e) => setMaxPromptLength(Number(e.target.value))}
+                onChange={(e) => setMaxPromptLength(toNumberField(e.target.value))}
               />
             </div>
 
@@ -220,7 +255,7 @@ export function PolicyManagementPage() {
                   type="number"
                   min={0}
                   value={maskThreshold}
-                  onChange={(e) => setMaskThreshold(Number(e.target.value))}
+                  onChange={(e) => setMaskThreshold(toNumberField(e.target.value))}
                 />
               </div>
               <div className="form-field">
@@ -230,7 +265,7 @@ export function PolicyManagementPage() {
                   type="number"
                   min={0}
                   value={confirmThreshold}
-                  onChange={(e) => setConfirmThreshold(Number(e.target.value))}
+                  onChange={(e) => setConfirmThreshold(toNumberField(e.target.value))}
                 />
               </div>
               <div className="form-field">
@@ -240,7 +275,7 @@ export function PolicyManagementPage() {
                   type="number"
                   min={0}
                   value={reviewThreshold}
-                  onChange={(e) => setReviewThreshold(Number(e.target.value))}
+                  onChange={(e) => setReviewThreshold(toNumberField(e.target.value))}
                 />
               </div>
               <div className="form-field">
@@ -250,7 +285,7 @@ export function PolicyManagementPage() {
                   type="number"
                   min={0}
                   value={blockThreshold}
-                  onChange={(e) => setBlockThreshold(Number(e.target.value))}
+                  onChange={(e) => setBlockThreshold(toNumberField(e.target.value))}
                 />
               </div>
             </div>
@@ -314,7 +349,7 @@ export function PolicyManagementPage() {
                 type="number"
                 min={1}
                 value={retentionDays}
-                onChange={(e) => setRetentionDays(Number(e.target.value))}
+                onChange={(e) => setRetentionDays(toNumberField(e.target.value))}
               />
             </div>
             <button type="button" className="btn" disabled={retentionSaving} onClick={handleSaveRetention}>

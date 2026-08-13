@@ -155,14 +155,16 @@ class DashboardServiceTest {
         assertNull(stats.maxMs());
     }
 
+    // 41.7: the query now returns (userId, username, count) so the panel can name the user
+    // instead of showing a bare numeric id.
     @Test
-    void repeatedViolationsMapsUserIdAndCount() {
+    void repeatedViolationsMapsUserIdUsernameAndCount() {
         when(auditEventRepository.findUserIdsWithActionCountAtLeast(eq(List.of("BLOCK", "REVIEW")), any(), eq(3L)))
-                .thenReturn(List.<Object[]>of(new Object[]{42L, 5L}));
+                .thenReturn(List.<Object[]>of(new Object[]{42L, "demo_user3", 5L}));
 
         List<RepeatedViolationDto> result = dashboardService.getRepeatedViolations();
 
-        assertEquals(List.of(new RepeatedViolationDto(42L, 5L)), result);
+        assertEquals(List.of(new RepeatedViolationDto(42L, "demo_user3", 5L)), result);
     }
 
     @Test

@@ -60,25 +60,45 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
 
+    // 41.3: the admin holds USER in addition to ADMIN, because roles here are exclusive rather
+    // than cumulative and PromptController/AuditController are @PreAuthorize("hasRole('USER')")
+    // - so without it the seeded admin gets 403 on the Prompt and History pages the navbar
+    // links them to. Granting USER widens nothing: ADMIN is already the most privileged role,
+    // and PromptService.resolveRole still resolves this account to ADMIN, so
+    // policyContextScore's role baseline (11.1.4) is unchanged and no risk score moves.
+    //
+    // Role granting runs on every startup, not only when the admin row is first created: the
+    // old version returned early whenever the username already existed, which would have left
+    // every already-seeded database (i.e. the user's actual machine) without the new role and
+    // made this fix look like it had done nothing.
     private void seedAdmin() {
-        if (userRepository.existsByUsername(adminUsername)) {
-            return;
-        }
-        Role adminRole = roleRepository.findByName("ADMIN")
-                .orElseThrow(() -> new IllegalStateException("ADMIN role not seeded yet"));
+        User admin = userRepository.findByUsername(adminUsername).orElseGet(this::createAdminUser);
+        grantRoleIfMissing(admin, "ADMIN");
+        grantRoleIfMissing(admin, "USER");
+    }
 
+    private User createAdminUser() {
         User admin = new User();
         admin.setUsername(adminUsername);
         admin.setEmail(adminEmail);
         admin.setPasswordHash(passwordEncoder.encode(adminPassword));
         admin.setAccountStatus(AccountStatus.ACTIVE);
         admin.setCreatedAt(LocalDateTime.now());
-        admin = userRepository.save(admin);
+        return userRepository.save(admin);
+    }
 
-        UserRole userRole = new UserRole();
-        userRole.setUserId(admin.getId());
-        userRole.setRoleId(adminRole.getId());
-        userRoleRepository.save(userRole);
+    private void grantRoleIfMissing(User user, String roleName) {
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new IllegalStateException(roleName + " role not seeded yet"));
+        boolean alreadyHeld = userRoleRepository.findByUserId(user.getId()).stream()
+                .anyMatch(link -> role.getId().equals(link.getRoleId()));
+        if (alreadyHeld) {
+            return;
+        }
+        UserRole link = new UserRole();
+        link.setUserId(user.getId());
+        link.setRoleId(role.getId());
+        userRoleRepository.save(link);
     }
 
     private void seedApprovedModel() {

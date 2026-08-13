@@ -35,7 +35,10 @@ class ReportServiceTest {
         reportService = new ReportService(dashboardService, adminService);
 
         when(dashboardService.getSummaryForRange(any(), any()))
-                .thenReturn(new DashboardSummaryDto(10, 6, 2, 1, 1));
+                // 41.6: (total, allowed, masked, confirm, blocked, pendingReview) - the
+                // categories deliberately sum to the total so the report's own arithmetic
+                // is exercised: 6+2+1+... see summaryCategoriesSumToTotal below.
+                .thenReturn(new DashboardSummaryDto(10, 5, 2, 1, 1, 1));
         when(dashboardService.getRiskDistributionForRange(any(), any()))
                 .thenReturn(List.of(new RiskBandStatDto("ALLOW", 6L), new RiskBandStatDto("BLOCK", 1L)));
         when(dashboardService.getEntityStatsForRange(any(), any()))
@@ -52,12 +55,35 @@ class ReportServiceTest {
 
         assertTrue(csv.contains("Summary"));
         assertTrue(csv.contains("Total,10"));
-        assertTrue(csv.contains("Allowed,6"));
+        assertTrue(csv.contains("Allowed,5"));
         assertTrue(csv.contains("Blocked,1"));
         assertTrue(csv.contains("PERSONAL_EMAIL,3"));
         assertTrue(csv.contains("ALLOW,6"));
         // aggregate/category data only - never a raw email/phone/etc value.
         assertFalse(csv.contains("@"));
+    }
+
+    // 41.6: the Summary block used to omit CONFIRM entirely while Total counted it, so the
+    // categories an examiner can add up did not reach the total printed above them. Asserts
+    // the row exists and that the five categories reconcile against Total.
+    @Test
+    void summaryCategoriesSumToTotal() {
+        String csv = new String(reportService.exportCsv(null, null), StandardCharsets.UTF_8);
+
+        assertTrue(csv.contains("Confirm,1"));
+
+        long total = csvValue(csv, "Total");
+        long categories = csvValue(csv, "Allowed") + csvValue(csv, "Masked") + csvValue(csv, "Confirm")
+                + csvValue(csv, "Blocked") + csvValue(csv, "Pending Review");
+        assertEquals(total, categories);
+    }
+
+    private long csvValue(String csv, String label) {
+        return csv.lines()
+                .filter(line -> line.startsWith(label + ","))
+                .findFirst()
+                .map(line -> Long.parseLong(line.substring(label.length() + 1).trim()))
+                .orElseThrow(() -> new AssertionError("No CSV row labelled " + label));
     }
 
     @Test
