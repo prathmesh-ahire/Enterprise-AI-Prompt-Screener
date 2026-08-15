@@ -1,0 +1,970 @@
+/* ==========================================================================
+   COMPONENT LIBRARY — V1.1 Phase 45
+   --------------------------------------------------------------------------
+   The shared UI vocabulary, defined once so Phase 47 is composition rather
+   than twelve separate styling jobs. Imported after index.css in main.tsx,
+   so index.css keeps only tokens, resets and base typography.
+
+   Rules that apply to everything below:
+     * No raw colour. Every value comes from a token in index.css.
+     * No legacy alias (--bg, --text-h, --text, --code-bg). Anything moved
+       into this file was re-pointed at the real token on the way in; those
+       four aliases should be gone entirely by the end of Phase 47.
+     * Every transform-based effect degrades under prefers-reduced-motion —
+       see the block at the foot of this file, which is the single place
+       that opts out, so a new effect can't quietly forget to.
+   ========================================================================== */
+
+/* ==========================================================================
+   45.1 BUTTONS
+   The reference design's signature control: a multi-stop accent gradient at
+   300% background-size, parked at the left edge and slid to the right on
+   hover. Nothing moves except the background position, so the effect costs
+   no layout and degrades to a still gradient when motion is reduced.
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--on-accent);
+  background-color: transparent;
+  background-image: var(--gradient-accent);
+  background-size: 300%;
+  background-position: left center;
+  transition:
+    background-position 0.4s ease,
+    transform 0.15s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    opacity 0.2s ease;
+}
+
+/* Explicit alias. The bare `.btn` already renders primary (17 existing call
+   sites rely on that), so this exists for pages that prefer to name it. */
+.btn-primary {
+  background-image: var(--gradient-accent);
+}
+
+.btn:hover:not(:disabled) {
+  background-position: right center;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Covers the loading state too — the Button component sets `disabled` when
+   loading, so a request in flight can't be fired twice by an impatient click. */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background-image: none;
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.btn-danger {
+  background-image: var(--gradient-danger);
+  color: var(--on-accent);
+}
+
+.btn-link {
+  font: inherit;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.btn-link:hover:not(:disabled) {
+  color: var(--accent-soft);
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.review-actions {
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   45.7 (defined early — buttons use it) INLINE LOADING
+   Deliberately never motion-only: the spinner always sits beside real text,
+   so "busy" is still legible with animation suppressed or at 200% zoom.
+   ========================================================================== */
+.spinner {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-rotate 0.7s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   45.2 NAVIGATION
+   Layout here is provisional — Phase 46.1 replaces it with the real app
+   shell (sticky, gutters, footer). What this section owns is the *link*
+   treatment and the wordmark, which 46 keeps.
+   ========================================================================== */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-card);
+  text-align: left;
+}
+
+.navbar-brand {
+  font-family: var(--heading);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  transition: opacity 0.3s ease;
+}
+
+/* Clipping a gradient to the text needs a transparent fill, which means the
+   colour has to come back on its own when the gradient is removed — hence
+   both the -webkit- and standard properties are reset explicitly. */
+.navbar-brand:hover {
+  background-image: var(--gradient-accent-bright);
+  background-size: 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.navbar-links a {
+  position: relative;
+  padding: 4px 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: var(--text-primary);
+}
+
+/* Grows outward from the centre: zero-width at left:50%, animating both
+   width and left so the two edges travel apart together. */
+.navbar-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background-image: var(--gradient-accent-bright);
+  pointer-events: none;
+  transition: width 0.25s ease, left 0.25s ease;
+}
+
+.navbar-links a:hover::after,
+.navbar-links a.active::after {
+  width: 100%;
+  left: 0;
+}
+
+/* The account controls beside the links are not navigation — they must not
+   pick up the uppercase link treatment or the underline. */
+.navbar-user {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   45.5 (partial — the navbar needs it) NEUTRAL STATUS PILL
+   ========================================================================== */
+.role-badge,
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   45.3 FORM CONTROLS
+   One focus treatment shared by inputs, textareas and selects: a gradient
+   underline grown from the centre (a background-image sized 0% -> 100%, so
+   no extra markup is needed on 17 existing form fields) plus a subtle lift.
+
+   The global :focus-visible outline in index.css is deliberately NOT
+   overridden here. It uses :where(), so it has zero specificity and these
+   rules would silently win — a keyboard user would lose the focus ring to a
+   decorative underline. Both are wanted: the ring for keyboard, the
+   underline for everyone.
+   ========================================================================== */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.form-field label,
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea,
+.input,
+.prompt-textarea,
+.history-filter select,
+.term-add-form input {
+  font: inherit;
+  font-size: 15px;
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  background-color: var(--surface-card);
+  background-image: var(--gradient-accent-bright);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 0% 2px;
+  transition:
+    background-size 0.3s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder,
+.input::placeholder,
+.prompt-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.form-field input:hover:not(:disabled),
+.form-field select:hover:not(:disabled),
+.form-field textarea:hover:not(:disabled),
+.input:hover:not(:disabled),
+.prompt-textarea:hover:not(:disabled),
+.history-filter select:hover:not(:disabled),
+.term-add-form input:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus,
+.input:focus,
+.prompt-textarea:focus,
+.history-filter select:focus,
+.term-add-form input:focus {
+  background-size: 100% 2px;
+  border-color: var(--accent-border);
+  box-shadow: 0 4px 14px var(--accent-bg);
+  transform: scale(1.005);
+}
+
+.form-field input:disabled,
+.form-field select:disabled,
+.form-field textarea:disabled,
+.input:disabled,
+.prompt-textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.prompt-textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Error state pairs colour with a border AND the message text below — never
+   colour alone (49.1). Supports both the class and aria-invalid, so Phase 47
+   can wire up the accessible attribute without a second style pass. */
+.form-field input.input-error,
+.form-field select.input-error,
+.form-field textarea.input-error,
+.input-error,
+[aria-invalid='true'] {
+  border-color: var(--decision-block-border);
+  background-image: none;
+}
+
+.form-field input.input-error:focus,
+.input-error:focus,
+[aria-invalid='true']:focus {
+  border-color: var(--decision-block);
+  box-shadow: 0 4px 14px var(--decision-block-bg);
+}
+
+.form-field-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--decision-block);
+}
+
+.form-field-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.char-counter {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 4px;
+}
+
+.char-counter-over {
+  color: var(--decision-block);
+  font-weight: 600;
+}
+
+.detector-toggle input,
+.form-field input[type='checkbox'] {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+/* ==========================================================================
+   45.4 CARDS
+   Three separable behaviours, so a card only takes the ones it should:
+     .card            surface only — safe for tables and long text
+     .card-lift       upward lift + shadow on hover
+     .card-curtain    two panels that slide apart sideways to reveal the
+                      card surface beneath
+     .card-tilt       the reference's 3D tilt at ~a third strength (3.5deg
+                      against its 10deg), per the locked motion decision
+
+   The curtain panels sit BEHIND the content (z-index 0 vs 1), not over it,
+   so text is legible throughout the transition rather than being wiped
+   across. That is a deliberate change from the reference, which slides its
+   panels over the top.
+   ========================================================================== */
+.card {
+  position: relative;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-card);
+  overflow: hidden;
+  transition:
+    transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.4s ease,
+    border-color 0.3s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-border);
+}
+
+.card-curtain::before,
+.card-curtain::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  z-index: 0;
+  width: 50%;
+  height: 100%;
+  background: var(--surface-raised);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-curtain::before {
+  left: 0;
+}
+
+.card-curtain::after {
+  right: 0;
+}
+
+.card-curtain:hover::before {
+  transform: translateX(-100%);
+}
+
+.card-curtain:hover::after {
+  transform: translateX(100%);
+}
+
+.card-curtain > * {
+  position: relative;
+  z-index: 1;
+}
+
+.card-tilt {
+  transform-style: preserve-3d;
+}
+
+.card-tilt:hover {
+  transform: perspective(900px) rotateX(3.5deg) rotateY(3.5deg) translateY(-4px) scale(1.02);
+}
+
+.card-header {
+  font-family: var(--heading);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+/* Stat cards get all three effects. Nothing containing a table or a
+   paragraph of text ever gets .card-tilt — rotating readable copy is what
+   made the reference's tilt too strong to keep at full power. */
+.stat-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stat-card {
+  position: relative;
+  flex: 1 1 130px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-card);
+  text-align: center;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.4s ease,
+    border-color 0.3s ease;
+}
+
+.stat-card::before,
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  z-index: 0;
+  width: 50%;
+  height: 100%;
+  background: var(--surface-raised);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.stat-card::before {
+  left: 0;
+}
+
+.stat-card::after {
+  right: 0;
+}
+
+.stat-card:hover::before {
+  transform: translateX(-100%);
+}
+
+.stat-card:hover::after {
+  transform: translateX(100%);
+}
+
+.stat-card:hover {
+  transform: perspective(900px) rotateX(3.5deg) rotateY(3.5deg) translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-border);
+}
+
+.stat-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.stat-card-value {
+  font-family: var(--heading);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.stat-card-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   45.5 BADGES AND CHIPS
+   Decision badges map from the DECISION STRING via decisionBadge.ts, never
+   from the raw score — an 11.2.3 hard override (a REVIEW forced by an
+   injection phrase at score 23) has to read as elevated, and a
+   score-coloured badge would render it green. That mapping stays in TS;
+   this file only supplies the four band appearances it names.
+   ========================================================================== */
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  line-height: 1.35;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.badge-band-green,
+.badge-safe {
+  background: var(--decision-allow-bg);
+  border-color: var(--decision-allow-border);
+  color: var(--decision-allow);
+}
+
+.badge-band-yellow {
+  background: var(--decision-mask-bg);
+  border-color: var(--decision-mask-border);
+  color: var(--decision-mask);
+}
+
+/* CONFIRM and REVIEW share this one, per the Phase 44 band decision. They
+   stay tellable apart because the badge prints the decision word itself —
+   colour is never the only signal (49.1). */
+.badge-band-orange {
+  background: var(--decision-confirm-bg);
+  border-color: var(--decision-confirm-border);
+  color: var(--decision-confirm);
+}
+
+.badge-band-red {
+  background: var(--decision-block-bg);
+  border-color: var(--decision-block-border);
+  color: var(--decision-block);
+}
+
+.badge-neutral {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--text-primary);
+}
+
+/* Entity chips are keyed to the SEVERITY tiers, not the decision bands —
+   they describe what was found, not what was decided about it. Before this
+   phase they borrowed the decision tokens, which made a MEDIUM-tier email
+   chip the same colour as the brand chrome. */
+.entity-chips,
+.signal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 16px;
+}
+
+.entity-chip,
+.signal-chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.entity-chip-critical {
+  background: var(--severity-critical-bg);
+  border-color: var(--severity-critical-border);
+  color: var(--severity-critical);
+}
+
+.entity-chip-high {
+  background: var(--severity-high-bg);
+  border-color: var(--severity-high-border);
+  color: var(--severity-high);
+}
+
+.entity-chip-medium {
+  background: var(--severity-medium-bg);
+  border-color: var(--severity-medium-border);
+  color: var(--severity-medium);
+}
+
+/* Risk signals are neutral: they are evidence, not a severity ranking. */
+.signal-chip {
+  background: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.placeholder-chip {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: var(--text-primary);
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+/* ==========================================================================
+   45.6 TABLES
+   One treatment for all four (history, review queue, users, audit). They
+   already share the .history-table class; .data-table is accepted as an
+   equal so Phase 47 can rename toward the honest name without a flag day.
+   ========================================================================== */
+.data-table,
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table th,
+.history-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-family: var(--heading);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+
+.data-table th:first-child,
+.history-table th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.data-table th:last-child,
+.history-table th:last-child {
+  border-top-right-radius: 8px;
+}
+
+.data-table td,
+.history-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+.data-table tbody tr,
+.history-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:hover,
+.history-table tbody tr:hover {
+  background: var(--accent-bg);
+}
+
+.history-row {
+  cursor: pointer;
+}
+
+/* The expanded row reads as attached to its parent: same raised surface, an
+   accent rule down the left edge, and no hover reaction of its own (it is
+   not itself clickable). */
+.history-detail-row td,
+.history-detail-row:hover td {
+  background: var(--surface-raised);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.history-detail {
+  padding: 8px 4px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.pagination-label {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   45.7 FEEDBACK SURFACES
+   Every variant carries an icon glyph as well as its colour, so the four
+   read apart in greyscale and for anyone who cannot distinguish the hues.
+   ========================================================================== */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.alert-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--on-accent);
+}
+
+.alert-body {
+  min-width: 0;
+}
+
+.alert-title {
+  font-family: var(--heading);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.alert-success {
+  background: var(--decision-allow-bg);
+  border-color: var(--decision-allow-border);
+}
+
+.alert-success .alert-icon {
+  background: var(--decision-allow);
+}
+
+.alert-error {
+  background: var(--decision-block-bg);
+  border-color: var(--decision-block-border);
+}
+
+.alert-error .alert-icon {
+  background: var(--decision-block);
+}
+
+.alert-warning {
+  background: var(--decision-mask-bg);
+  border-color: var(--decision-mask-border);
+}
+
+.alert-warning .alert-icon {
+  background: var(--decision-mask);
+}
+
+.alert-info {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.alert-info .alert-icon {
+  background: var(--accent);
+}
+
+/* Banners are the page-level form of the same thing (auth pages, save
+   confirmations). 22 call sites, so the class names stay as they are. */
+.banner {
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
+
+.banner-error {
+  background: var(--decision-block-bg);
+  border-color: var(--decision-block-border);
+  color: var(--decision-block);
+}
+
+.banner-success {
+  background: var(--decision-allow-bg);
+  border-color: var(--decision-allow-border);
+  color: var(--decision-allow);
+}
+
+/* The BLOCK explanation panel — the single most consequential surface in the
+   app, so it gets the heaviest treatment: full-height accent rule, raised
+   weight, block-red throughout. */
+.alert-block {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--decision-block-bg);
+  border: 1px solid var(--decision-block-border);
+  border-left: 4px solid var(--decision-block);
+  color: var(--text-primary);
+}
+
+.alert-review {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--decision-confirm-bg);
+  border: 1px solid var(--decision-confirm-border);
+  border-left: 4px solid var(--decision-confirm);
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.alert-review p {
+  margin: 0;
+}
+
+.alert-review p + p {
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   REDUCED MOTION — the one place effects opt out
+   Nothing above needs its own media query; every transform-based effect in
+   this file is neutralised here and replaced with a colour, border or
+   shadow change so the affordance survives.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn-link,
+  .navbar-brand,
+  .navbar-links a,
+  .navbar-links a::after,
+  .card,
+  .card-curtain::before,
+  .card-curtain::after,
+  .stat-card,
+  .stat-card::before,
+  .stat-card::after,
+  .data-table tbody tr,
+  .history-table tbody tr,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .input,
+  .prompt-textarea,
+  .history-filter select,
+  .term-add-form input {
+    transition-duration: 0.01ms;
+  }
+
+  /* No gradient slide, no press-scale — hover is signalled by the shadow. */
+  .btn:hover:not(:disabled) {
+    background-position: left center;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+
+  /* The curtain stays shut and the tilt is dropped. Both cards keep their
+     border/shadow hover response, so hover is still visibly acknowledged —
+     and because the closed curtain is --surface-raised, the resting
+     appearance is identical either way. */
+  .card-lift:hover,
+  .card-tilt:hover,
+  .stat-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-border);
+  }
+
+  .card-curtain:hover::before,
+  .card-curtain:hover::after,
+  .stat-card:hover::before,
+  .stat-card:hover::after {
+    transform: none;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus,
+  .input:focus,
+  .prompt-textarea:focus,
+  .history-filter select:focus,
+  .term-add-form input:focus {
+    transform: none;
+  }
+
+  /* Slowed, not stopped: a frozen spinner reads as a hung request. It is
+     always accompanied by text, so the meaning does not rest on the motion. */
+  .spinner {
+    animation-duration: 2s;
+  }
+}

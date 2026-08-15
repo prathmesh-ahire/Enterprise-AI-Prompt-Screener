@@ -13,6 +13,7 @@ import { ReviewQueuePage } from './pages/ReviewQueuePage'
 import { AdminPage } from './pages/AdminPage'
 import { PolicyManagementPage } from './pages/PolicyManagementPage'
 import { ModelConfigPage } from './pages/ModelConfigPage'
+import { UiPreviewPage } from './pages/UiPreviewPage'
 
 // todo.md Phase 24.2/24.5 (ProtectedRoute: authenticated-vs-not) + Phase 29.1
 // (RoleProtectedRoute: REVIEWER/ADMIN on /review) + Phase 30.1/31.1/32.1 (ADMIN-only on
@@ -26,6 +27,12 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          {/* TEMPORARY — Phase 45 component specimen, deleted at the end of Phase 47.
+              Public on purpose: it renders only hardcoded literals, so there is nothing
+              to protect, and the browser checks reach it without spending logins against
+              the shared 5/min auth rate limit. Not linked from the navbar. */}
+          <Route path="/ui-preview" element={<UiPreviewPage />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardRedirectPage />} />

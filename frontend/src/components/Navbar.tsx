@@ -31,7 +31,9 @@ export function Navbar() {
           </>
         )}
 
-        <span>{username}</span>
+        {/* 45.2: the account controls carry their own class so they don't inherit the
+            uppercase link treatment or the gradient underline meant for navigation. */}
+        <span className="navbar-user">{username}</span>
         {role && <span className="role-badge">{role}</span>}
         {/* 44.7: theme switch sits with the account controls, not the navigation links */}
         <ThemeToggle />
