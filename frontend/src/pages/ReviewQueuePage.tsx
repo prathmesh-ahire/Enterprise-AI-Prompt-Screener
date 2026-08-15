@@ -2,6 +2,8 @@ import { Fragment, useEffect, useState } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
 import { EntityChips } from '../components/EntityChips'
+import { EmptyState, LoadingState } from '../components/DataState'
+import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
 
 interface QueueItem {
@@ -102,18 +104,25 @@ export function ReviewQueuePage() {
 
   return (
     <div className="page-content">
-      <h1>Review Queue</h1>
+      <PageHeader
+        title="Review Queue"
+        description="Prompts flagged for human review. Each shows its masked text and what was detected — the raw prompt is never displayed."
+      />
 
       {error && <div className="banner banner-error">{error}</div>}
       {successMessage && <div className="banner banner-success">{successMessage}</div>}
 
-      {loading && <p>Loading…</p>}
+      {loading && <LoadingState label="Loading the review queue…" />}
 
       {!loading && queue && queue.length === 0 && (
-        <p>There are no prompts waiting for review.</p>
+        <EmptyState
+          title="There are no prompts waiting for review."
+          hint="Prompts arrive here when they score in the REVIEW band or trip a hard override."
+        />
       )}
 
       {!loading && queue && queue.length > 0 && (
+        <div className="table-scroll">
         <table className="history-table">
           <thead>
             <tr>
@@ -133,7 +142,7 @@ export function ReviewQueuePage() {
                 {expandedId === item.requestId && (
                   <tr className="history-detail-row">
                     <td colSpan={3}>
-                      {detailLoadingId === item.requestId && <p>Loading details…</p>}
+                      {detailLoadingId === item.requestId && <LoadingState label="Loading details…" />}
                       {detailError && detailLoadingId !== item.requestId && (
                         <div className="banner banner-error">{detailError}</div>
                       )}
@@ -187,6 +196,7 @@ export function ReviewQueuePage() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   )

@@ -145,20 +145,100 @@
 }
 
 /* ==========================================================================
-   45.2 NAVIGATION
-   Layout here is provisional — Phase 46.1 replaces it with the real app
-   shell (sticky, gutters, footer). What this section owns is the *link*
-   treatment and the wordmark, which 46 keeps.
+   46.1 APP SHELL
+   Navbar / content region / footer. #root is already a min-height flex
+   column (index.css), so the footer is pushed to the bottom by the content
+   region growing, not by a fixed position — a short page still fills the
+   viewport and a long one still scrolls normally.
+   ========================================================================== */
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.app-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   45.2 / 46.1 NAVIGATION
+   45 owns the link treatment and the wordmark; 46 makes the bar sticky and
+   collapsible.
    ========================================================================== */
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 14px 24px;
   border-bottom: 1px solid var(--border);
+  /* Opaque, not translucent: content scrolls underneath it, and a see-through
+     bar over a table of decision badges is unreadable in both themes. */
   background: var(--surface-card);
   text-align: left;
+}
+
+/* Hidden above the breakpoint. Not `display: none` on a media query alone —
+   it must also leave the tab order there, which display:none does correctly. */
+.navbar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.navbar-toggle:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+/* Three bars drawn from one element: the middle is the element's own
+   background, the outer two are its box-shadows. */
+.navbar-toggle-bars,
+.navbar-toggle-bars::before,
+.navbar-toggle-bars::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text-primary);
+}
+
+.navbar-toggle-bars::before,
+.navbar-toggle-bars::after {
+  content: '';
+  position: relative;
+}
+
+.navbar-toggle-bars::before {
+  top: -6px;
+}
+
+.navbar-toggle-bars::after {
+  top: 4px;
 }
 
 .navbar-brand {
@@ -231,6 +311,64 @@
 .navbar-user {
   font-size: 14px;
   color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   46.3 RESPONSIVE NAVBAR
+   Below 900px the links drop into a panel under the bar. The breakpoint is
+   set by content, not by a device: six links plus a username, a role pill, a
+   theme switch and a logout button stop fitting on one line at about 880px.
+   ========================================================================== */
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+
+  .navbar-toggle {
+    display: inline-flex;
+  }
+
+  .navbar-links {
+    /* Collapsed by default. The panel spans the full bar width and stacks,
+       so a link is a comfortable tap target rather than a 13px word. */
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .navbar-open .navbar-links {
+    display: flex;
+  }
+
+  .navbar-links a {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+
+  /* The centre-growing underline reads as an accident on a stacked list —
+     each link would carry a full-width rule that looks like a divider. Left
+     edge accent instead: same information, appropriate to the layout. */
+  .navbar-links a::after {
+    display: none;
+  }
+
+  .navbar-links a.active {
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* Account controls sit together on one row under the links. */
+  .navbar-user,
+  .role-badge {
+    margin-top: 4px;
+  }
 }
 
 /* ==========================================================================
@@ -486,15 +624,18 @@
 /* Stat cards get all three effects. Nothing containing a table or a
    paragraph of text ever gets .card-tilt — rotating readable copy is what
    made the reference's tilt too strong to keep at full power. */
+/* 46.3: a grid rather than a flex row, so the cards REFLOW onto more rows
+   instead of shrinking. auto-fit with a 150px floor means five cards go
+   5-up on a desktop and 2-up at 375px, always at a readable size — flex
+   would have let them squeeze down until a four-digit count wrapped. */
 .stat-cards {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
 }
 
 .stat-card {
   position: relative;
-  flex: 1 1 130px;
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -679,11 +820,90 @@
 }
 
 /* ==========================================================================
+   46.2 PAGE HEADER
+   ========================================================================== */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.page-header-description {
+  margin-top: 6px;
+  max-width: 68ch;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   46.4 LOADING / EMPTY / ERROR
+   ========================================================================== */
+.data-state {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.data-state-loading {
+  padding: 20px 0;
+}
+
+.data-state-empty {
+  padding: 28px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-card);
+  text-align: center;
+}
+
+.data-state-title {
+  color: var(--text-primary);
+  font-family: var(--heading);
+  font-weight: 600;
+}
+
+.data-state-hint {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.data-state-action {
+  margin-top: 12px;
+}
+
+/* ==========================================================================
    45.6 TABLES
    One treatment for all four (history, review queue, users, audit). They
    already share the .history-table class; .data-table is accepted as an
    equal so Phase 47 can rename toward the honest name without a flag day.
    ========================================================================== */
+
+/* 46.3: a table that is too wide scrolls inside its OWN box. Without this the
+   page body scrolls sideways instead, which drags the navbar and every other
+   section off-screen to read one extra column. */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  /* Momentum scrolling on touch, and a scrollbar that doesn't overlap the
+     last row on platforms that reserve space for it. */
+  -webkit-overflow-scrolling: touch;
+}
 .data-table,
 .history-table {
   width: 100%;

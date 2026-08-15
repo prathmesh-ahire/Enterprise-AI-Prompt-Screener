@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
+import { EmptyState, LoadingState } from '../components/DataState'
+import { PageHeader } from '../components/PageHeader'
 
 interface ApprovedModel {
   id: number
@@ -94,12 +96,15 @@ export function ModelConfigPage() {
 
   return (
     <div className="page-content page-content-wide">
-      <h1>Model Configuration</h1>
+      <PageHeader
+        title="Model Configuration"
+        description="The local Ollama model this system forwards approved prompts to. Everything runs on this machine — no prompt ever leaves it."
+      />
 
       <section className="admin-section">
         <h2>Model Status</h2>
         {statusError && <div className="banner banner-error">{statusError}</div>}
-        {statusLoading ? <p>Checking…</p> : (
+        {statusLoading ? <LoadingState label="Checking…" /> : (
           <div className="model-status-row">
             <span className={`badge ${status?.reachable ? 'badge-safe' : 'badge-band-red'}`}>
               {status?.reachable ? 'Online' : 'Unavailable'}
@@ -127,9 +132,10 @@ export function ModelConfigPage() {
         <h2>Approved Models</h2>
         {modelsError && <div className="banner banner-error">{modelsError}</div>}
 
-        {models === null ? <p>Loading models…</p> : (
+        {models === null ? <LoadingState label="Loading models…" /> : (
           <>
-            {models.length === 0 ? <p>No approved models configured yet.</p> : (
+            {models.length === 0 ? <EmptyState title="No approved models configured yet." /> : (
+              <div className="table-scroll">
               <table className="history-table">
                 <thead>
                   <tr>
@@ -163,6 +169,7 @@ export function ModelConfigPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
 
             <form className="term-add-form" onSubmit={handleAddModel}>

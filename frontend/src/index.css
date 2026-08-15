@@ -358,12 +358,14 @@ code {
   }
 }
 
-/* Phase 26+ prompt submission / results */
+/* Phase 26+ prompt submission / results.
+   46.1: the gutters and vertical rhythm moved to .app-main in the shell, so this
+   is now purely a reading-width constraint. Keeping the padding here as well
+   would double the gutter to 40px on every page. */
 .page-content {
   width: 100%;
-  max-width: 720px;
-  margin: 32px auto;
-  padding: 0 16px;
+  max-width: 760px;
+  margin: 0 auto;
   text-align: left;
   box-sizing: border-box;
 }
@@ -459,8 +461,10 @@ code {
 }
 
 /* Phase 30+ admin dashboard */
+/* Dashboards and admin tables use the shell's full width — .app-main already
+   caps it at 1180px, so this only needs to lift the reading-width limit. */
 .page-content-wide {
-  max-width: 960px;
+  max-width: 100%;
 }
 
 .admin-section {

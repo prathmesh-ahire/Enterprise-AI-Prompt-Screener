@@ -33,7 +33,10 @@ export function UiPreviewPage() {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="page-content page-content-wide" data-testid="ui-preview">
+    // .app-main supplies the gutters and max width that ProtectedRoute's shell would
+    // normally give a page. This route sits outside the shell (it is public), so it
+    // borrows the layout class directly rather than going without gutters entirely.
+    <div className="app-main page-content-wide" data-testid="ui-preview">
       <div className="navbar" style={{ marginBottom: 24 }}>
         <span className="navbar-brand">Enterprise AI Prompt Screener</span>
         <div className="navbar-links">

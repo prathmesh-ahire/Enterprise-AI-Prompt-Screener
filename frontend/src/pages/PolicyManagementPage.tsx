@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { entityLabel } from '../components/EntityChips'
+import { EmptyState, LoadingState } from '../components/DataState'
+import { PageHeader } from '../components/PageHeader'
 
 // Same 9 EntityType values DetectionEngine (backend Phase 9.6) checks against
 // disabled_detectors - reusing EntityChips' key list keeps this in one place.
@@ -206,7 +208,10 @@ export function PolicyManagementPage() {
 
   return (
     <div className="page-content page-content-wide">
-      <h1>Policy Management</h1>
+      <PageHeader
+        title="Policy Management"
+        description="Thresholds, detectors and retention. Changes take effect on the very next prompt — no restart needed."
+      />
 
       <section className="admin-section">
         <h2>
@@ -216,7 +221,7 @@ export function PolicyManagementPage() {
 
         {policyError && <div className="banner banner-error">{policyError}</div>}
         {policySuccess && <div className="banner banner-success">{policySuccess}</div>}
-        {policyLoading && <p>Loading policy…</p>}
+        {policyLoading && <LoadingState label="Loading policy…" />}
 
         {!policyLoading && (
           <>
@@ -301,9 +306,9 @@ export function PolicyManagementPage() {
         <h2>Organisation Confidential Terms</h2>
         {termsError && <div className="banner banner-error">{termsError}</div>}
 
-        {terms === null ? <p>Loading terms…</p> : (
+        {terms === null ? <LoadingState label="Loading terms…" /> : (
           <>
-            {terms.length === 0 ? <p>No confidential terms configured yet.</p> : (
+            {terms.length === 0 ? <EmptyState title="No confidential terms configured yet." hint="Add a term below and any prompt containing it is flagged as ORG_CONFIDENTIAL." /> : (
               <ul className="term-list">
                 {terms.map((t) => (
                   <li key={t.id} className="term-list-item">
@@ -340,7 +345,7 @@ export function PolicyManagementPage() {
         <h2>Data Retention</h2>
         {retentionError && <div className="banner banner-error">{retentionError}</div>}
         {retentionSuccess && <div className="banner banner-success">{retentionSuccess}</div>}
-        {retentionLoading ? <p>Loading retention setting…</p> : (
+        {retentionLoading ? <LoadingState label="Loading retention setting…" /> : (
           <>
             <div className="form-field">
               <label htmlFor="retention-days">Retention period (days)</label>

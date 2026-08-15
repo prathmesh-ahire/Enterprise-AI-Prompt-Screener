@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
 import { EntityChips, entityLabel } from '../components/EntityChips'
+import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
 
 const MAX_LENGTH = 2000
@@ -73,7 +74,10 @@ export function PromptPage() {
 
   return (
     <div className="page-content">
-      <h1>Submit a Prompt</h1>
+      <PageHeader
+        title="Submit a Prompt"
+        description="Prompts are screened for sensitive data and injection risk before anything reaches the AI model."
+      />
 
       {error && <div className="banner banner-error">{error}</div>}
 

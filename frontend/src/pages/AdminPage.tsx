@@ -1,5 +1,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
+import { EmptyState, LoadingState } from '../components/DataState'
+import { PageHeader } from '../components/PageHeader'
 import { decisionBadgeClass } from '../components/decisionBadge'
 import type { PageResponse } from '../api/types'
 
@@ -188,10 +190,17 @@ export function AdminPage() {
 
   return (
     <div className="page-content page-content-wide">
-      <h1>Admin Dashboard</h1>
+      {/* The description states the window caveat up front. These panels genuinely use
+          three different periods, and "the summary says 3 blocked but the database says
+          30" is the most common question this page provokes. Phase 48 repeats the window
+          on each chart; saying it once here covers the panels that are not charts. */}
+      <PageHeader
+        title="Admin Dashboard"
+        description="Summary cards cover today only. Entity stats are all-time; the panels below use the last 7 days."
+      />
 
       {dashboardError && <div className="banner banner-error">{dashboardError}</div>}
-      {dashboardLoading && <p>Loading dashboard…</p>}
+      {dashboardLoading && <LoadingState label="Loading dashboard…" />}
 
       {!dashboardLoading && summary && (
         <>
@@ -229,7 +238,7 @@ export function AdminPage() {
 
           <section className="admin-section">
             <h2>Entity Stats</h2>
-            {entityStats.length === 0 ? <p>No detections recorded yet.</p> : (
+            {entityStats.length === 0 ? <EmptyState title="No detections recorded yet." /> : (
               <div className="bar-chart">
                 {entityStats.map((stat) => (
                   <div className="bar-row" key={stat.entityType}>
@@ -246,7 +255,8 @@ export function AdminPage() {
 
           <section className="admin-section">
             <h2>Recent Blocked</h2>
-            {recentBlocked.length === 0 ? <p>No blocked prompts recorded yet.</p> : (
+            {recentBlocked.length === 0 ? <EmptyState title="No blocked prompts recorded yet." /> : (
+              <div className="table-scroll">
               <table className="history-table">
                 <thead>
                   <tr>
@@ -267,12 +277,19 @@ export function AdminPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </section>
 
           <section className="admin-section">
             <h2>Repeated Violations</h2>
-            {repeatedViolations.length === 0 ? <p>No users with repeated violations in the last 7 days.</p> : (
+            {repeatedViolations.length === 0 ? (
+              <EmptyState
+                title="No users with repeated violations in the last 7 days."
+                hint="A user appears here after three or more BLOCK or REVIEW decisions in that window."
+              />
+            ) : (
+              <div className="table-scroll">
               <table className="history-table">
                 <thead>
                   <tr>
@@ -299,10 +316,10 @@ export function AdminPage() {
                       {expandedUserId === v.userId && (
                         <tr className="history-detail-row">
                           <td colSpan={3}>
-                            {userHistoryLoadingId === v.userId && <p>Loading history…</p>}
+                            {userHistoryLoadingId === v.userId && <LoadingState label="Loading history…" />}
                             {userHistories[v.userId] && (
                               userHistories[v.userId].length === 0
-                                ? <p>This user has no prompt history.</p>
+                                ? <EmptyState title="This user has no prompt history." />
                                 : (
                                   <table className="history-table">
                                     <thead>
@@ -335,6 +352,7 @@ export function AdminPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </section>
 
@@ -370,8 +388,9 @@ export function AdminPage() {
       <section className="admin-section">
         <h2>User Management</h2>
         {usersError && <div className="banner banner-error">{usersError}</div>}
-        {usersLoading ? <p>Loading users…</p> : usersData && (
+        {usersLoading ? <LoadingState label="Loading users…" /> : usersData && (
           <>
+            <div className="table-scroll">
             <table className="history-table">
               <thead>
                 <tr>
@@ -403,6 +422,7 @@ export function AdminPage() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             <div className="pagination">
               <button type="button" className="btn btn-secondary" onClick={() => setUsersPage((p) => p - 1)} disabled={usersData.first}>

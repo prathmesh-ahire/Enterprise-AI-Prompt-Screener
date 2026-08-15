@@ -2,6 +2,8 @@ import { Fragment, useEffect, useState } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
 import { EntityChips } from '../components/EntityChips'
+import { EmptyState, LoadingState } from '../components/DataState'
+import { PageHeader } from '../components/PageHeader'
 import { decisionBadgeClass } from '../components/decisionBadge'
 import type { PageResponse } from '../api/types'
 
@@ -101,12 +103,19 @@ export function HistoryPage() {
 
   return (
     <div className="page-content">
-      <h1>Prompt History</h1>
+      <PageHeader
+        title="Prompt History"
+        description="Every prompt you have submitted, with the decision it received and why."
+      />
 
       {error && <div className="banner banner-error">{error}</div>}
 
+      {/* "No history at all" — distinct from "no rows match the filter" below. */}
       {!loading && pageData && pageData.totalElements === 0 && (
-        <p>You haven't submitted any prompts yet.</p>
+        <EmptyState
+          title="You haven't submitted any prompts yet."
+          hint="Submit one from the Prompt page and it will appear here with its decision."
+        />
       )}
 
       {(loading || (pageData && pageData.totalElements > 0)) && (
@@ -121,9 +130,10 @@ export function HistoryPage() {
           </div>
 
           {loading ? (
-            <p>Loading…</p>
+            <LoadingState label="Loading your history…" />
           ) : (
             <>
+              <div className="table-scroll">
               <table className="history-table">
                 <thead>
                   <tr>
@@ -149,7 +159,7 @@ export function HistoryPage() {
                       {expandedId === item.requestId && (
                         <tr className="history-detail-row">
                           <td colSpan={4}>
-                            {detailLoadingId === item.requestId && <p>Loading details…</p>}
+                            {detailLoadingId === item.requestId && <LoadingState label="Loading details…" />}
                             {detailError && detailLoadingId !== item.requestId && (
                               <div className="banner banner-error">{detailError}</div>
                             )}
@@ -174,9 +184,15 @@ export function HistoryPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
 
+              {/* Filter matched nothing — the user DOES have history, so this must not
+                  say the same thing as the empty state above. */}
               {filteredItems.length === 0 && (
-                <p>No records match this filter on this page.</p>
+                <EmptyState
+                  title="No records match this filter on this page."
+                  hint="Try a different decision, or move to another page."
+                />
               )}
 
               <div className="pagination">
