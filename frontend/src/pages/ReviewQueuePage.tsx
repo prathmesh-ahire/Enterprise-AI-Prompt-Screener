@@ -163,8 +163,9 @@ export function ReviewQueuePage() {
                             </div>
                           )}
 
+                          <p className="section-label">Your decision</p>
                           <div className="form-field">
-                            <label htmlFor="review-reason">Reason (required for any action)</label>
+                            <label htmlFor="review-reason">Reason</label>
                             <input
                               id="review-reason"
                               type="text"
@@ -172,6 +173,15 @@ export function ReviewQueuePage() {
                               onChange={(e) => setReason(e.target.value)}
                               placeholder="Explain your decision…"
                             />
+                            {/* 47.4: the four actions have always been disabled until a
+                                reason is typed, but nothing said so — four greyed-out
+                                buttons with no explanation read as "you lack permission".
+                                The hint states the gate and clears once it is satisfied. */}
+                            <span className="form-field-hint">
+                              {reason.trim()
+                                ? 'Choose an action below.'
+                                : 'Enter a reason to enable the four actions below.'}
+                            </span>
                           </div>
 
                           <div className="btn-row review-actions">

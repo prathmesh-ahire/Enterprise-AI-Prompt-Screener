@@ -1,11 +1,25 @@
 import { useState, type FormEvent } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
+import { Button } from '../components/Button'
 import { EntityChips, entityLabel } from '../components/EntityChips'
 import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
+import { decisionBadgeClass } from '../components/decisionBadge'
 
 const MAX_LENGTH = 2000
+
+// 47.2: one plain-English heading per decision band, so the result says what happened
+// before the reader parses a score or a colour. Keyed on the decision string for the same
+// reason decisionBadgeClass is (see that file): a hard-overridden REVIEW at score 23 must
+// read as elevated, and anything keyed on the score would call it safe.
+const RESULT_TITLE: Record<string, string> = {
+  ALLOW: 'Allowed — sent to the model',
+  MASK: 'Sensitive data found and masked',
+  CONFIRM: 'Your confirmation needed',
+  REVIEW: 'Sent for human review',
+  BLOCK: 'Blocked — not sent anywhere',
+}
 
 interface PromptResult {
   requestId: string
@@ -82,29 +96,40 @@ export function PromptPage() {
       {error && <div className="banner banner-error">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        <div className="field-row">
+          <label className="section-label" htmlFor="prompt-input" style={{ margin: '0 0 6px' }}>Your prompt</label>
+          <div className={`char-counter${text.length > MAX_LENGTH ? ' char-counter-over' : ''}`}>
+            {text.length} / {MAX_LENGTH}
+          </div>
+        </div>
         <textarea
+          id="prompt-input"
           className="prompt-textarea"
-          rows={6}
+          rows={8}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type your prompt here…"
         />
-        <div className={`char-counter${text.length > MAX_LENGTH ? ' char-counter-over' : ''}`}>
-          {text.length} / {MAX_LENGTH}
-        </div>
 
-        <button type="submit" className="btn" disabled={submitting || text.trim().length < 3}>
-          {submitting ? 'Screening…' : 'Submit'}
-        </button>
+        <div className="btn-row" style={{ marginTop: 12 }}>
+          <Button type="submit" loading={submitting} disabled={text.trim().length < 3}>
+            {submitting ? 'Screening…' : 'Screen & send'}
+          </Button>
+        </div>
       </form>
 
       {result && (
         <div className="results-section">
+          <div className={`result-card result-card-${(result.decision ?? '').toLowerCase()}`}>
+            <div className="result-head">
+              <span className={`badge ${decisionBadgeClass(result.decision)}`} style={{ marginBottom: 0 }}>
+                {result.decision}
+              </span>
+              <span className="result-title">{RESULT_TITLE[result.decision] ?? 'Screened'}</span>
+            </div>
           {result.status === 'COMPLETED' && (
             <>
-              <span className={`badge ${result.decision === 'ALLOW' ? 'badge-safe' : 'badge-neutral'}`}>
-                {result.decision === 'ALLOW' ? 'Safe' : 'Sent'}
-              </span>
+              <p className="section-label">AI response</p>
               <div className="ai-response-box">{result.aiResponse}</div>
             </>
           )}
@@ -148,6 +173,7 @@ export function PromptPage() {
                     : 'This prompt needs your confirmation before it is sent.'}
                 </p>
               )}
+              {result.maskedText && <p className="section-label">Masked preview</p>}
               {result.maskedText
                 ? <MaskedText text={result.maskedText} />
                 : (
@@ -157,14 +183,14 @@ export function PromptPage() {
                     the AI model exactly as you wrote it.
                   </p>
                 )}
-              <div className="btn-row">
-                <button type="button" className="btn" onClick={handleConfirm} disabled={confirming}>
+              <div className="btn-row" style={{ marginTop: 14 }}>
+                <Button loading={confirming} onClick={handleConfirm}>
                   {confirming ? 'Sending…' : 'Confirm & Send'}
-                </button>
+                </Button>
                 {result.decision === 'CONFIRM' && (
-                  <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={confirming}>
+                  <Button variant="secondary" onClick={handleCancel} disabled={confirming}>
                     Cancel
-                  </button>
+                  </Button>
                 )}
               </div>
             </>
@@ -173,6 +199,7 @@ export function PromptPage() {
           {result.status !== 'COMPLETED' && result.decision !== 'BLOCK' && !awaitingConfirm && !pendingReview && (
             <p>{result.explanation ?? `Status: ${result.status}`}</p>
           )}
+          </div>
         </div>
       )}
     </div>

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
+import { AuthLayout } from '../components/AuthLayout'
+import { Button } from '../components/Button'
 import { useAuth, type Role } from '../AuthContext'
 
 interface LoginForm {
@@ -41,9 +43,16 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-page">
-      <h1>Login</h1>
-
+    <AuthLayout
+      title="Sign in"
+      subtitle="Use your account to submit and review screened prompts."
+      links={(
+        <>
+          <Link to="/register">Create an account</Link>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </>
+      )}
+    >
       {justRegistered && (
         <div className="banner banner-success">Account created. Please log in.</div>
       )}
@@ -64,15 +73,10 @@ export function LoginPage() {
           {errors.password && <span className="form-field-error">{errors.password.message}</span>}
         </div>
 
-        <button type="submit" className="btn" disabled={submitting}>
-          {submitting ? 'Logging in…' : 'Login'}
-        </button>
+        <Button type="submit" loading={submitting} className="btn-block">
+          {submitting ? 'Signing in…' : 'Sign in'}
+        </Button>
       </form>
-
-      <div className="form-links">
-        <Link to="/register">Create an account</Link>
-        <Link to="/forgot-password">Forgot password?</Link>
-      </div>
-    </div>
+    </AuthLayout>
   )
 }

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
+import { AuthLayout } from '../components/AuthLayout'
+import { Button } from '../components/Button'
 
 interface ForgotPasswordForm {
   email: string
@@ -29,8 +31,16 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="auth-page">
-      <h1>Forgot Password</h1>
+    <AuthLayout
+      title="Forgot password"
+      subtitle="Enter your email and we'll issue a reset token."
+      links={(
+        <>
+          <Link to="/login">Back to sign in</Link>
+          <Link to="/reset-password">Have a token?</Link>
+        </>
+      )}
+    >
 
       {message && (
         <div className="banner banner-success">
@@ -50,15 +60,10 @@ export function ForgotPasswordPage() {
           {errors.email && <span className="form-field-error">{errors.email.message}</span>}
         </div>
 
-        <button type="submit" className="btn" disabled={submitting}>
+        <Button type="submit" loading={submitting} className="btn-block">
           {submitting ? 'Sending…' : 'Send reset link'}
-        </button>
+        </Button>
       </form>
-
-      <div className="form-links">
-        <Link to="/login">Back to login</Link>
-        <Link to="/reset-password">Have a token?</Link>
-      </div>
-    </div>
+    </AuthLayout>
   )
 }

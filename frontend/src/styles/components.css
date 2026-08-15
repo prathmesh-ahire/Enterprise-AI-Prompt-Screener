@@ -820,6 +820,185 @@
 }
 
 /* ==========================================================================
+   47.1 AUTH PAGES
+   A centred card on a branded background. The tint is two very wide, very
+   faint radial washes of the accent — enough to read as "branded" rather
+   than "blank", without ever competing with the card or the form text.
+   ========================================================================== */
+.auth-shell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background-image:
+    radial-gradient(60ch 60ch at 15% 0%, var(--accent-bg), transparent 70%),
+    radial-gradient(70ch 70ch at 90% 100%, var(--accent-bg), transparent 70%);
+}
+
+.auth-page {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.auth-brand {
+  display: block;
+  margin-bottom: 16px;
+  text-align: center;
+  font-family: var(--heading);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.auth-brand:hover {
+  color: var(--accent);
+}
+
+.auth-card {
+  padding: 28px 26px;
+  box-shadow: var(--shadow-md);
+}
+
+.auth-title {
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+
+.auth-subtitle {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Full-width submit: on a 400px card a pill-shaped button hugging the left
+   edge reads as unfinished, and the primary action should be unmissable. */
+.btn-block {
+  width: 100%;
+}
+
+.auth-footnote {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   47.2 PROMPT RESULT — one presentation per decision band
+   The band's own colour drives a left rule and the heading, so ALLOW / MASK
+   / CONFIRM / REVIEW / BLOCK are distinguishable at a glance without the
+   reader parsing the score. Colour is never the only cue: every result
+   carries its decision word in the badge as well.
+   ========================================================================== */
+.result-card {
+  padding: 18px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border-strong);
+  background: var(--surface-card);
+}
+
+.result-card-allow {
+  border-left-color: var(--decision-allow);
+  background: color-mix(in srgb, var(--decision-allow) 5%, var(--surface-card));
+}
+
+.result-card-mask {
+  border-left-color: var(--decision-mask);
+  background: color-mix(in srgb, var(--decision-mask) 5%, var(--surface-card));
+}
+
+/* CONFIRM and REVIEW share the orange band, per the Phase 44 decision. */
+.result-card-confirm,
+.result-card-review {
+  border-left-color: var(--decision-confirm);
+  background: color-mix(in srgb, var(--decision-confirm) 5%, var(--surface-card));
+}
+
+.result-card-block {
+  border-left-color: var(--decision-block);
+  background: color-mix(in srgb, var(--decision-block) 5%, var(--surface-card));
+}
+
+.result-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.result-title {
+  font-family: var(--heading);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.field-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-label {
+  font-family: var(--heading);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 16px 0 6px;
+}
+
+/* ==========================================================================
+   47.5 / 47.6 ADMIN PANELS
+   The three admin pages were flat runs of <h2> + content with nothing
+   separating one concern from the next — on the policy page in particular,
+   thresholds, detector toggles, org terms and retention all ran together as
+   one long column. Each section is now its own panel, which is the whole of
+   "grouped form sections": no markup changed, every page gets it at once.
+   ========================================================================== */
+.admin-section {
+  margin: 20px 0;
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-card);
+}
+
+.admin-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 17px;
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* A panel whose only child is a table should not double the padding around
+   it — the table brings its own cell padding. */
+.admin-section > .table-scroll:last-child {
+  margin-bottom: -4px;
+}
+
+@media (max-width: 700px) {
+  .admin-section {
+    padding: 16px;
+  }
+}
+
+/* ==========================================================================
    46.2 PAGE HEADER
    ========================================================================== */
 .page-header {

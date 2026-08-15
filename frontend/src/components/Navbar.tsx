@@ -50,7 +50,11 @@ export function Navbar() {
         {(role === 'REVIEWER' || role === 'ADMIN') && <NavLink to="/review">Review Queue</NavLink>}
         {role === 'ADMIN' && (
           <>
-            <NavLink to="/admin">Admin Panel</NavLink>
+            {/* `end` matters here: NavLink matches by path PREFIX by default, so /admin
+                also matched /admin/policy and /admin/models — two links lit up as the
+                active route at once, on every admin sub-page. The other five links have
+                no sub-routes, so only this one needs it. */}
+            <NavLink to="/admin" end>Admin Panel</NavLink>
             <NavLink to="/admin/policy">Policy</NavLink>
             <NavLink to="/admin/models">Models</NavLink>
           </>

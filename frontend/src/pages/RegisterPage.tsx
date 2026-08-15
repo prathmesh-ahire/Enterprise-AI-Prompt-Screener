@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
+import { AuthLayout } from '../components/AuthLayout'
+import { Button } from '../components/Button'
 
 interface RegisterForm {
   username: string
@@ -33,9 +35,11 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-page">
-      <h1>Register</h1>
-
+    <AuthLayout
+      title="Create an account"
+      subtitle="New accounts get the standard user role and can submit prompts straight away."
+      links={<Link to="/login">Already have an account? Sign in</Link>}
+    >
       {serverError && <div className="banner banner-error">{serverError}</div>}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -70,14 +74,10 @@ export function RegisterPage() {
           {errors.password && <span className="form-field-error">{errors.password.message}</span>}
         </div>
 
-        <button type="submit" className="btn" disabled={submitting}>
-          {submitting ? 'Creating account…' : 'Register'}
-        </button>
+        <Button type="submit" loading={submitting} className="btn-block">
+          {submitting ? 'Creating account…' : 'Create account'}
+        </Button>
       </form>
-
-      <div className="form-links">
-        <Link to="/login">Already have an account? Login</Link>
-      </div>
-    </div>
+    </AuthLayout>
   )
 }

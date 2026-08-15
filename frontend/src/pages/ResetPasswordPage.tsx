@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useSearchParams } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
+import { AuthLayout } from '../components/AuthLayout'
+import { Button } from '../components/Button'
 
 interface ResetPasswordForm {
   token: string
@@ -35,19 +37,25 @@ export function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="auth-page">
-        <h1>Reset Password</h1>
+      <AuthLayout title="Password reset" subtitle="You can sign in with your new password now.">
         <div className="banner banner-success">
-          Password has been reset successfully. <Link to="/login">Go to login</Link>
+          Password has been reset successfully. <Link to="/login">Go to sign in</Link>
         </div>
-      </div>
+      </AuthLayout>
     )
   }
 
   return (
-    <div className="auth-page">
-      <h1>Reset Password</h1>
-
+    <AuthLayout
+      title="Reset password"
+      subtitle="Paste the token you were issued, then choose a new password."
+      links={(
+        <>
+          <Link to="/login">Back to sign in</Link>
+          <Link to="/forgot-password">Need a token?</Link>
+        </>
+      )}
+    >
       {serverError && <div className="banner banner-error">{serverError}</div>}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -68,14 +76,10 @@ export function ResetPasswordPage() {
           {errors.newPassword && <span className="form-field-error">{errors.newPassword.message}</span>}
         </div>
 
-        <button type="submit" className="btn" disabled={submitting}>
+        <Button type="submit" loading={submitting} className="btn-block">
           {submitting ? 'Resetting…' : 'Reset password'}
-        </button>
+        </Button>
       </form>
-
-      <div className="form-links">
-        <Link to="/login">Back to login</Link>
-      </div>
-    </div>
+    </AuthLayout>
   )
 }
