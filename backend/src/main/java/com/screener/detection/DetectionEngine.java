@@ -1,5 +1,6 @@
 package com.screener.detection;
 
+import com.screener.config.SystemConfigValues;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
 import com.screener.model.SystemConfig;
@@ -68,13 +69,12 @@ public class DetectionEngine {
     }
 
     private Set<EntityType> loadDisabledDetectors() {
+        // 42.3: an unknown detector name in this row used to throw from EntityType.valueOf on
+        // every submission thereafter. Unknown entries are now skipped with a WARN instead.
         return systemConfigRepository.findByConfigKey(DISABLED_DETECTORS_CONFIG_KEY)
                 .map(SystemConfig::getConfigValue)
                 .filter(value -> !value.isBlank())
-                .map(value -> java.util.Arrays.stream(value.split(","))
-                        .map(String::trim)
-                        .map(EntityType::valueOf)
-                        .collect(Collectors.toSet()))
+                .map(value -> SystemConfigValues.parseEntityTypes(DISABLED_DETECTORS_CONFIG_KEY, value))
                 .orElse(Set.of());
     }
 

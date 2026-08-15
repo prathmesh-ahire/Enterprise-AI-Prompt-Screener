@@ -32,6 +32,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
     private static final long WINDOW_MS = 60_000L;
 
+    // 42.1: a window untouched for this long cannot affect any live limit (the window itself
+    // is one minute), so it is safe to forget. Swept every SWEEP_INTERVAL_REQUESTS writes so
+    // the cost is amortised to nothing on a normal request.
+    private static final long STALE_AFTER_MS = WINDOW_MS * 10;
+    private static final int SWEEP_INTERVAL_REQUESTS = 200;
+
     private static final List<String> PROMPT_PATTERNS = List.of(
             "/api/prompts/submit",
             "/api/prompts/*/confirm"
@@ -45,6 +51,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     );
 
     private final ConcurrentHashMap<String, Window> windows = new ConcurrentHashMap<>();
+    private final AtomicInteger requestsSinceSweep = new AtomicInteger();
 
     @Value("${app.rate-limit.prompt-per-minute:10}")
     private int promptLimitPerMinute;
@@ -93,6 +100,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private boolean tryConsume(String key, int limit) {
+        evictStaleWindowsOccasionally();
         Window window = windows.computeIfAbsent(key, k -> new Window());
         synchronized (window) {
             long now = System.currentTimeMillis();
@@ -101,6 +109,30 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 window.count.set(0);
             }
             return window.count.incrementAndGet() <= limit;
+        }
+    }
+
+    // 42.1: the map gained one permanent entry per distinct prompt:<username>/auth:<ip> key
+    // and never released one - expired windows were reset in place, never removed - so it grew
+    // without bound in principle. Swept opportunistically on write rather than by a scheduled
+    // job or a bucket library, which would be exactly the over-engineering this project avoids.
+    //
+    // A window is only dropped once it has been idle for far longer than the window itself, so
+    // the theoretical race (evicting a window another thread is mid-increment on) needs a key
+    // that is simultaneously untouched for STALE_AFTER_MS and actively being counted. Even if
+    // it happened, the cost is one caller getting a fresh window - a few extra requests allowed,
+    // never a wrongly rejected one.
+    private void evictStaleWindowsOccasionally() {
+        if (requestsSinceSweep.incrementAndGet() < SWEEP_INTERVAL_REQUESTS) {
+            return;
+        }
+        requestsSinceSweep.set(0);
+        long staleBefore = System.currentTimeMillis() - STALE_AFTER_MS;
+        int before = windows.size();
+        windows.entrySet().removeIf(entry -> entry.getValue().windowStart < staleBefore);
+        int removed = before - windows.size();
+        if (removed > 0) {
+            log.debug("Evicted {} stale rate-limit window(s); {} remain", removed, windows.size());
         }
     }
 

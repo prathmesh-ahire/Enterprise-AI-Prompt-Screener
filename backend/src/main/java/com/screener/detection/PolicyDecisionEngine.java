@@ -1,5 +1,6 @@
 package com.screener.detection;
 
+import com.screener.config.SystemConfigValues;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
@@ -106,10 +107,11 @@ public class PolicyDecisionEngine {
         return Decision.ALLOW;
     }
 
+    // 42.3: a non-numeric threshold row used to throw here on every prompt submission.
     private int resolveThreshold(String key, int defaultValue) {
         return systemConfigRepository.findByConfigKey(key)
                 .map(SystemConfig::getConfigValue)
-                .map(Integer::parseInt)
+                .map(value -> SystemConfigValues.parseInt(key, value, defaultValue))
                 .orElse(defaultValue);
     }
 

@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -134,6 +135,29 @@ class ReviewServiceTest {
         assertEquals(REVIEWER_ID, captor.getValue().getReviewerId());
 
         verify(auditService).log(eq(REVIEWER_ID), eq("REVIEWER_APPROVE"), eq(requestId), eq("REVIEW"));
+    }
+
+    // 42.2: the forward used to run before the record and audit event were written, so an AI
+    // gateway failure (Ollama down - a recurring event on this machine) meant a reviewer who
+    // had genuinely acted left no trace at all. The decision must survive the failure, and the
+    // exception must still propagate so the prompt stays PENDING_REVIEW and can be re-decided.
+    @Test
+    void decideStillRecordsTheDecisionWhenTheAiForwardFails() {
+        init();
+        UUID requestId = UUID.randomUUID();
+        when(promptService.approveFromReview(requestId))
+                .thenThrow(new AiGatewayException("model unavailable", new RuntimeException("timeout")));
+
+        assertThrows(AiGatewayException.class,
+                () -> reviewService.decide(requestId, REVIEWER_ID, ReviewAction.APPROVE, "looks fine"));
+
+        ArgumentCaptor<ReviewRecord> captor = ArgumentCaptor.forClass(ReviewRecord.class);
+        verify(reviewRecordRepository).save(captor.capture());
+        assertEquals(ReviewAction.APPROVE, captor.getValue().getAction());
+        assertEquals("looks fine", captor.getValue().getReason());
+        assertEquals(REVIEWER_ID, captor.getValue().getReviewerId());
+
+        verify(auditService).log(eq(REVIEWER_ID), eq("REVIEWER_APPROVE"), eq(requestId), eq(null));
     }
 
     @Test

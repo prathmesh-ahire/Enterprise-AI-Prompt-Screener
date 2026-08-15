@@ -1,5 +1,6 @@
 package com.screener.detection;
 
+import com.screener.config.SystemConfigValues;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
 import com.screener.model.SignalType;
@@ -135,10 +136,11 @@ public class RiskSubScoreCalculator {
 
     // Duplicated from PromptService.resolveMaxLength rather than shared — same pattern
     // DetectionEngine already uses for its own system_config lookup (disabled_detectors).
+    // 42.3: falls back to the default on a malformed row instead of throwing mid-pipeline.
     private int resolveMaxLength() {
         return systemConfigRepository.findByConfigKey(MAX_LENGTH_CONFIG_KEY)
                 .map(SystemConfig::getConfigValue)
-                .map(Integer::parseInt)
+                .map(value -> SystemConfigValues.parseInt(MAX_LENGTH_CONFIG_KEY, value, DEFAULT_MAX_LENGTH))
                 .orElse(DEFAULT_MAX_LENGTH);
     }
 }

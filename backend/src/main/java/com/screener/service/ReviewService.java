@@ -81,9 +81,29 @@ public class ReviewService {
     public PromptResponseDto decide(UUID requestId, Long reviewerId, ReviewAction action, String reason) {
         log.info("Reviewer {} decided {} on prompt {}", reviewerId, action, requestId);
 
-        PromptResponseDto result = APPROVING_ACTIONS.contains(action)
-                ? promptService.approveFromReview(requestId)
-                : promptService.rejectFromReview(requestId);
+        // 42.2: the forward used to run first with the record and audit event after it, so an
+        // AiGatewayException (Ollama down or timed out - a documented, recurring event on this
+        // machine) propagated before either was written. The reviewer had genuinely acted, yet
+        // the decision left no trace at all: "a reviewer clicked Approve" and "a ReviewRecord
+        // exists" were not equivalent, which quietly undermines the audit trail the project
+        // claims. The record is now persisted on the failure path too, before rethrowing.
+        //
+        // Deliberately still forward-first on the happy path: the record then carries the
+        // decision the forward actually produced. On failure the prompt correctly stays
+        // PENDING_REVIEW and can simply be re-decided once Ollama is back - which will write a
+        // second record, an honest history of two attempts rather than a rewritten single one.
+        PromptResponseDto result;
+        try {
+            result = APPROVING_ACTIONS.contains(action)
+                    ? promptService.approveFromReview(requestId)
+                    : promptService.rejectFromReview(requestId);
+        } catch (RuntimeException ex) {
+            log.warn("Reviewer {}'s {} decision on prompt {} could not be completed - recording the "
+                    + "decision anyway so it is not lost, prompt stays awaiting review", reviewerId, action, requestId);
+            saveReviewRecord(requestId, reviewerId, action, reason);
+            auditService.log(reviewerId, "REVIEWER_" + action.name(), requestId, null);
+            throw ex;
+        }
 
         saveReviewRecord(requestId, reviewerId, action, reason);
         auditService.log(reviewerId, "REVIEWER_" + action.name(), requestId, result.decision());

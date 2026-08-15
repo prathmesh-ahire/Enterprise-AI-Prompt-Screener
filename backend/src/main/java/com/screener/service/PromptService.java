@@ -10,6 +10,7 @@ import com.screener.detection.RiskSubScoreCalculator;
 import com.screener.detection.RiskSubScores;
 import com.screener.dto.PromptHistoryItemDto;
 import com.screener.dto.PromptResponseDto;
+import com.screener.config.SystemConfigValues;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.PromptRequest;
@@ -407,17 +408,19 @@ public class PromptService {
         return cleaned.toString();
     }
 
+    // 42.3: both fall back to the documented default (with a WARN) rather than throwing on a
+    // hand-edited, non-numeric config row - which previously broke every submission.
     private int resolveMaxLength() {
         return systemConfigRepository.findByConfigKey(MAX_LENGTH_CONFIG_KEY)
                 .map(SystemConfig::getConfigValue)
-                .map(Integer::parseInt)
+                .map(value -> SystemConfigValues.parseInt(MAX_LENGTH_CONFIG_KEY, value, DEFAULT_MAX_LENGTH))
                 .orElse(DEFAULT_MAX_LENGTH);
     }
 
     private int resolvePolicyVersion() {
         return systemConfigRepository.findByConfigKey(POLICY_VERSION_CONFIG_KEY)
                 .map(SystemConfig::getConfigValue)
-                .map(Integer::parseInt)
+                .map(value -> SystemConfigValues.parseInt(POLICY_VERSION_CONFIG_KEY, value, DEFAULT_POLICY_VERSION))
                 .orElse(DEFAULT_POLICY_VERSION);
     }
 
