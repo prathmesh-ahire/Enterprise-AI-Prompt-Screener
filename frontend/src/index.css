@@ -1,85 +1,208 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* ==========================================================================
+   DESIGN TOKENS — V1.1 Phase 44.3 / 44.4
+   --------------------------------------------------------------------------
+   Everything above this file's component styles is defined here, once. No
+   component rule should contain a raw colour from here on.
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+   Dark is the BASE theme (plain :root); light is an override applied when
+   the theme toggle writes data-theme="light" onto <html>. That ordering is
+   deliberate — dark is the default the app opens in (44.6).
+
+   Two families, kept strictly apart:
+     * BRAND / CHROME  - the teal ramp. Navbar, buttons, links, focus rings,
+       chart accents. Purely decorative; carries no meaning.
+     * SEMANTIC STATUS - the five decision bands and three severity tiers.
+       These keep traffic-light meaning because an examiner has to read
+       severity instantly, and colour is doing real work there. They are
+       retuned per theme so they stay legible on both surfaces rather than
+       being one fixed hex that only works on white.
+   ========================================================================== */
+
+:root {
+  /* --- brand ramp (ocean/teal) ------------------------------------------ */
+  --accent-deep: #03045e;
+  --accent-strong: #0077b6;
+  --accent: #00b4d8;
+  --accent-soft: #90e0ef;
+  --accent-faint: #caf0f8;
+  --accent-bg: rgba(0, 180, 216, 0.14);
+  --accent-border: rgba(0, 180, 216, 0.45);
+  --on-accent: #ffffff;
+
+  /* --- surfaces --------------------------------------------------------- */
+  --surface-page: #060a0f;
+  --surface-card: #0e141b;
+  --surface-raised: #161e27;
+
+  /* --- text ------------------------------------------------------------- */
+  --text-primary: #f2f7fa;
+  --text-secondary: #a7becd;
+  --text-muted: #6f8496;
+
+  /* --- lines & depth ---------------------------------------------------- */
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.3);
+
+  /* --- decision bands (traffic-light meaning is load-bearing) ------------ */
+  --decision-allow: #34d399;
+  --decision-allow-bg: rgba(52, 211, 153, 0.14);
+  --decision-allow-border: rgba(52, 211, 153, 0.45);
+  --decision-mask: #fbbf24;
+  --decision-mask-bg: rgba(251, 191, 36, 0.14);
+  --decision-mask-border: rgba(251, 191, 36, 0.45);
+  /* CONFIRM and REVIEW deliberately share one band: PolicyDecisionEngine
+     splits 50-74 at 65, but the project defines only four colour steps for
+     the 0-100 range, so both sit in orange. */
+  --decision-confirm: #fb923c;
+  --decision-confirm-bg: rgba(251, 146, 60, 0.14);
+  --decision-confirm-border: rgba(251, 146, 60, 0.45);
+  --decision-block: #f87171;
+  --decision-block-bg: rgba(248, 113, 113, 0.14);
+  --decision-block-border: rgba(248, 113, 113, 0.45);
+
+  /* --- severity tiers, mirroring RiskSubScoreCalculator.SEVERITY_WEIGHT --- */
+  --severity-critical: #f87171;
+  --severity-critical-bg: rgba(248, 113, 113, 0.14);
+  --severity-critical-border: rgba(248, 113, 113, 0.4);
+  --severity-high: #fbbf24;
+  --severity-high-bg: rgba(251, 191, 36, 0.14);
+  --severity-high-border: rgba(251, 191, 36, 0.4);
+  --severity-medium: #67d9ef;
+  --severity-medium-bg: rgba(103, 217, 239, 0.14);
+  --severity-medium-border: rgba(103, 217, 239, 0.4);
+
+  /* --- typography (self-hosted via @fontsource, see main.tsx) ------------ */
+  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Source Sans 3', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  /* --- legacy aliases ---------------------------------------------------
+     Phase 44 is the foundation only; the component styles further down this
+     file (and the pages themselves) still use the older names. Aliasing them
+     onto the new system means the whole app re-themes immediately with no
+     risk of a half-restyled UI, and Phases 45-47 can retire these as each
+     component is rewritten. Do not add new usages of these. */
+  --bg: var(--surface-page);
+  --text-h: var(--text-primary);
+  --text: var(--text-secondary);
+  --code-bg: var(--surface-raised);
+  --shadow: var(--shadow-md);
+
+  color-scheme: dark;
+  font: 16px/1.55 var(--sans);
+  color: var(--text-secondary);
+  background: var(--surface-page);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* ==========================================================================
+   LIGHT THEME — only the tokens that actually change
+   ========================================================================== */
+:root[data-theme='light'] {
+  --accent: #0077b6;
+  --accent-strong: #03045e;
+  --accent-soft: #48b8d8;
+  --accent-bg: rgba(0, 119, 182, 0.10);
+  --accent-border: rgba(0, 119, 182, 0.40);
+  --on-accent: #ffffff;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+  --surface-page: #f4f8fb;
+  --surface-card: #ffffff;
+  --surface-raised: #e9f1f7;
+
+  --text-primary: #0b2233;
+  --text-secondary: #3d5f77;
+  --text-muted: #6b8296;
+
+  --border: rgba(11, 34, 51, 0.14);
+  --border-strong: rgba(11, 34, 51, 0.28);
+  --shadow-sm: 0 1px 2px rgba(11, 34, 51, 0.08);
+  --shadow-md: 0 10px 24px rgba(11, 34, 51, 0.10), 0 3px 8px rgba(11, 34, 51, 0.06);
+
+  /* Darkened so they carry the same weight against white that the dark-theme
+     values carry against near-black. Same meanings, different luminance. */
+  --decision-allow: #157f4a;
+  --decision-allow-bg: rgba(21, 127, 74, 0.10);
+  --decision-allow-border: rgba(21, 127, 74, 0.40);
+  --decision-mask: #a16207;
+  --decision-mask-bg: rgba(161, 98, 7, 0.10);
+  --decision-mask-border: rgba(161, 98, 7, 0.40);
+  --decision-confirm: #c2410c;
+  --decision-confirm-bg: rgba(194, 65, 12, 0.10);
+  --decision-confirm-border: rgba(194, 65, 12, 0.40);
+  --decision-block: #b91c1c;
+  --decision-block-bg: rgba(185, 28, 28, 0.10);
+  --decision-block-border: rgba(185, 28, 28, 0.40);
+
+  --severity-critical: #b91c1c;
+  --severity-critical-bg: rgba(185, 28, 28, 0.10);
+  --severity-critical-border: rgba(185, 28, 28, 0.35);
+  --severity-high: #a16207;
+  --severity-high-bg: rgba(161, 98, 7, 0.10);
+  --severity-high-border: rgba(161, 98, 7, 0.35);
+  --severity-medium: #0e7490;
+  --severity-medium-bg: rgba(14, 116, 144, 0.10);
+  --severity-medium-border: rgba(14, 116, 144, 0.35);
+
+  color-scheme: light;
 }
 
+/* 44.2: the fixed 1126px centred, side-bordered box was the Vite starter
+   template's own demo-page layout - the single biggest reason every screen
+   read as narrow and generic. The app shell in Phase 46 builds on this. */
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  background: var(--surface-page);
 }
 
 body {
   margin: 0;
+  background: var(--surface-page);
 }
 
+/* Visible keyboard focus everywhere, on the brand colour (accessibility pass
+   in 49.1 verifies this; defining it here keeps it consistent from the start). */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Inter for headings, Source Sans 3 for body - the pairing from the reference
+   design. 44.5 self-hosts both; the reference project named them but never
+   actually loaded them, so it was silently falling back to system fonts. */
+/* Weight must be one of the faces actually imported in main.tsx (500/600/700).
+   `font-synthesis: none` is set, and @fontsource ships discrete static weights
+   rather than a variable font, so an in-between value like 650 would silently
+   fall back to the nearest face instead of rendering as asked. */
 h1,
-h2 {
+h2,
+h3 {
   font-family: var(--heading);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-h);
+  letter-spacing: -0.01em;
 }
 
+/* Was 56px - the Vite template's landing-page hero scale, far too loud for an
+   application screen. Phase 46.2 introduces the real page-header pattern. */
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 0 0 20px;
   @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+    font-size: 24px;
   }
 }
 h2 {
@@ -95,8 +218,9 @@ p {
   margin: 0;
 }
 
-code,
-.counter {
+/* 44.1: `.counter` removed here - it was the Vite starter template's demo
+   click-counter, matched by nothing in this app. */
+code {
   font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
@@ -139,12 +263,12 @@ code {
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--bg);
+  background: var(--surface-card);
   color: var(--text-h);
 }
 
 .form-field-error {
-  color: #d33;
+  color: var(--decision-block);
   font-size: 13px;
 }
 
@@ -155,7 +279,7 @@ code {
   border: none;
   border-radius: 6px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   cursor: pointer;
 }
 
@@ -182,9 +306,9 @@ code {
 }
 
 .banner-error {
-  background: rgba(211, 51, 51, 0.1);
-  border: 1px solid rgba(211, 51, 51, 0.4);
-  color: #d33;
+  background: var(--decision-block-bg);
+  border: 1px solid var(--decision-block-border);
+  color: var(--decision-block);
 }
 
 .banner-success {
@@ -207,6 +331,79 @@ code {
   padding: 12px 24px;
   border-bottom: 1px solid var(--border);
   text-align: left;
+  background: var(--surface-card);
+}
+
+/* ==========================================================================
+   THEME SWITCH — Phase 44.7
+   The visible control is the slider span; the checkbox behind it stays a real
+   focusable input so keyboard and screen-reader behaviour come for free.
+   ========================================================================== */
+.theme-switch {
+  --switch-w: 3.1em;
+  --switch-h: 1.7em;
+  --knob: 1.2em;
+  --knob-gap: 0.25em;
+  position: relative;
+  display: inline-block;
+  width: var(--switch-w);
+  height: var(--switch-h);
+  flex: none;
+}
+
+.theme-switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.theme-switch-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  transition: background 0.3s ease, border-color 0.3s ease;
+  pointer-events: none;
+}
+
+/* Light theme (unchecked): a sun-ish knob carrying the brand gradient. */
+.theme-switch-slider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--knob-gap);
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(40deg, var(--accent-deep), var(--accent) 70%);
+  transition: left 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Dark theme (checked): knob slides right and the inset shadow carves it into
+   a crescent moon - the same trick the reference design uses. */
+.theme-switch-input:checked + .theme-switch-slider::before {
+  left: calc(100% - (var(--knob) + var(--knob-gap)));
+  background: #2a3441;
+  box-shadow:
+    inset -3px -2px 5px -2px var(--accent-strong),
+    inset -10px -4px 0 0 var(--accent-faint);
+}
+
+.theme-switch-input:focus-visible + .theme-switch-slider {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch-slider,
+  .theme-switch-slider::before {
+    transition: none;
+  }
 }
 
 .navbar-brand {
@@ -256,7 +453,7 @@ code {
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--bg);
+  background: var(--surface-card);
   color: var(--text-h);
   box-sizing: border-box;
   resize: vertical;
@@ -270,7 +467,7 @@ code {
 }
 
 .char-counter-over {
-  color: #d33;
+  color: var(--decision-block);
 }
 
 .results-section {
@@ -289,9 +486,9 @@ code {
 }
 
 .badge-safe {
-  background: rgba(42, 157, 92, 0.12);
-  border: 1px solid rgba(42, 157, 92, 0.4);
-  color: #2a9d5c;
+  background: var(--decision-allow-bg);
+  border: 1px solid var(--decision-allow-border);
+  color: var(--decision-allow);
 }
 
 .badge-neutral {
@@ -303,8 +500,8 @@ code {
 .alert-block {
   padding: 12px 14px;
   border-radius: 6px;
-  background: rgba(211, 51, 51, 0.1);
-  border: 1px solid rgba(211, 51, 51, 0.4);
+  background: var(--decision-block-bg);
+  border: 1px solid var(--decision-block-border);
   color: var(--text-h);
 }
 
@@ -341,8 +538,8 @@ code {
 .alert-review {
   padding: 12px 14px;
   border-radius: 6px;
-  background: rgba(230, 168, 23, 0.12);
-  border: 1px solid rgba(230, 168, 23, 0.4);
+  background: var(--decision-confirm-bg);
+  border: 1px solid var(--decision-confirm-border);
   color: var(--text-h);
   margin-bottom: 16px;
 }
@@ -386,15 +583,15 @@ code {
 }
 
 .entity-chip-critical {
-  background: rgba(211, 51, 51, 0.12);
-  border: 1px solid rgba(211, 51, 51, 0.4);
-  color: #d33;
+  background: var(--decision-block-bg);
+  border: 1px solid var(--decision-block-border);
+  color: var(--decision-block);
 }
 
 .entity-chip-high {
-  background: rgba(230, 126, 23, 0.12);
-  border: 1px solid rgba(230, 126, 23, 0.4);
-  color: #e67e17;
+  background: var(--decision-confirm-bg);
+  border: 1px solid var(--decision-confirm-border);
+  color: var(--decision-confirm);
 }
 
 .entity-chip-medium {
@@ -431,19 +628,19 @@ code {
 }
 
 .risk-score-green {
-  background: #2a9d5c;
+  background: var(--decision-allow);
 }
 
 .risk-score-yellow {
-  background: #e6b800;
+  background: var(--decision-mask);
 }
 
 .risk-score-orange {
-  background: #e67e17;
+  background: var(--decision-confirm);
 }
 
 .risk-score-red {
-  background: #d33;
+  background: var(--decision-block);
 }
 
 .btn-row {
@@ -459,27 +656,27 @@ code {
 
 /* Phase 28+ history table, pagination, decision badges */
 .badge-band-green {
-  background: rgba(42, 157, 92, 0.12);
-  border: 1px solid rgba(42, 157, 92, 0.4);
-  color: #2a9d5c;
+  background: var(--decision-allow-bg);
+  border: 1px solid var(--decision-allow-border);
+  color: var(--decision-allow);
 }
 
 .badge-band-yellow {
-  background: rgba(230, 184, 0, 0.12);
-  border: 1px solid rgba(230, 184, 0, 0.4);
-  color: #a37f00;
+  background: var(--decision-mask-bg);
+  border: 1px solid var(--decision-mask-border);
+  color: var(--decision-mask);
 }
 
 .badge-band-orange {
-  background: rgba(230, 126, 23, 0.12);
-  border: 1px solid rgba(230, 126, 23, 0.4);
-  color: #e67e17;
+  background: var(--decision-confirm-bg);
+  border: 1px solid var(--decision-confirm-border);
+  color: var(--decision-confirm);
 }
 
 .badge-band-red {
-  background: rgba(211, 51, 51, 0.12);
-  border: 1px solid rgba(211, 51, 51, 0.4);
-  color: #d33;
+  background: var(--decision-block-bg);
+  border: 1px solid var(--decision-block-border);
+  color: var(--decision-block);
 }
 
 .history-filter {
@@ -493,7 +690,7 @@ code {
   padding: 6px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--bg);
+  background: var(--surface-card);
   color: var(--text-h);
 }
 
@@ -547,8 +744,8 @@ code {
 
 /* Phase 29+ review queue: danger button, risk-signal chips */
 .btn-danger {
-  background: #d33;
-  color: #fff;
+  background: var(--decision-block);
+  color: var(--on-accent);
 }
 
 .signal-chips {
@@ -704,7 +901,7 @@ code {
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--bg);
+  background: var(--surface-card);
   color: var(--text-h);
 }
 
