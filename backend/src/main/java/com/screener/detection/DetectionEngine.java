@@ -52,8 +52,17 @@ public class DetectionEngine {
     private final List<Detector> detectors;
     private final SystemConfigRepository systemConfigRepository;
 
+    /**
+     * Reads the disabled-detector set itself. Kept for callers that screen a one-off piece of
+     * text outside a prompt submission (e.g. {@code ResponseSafetyChecker}) and for tests.
+     */
     public List<DetectionFinding> detectAll(String text) {
-        Set<EntityType> disabled = loadDisabledDetectors();
+        return detectAll(text, loadDisabledDetectors());
+    }
+
+    // 43.3: the prompt pipeline passes the set in from the per-request SystemConfigSnapshot so
+    // this class does not issue its own config query on every submission.
+    public List<DetectionFinding> detectAll(String text, Set<EntityType> disabled) {
         List<DetectionFinding> findings = new ArrayList<>();
         for (Detector detector : detectors) {
             if (disabled.contains(detector.getEntityType())) {

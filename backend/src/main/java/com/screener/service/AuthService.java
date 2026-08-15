@@ -23,9 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -136,12 +134,6 @@ public class AuthService {
     // to be findFirst() over an unordered repository result, so a multi-role account's login
     // response - and therefore its navbar and landing page - was effectively arbitrary.
     private String resolveRole(Long userId) {
-        Set<String> roleNames = userRoleRepository.findByUserId(userId).stream()
-                .map(UserRole::getRoleId)
-                .map(roleRepository::findById)
-                .flatMap(Optional::stream)
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-        return Role.mostPrivileged(roleNames);
+        return Role.mostPrivileged(userRoleRepository.findRoleNamesByUserId(userId));
     }
 }

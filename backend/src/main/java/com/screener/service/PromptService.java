@@ -19,11 +19,9 @@ import com.screener.model.Role;
 import com.screener.model.RiskSignal;
 import com.screener.model.ScreeningDecision;
 import com.screener.model.SystemConfig;
-import com.screener.model.UserRole;
 import com.screener.repository.DetectionFindingRepository;
 import com.screener.repository.PromptRequestRepository;
 import com.screener.repository.RiskSignalRepository;
-import com.screener.repository.RoleRepository;
 import com.screener.repository.ScreeningDecisionRepository;
 import com.screener.repository.SystemConfigRepository;
 import com.screener.repository.UserRoleRepository;
@@ -76,7 +74,6 @@ public class PromptService {
     private final RiskSignalRepository riskSignalRepository;
     private final ScreeningDecisionRepository screeningDecisionRepository;
     private final UserRoleRepository userRoleRepository;
-    private final RoleRepository roleRepository;
 
     private final DetectionEngine detectionEngine;
     private final RiskAnalysisEngine riskAnalysisEngine;
@@ -95,7 +92,13 @@ public class PromptService {
             throw new IllegalArgumentException("Prompt text cannot be blank");
         }
 
-        int maxLength = resolveMaxLength();
+        // 43.3: one read of system_config for the whole submission. Every value below used to
+        // be fetched separately at the moment it was needed - nine queries against an
+        // eight-row table per prompt. Snapshot, not cache: it dies with this method call, so
+        // an admin policy change still applies to the very next prompt.
+        SystemConfigSnapshot config = SystemConfigSnapshot.from(systemConfigRepository.findAll());
+
+        int maxLength = config.maxPromptLength();
         if (normalised.length() > maxLength) {
             throw new IllegalArgumentException(
                     "Prompt exceeds the maximum allowed length of " + maxLength + " characters");
@@ -106,11 +109,11 @@ public class PromptService {
 
         // Steps 2-5 only (13.4) - excludes normalise (1), masking (6), and any AI call.
         long pipelineStartMs = System.currentTimeMillis();
-        List<DetectionFinding> findings = detectionEngine.detectAll(normalised);
+        List<DetectionFinding> findings = detectionEngine.detectAll(normalised, config.disabledDetectors());
         List<RiskSignalResult> signals = riskAnalysisEngine.analyze(normalised, userId);
-        RiskSubScores subScores = riskSubScoreCalculator.compute(findings, signals, role, normalised.length());
+        RiskSubScores subScores = riskSubScoreCalculator.compute(findings, signals, role, normalised.length(), maxLength);
         double riskScore = riskScorer.score(subScores);
-        DecisionResult decisionResult = policyDecisionEngine.decide(riskScore, findings, signals);
+        DecisionResult decisionResult = policyDecisionEngine.decide(riskScore, findings, signals, config.thresholds());
         long processingTimeMs = System.currentTimeMillis() - pipelineStartMs;
         logDecisionOutcome(requestId, decisionResult, findings.size(), signals.size(), processingTimeMs);
 
@@ -130,7 +133,7 @@ public class PromptService {
 
         saveFindings(requestId, findings);
         saveSignals(requestId, signals);
-        saveDecision(requestId, decisionResult, processingTimeMs);
+        saveDecision(requestId, decisionResult, processingTimeMs, config.policyVersion());
 
         // 17.2: one event for the intake itself, one for the decision outcome. The
         // decision's action is always decision.name() (ALLOW/MASK/CONFIRM/REVIEW/BLOCK) -
@@ -331,13 +334,13 @@ public class PromptService {
         riskSignalRepository.saveAll(entities);
     }
 
-    private void saveDecision(UUID requestId, DecisionResult decisionResult, long processingTimeMs) {
+    private void saveDecision(UUID requestId, DecisionResult decisionResult, long processingTimeMs, int policyVersion) {
         ScreeningDecision decision = new ScreeningDecision();
         decision.setRequestId(requestId);
         decision.setDecision(decisionResult.decision());
         decision.setRiskScore(decisionResult.riskScore());
         decision.setExplanation(decisionResult.explanation());
-        decision.setPolicyVersion(resolvePolicyVersion());
+        decision.setPolicyVersion(policyVersion);
         decision.setTimestamp(LocalDateTime.now());
         decision.setProcessingTimeMs(processingTimeMs);
         screeningDecisionRepository.save(decision);
@@ -353,15 +356,9 @@ public class PromptService {
         };
     }
 
+    // 43.4: one join instead of one query for the links plus one per role.
     private String resolveRole(Long userId) {
-        Set<String> roleNames = userRoleRepository.findByUserId(userId).stream()
-                .map(UserRole::getRoleId)
-                .map(roleRepository::findById)
-                .filter(java.util.Optional::isPresent)
-                .map(java.util.Optional::get)
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-        return Role.mostPrivileged(roleNames);
+        return Role.mostPrivileged(userRoleRepository.findRoleNamesByUserId(userId));
     }
 
     // Phase 27.3/27.4: riskScore and entityTypes ride along on every PromptResponseDto so

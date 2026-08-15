@@ -1,9 +1,6 @@
 package com.screener.config;
 
 import com.screener.model.AccountStatus;
-import com.screener.model.Role;
-import com.screener.model.UserRole;
-import com.screener.repository.RoleRepository;
 import com.screener.repository.UserRepository;
 import com.screener.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +19,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
-    private final RoleRepository roleRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -33,11 +29,10 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new DisabledException("Account is disabled: " + username);
         }
 
-        List<SimpleGrantedAuthority> authorities = userRoleRepository.findByUserId(user.getId()).stream()
-                .map(UserRole::getRoleId)
-                .map(roleRepository::findById)
-                .flatMap(java.util.Optional::stream)
-                .map(Role::getName)
+        // 43.4: one join instead of one query for the link rows plus one per role. This is the
+        // highest-traffic instance of that N+1 in the project - JwtAuthFilter calls this on
+        // EVERY authenticated request, not just prompt submissions.
+        List<SimpleGrantedAuthority> authorities = userRoleRepository.findRoleNamesByUserId(user.getId()).stream()
                 .map(name -> new SimpleGrantedAuthority("ROLE_" + name))
                 .toList();
 

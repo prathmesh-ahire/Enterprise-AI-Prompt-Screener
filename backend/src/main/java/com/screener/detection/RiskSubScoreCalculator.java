@@ -77,13 +77,21 @@ public class RiskSubScoreCalculator {
 
     private final SystemConfigRepository systemConfigRepository;
 
+    /** Reads the max prompt length itself. Kept for tests and any non-pipeline caller. */
     public RiskSubScores compute(List<DetectionFinding> findings, List<RiskSignalResult> signals,
                                   String role, int promptLength) {
+        return compute(findings, signals, role, promptLength, resolveMaxLength());
+    }
+
+    // 43.3: the prompt pipeline passes maxLength in from the per-request snapshot - PromptService
+    // has already read it to validate the prompt, so re-reading it here was a duplicate query.
+    public RiskSubScores compute(List<DetectionFinding> findings, List<RiskSignalResult> signals,
+                                  String role, int promptLength, int maxLength) {
         return new RiskSubScores(
                 sensitiveDataScore(findings),
                 injectionScore(signals),
                 secretCriticalityScore(findings),
-                policyContextScore(role, promptLength),
+                policyContextScore(role, promptLength, maxLength),
                 obfuscationScore(signals));
     }
 
@@ -113,8 +121,11 @@ public class RiskSubScoreCalculator {
     }
 
     double policyContextScore(String role, int promptLength) {
+        return policyContextScore(role, promptLength, resolveMaxLength());
+    }
+
+    double policyContextScore(String role, int promptLength, int maxLength) {
         double baseline = ROLE_BASELINE.getOrDefault(role, DEFAULT_ROLE_BASELINE);
-        int maxLength = resolveMaxLength();
         double lengthRatio = maxLength > 0 ? (double) promptLength / maxLength : 0.0;
         double lengthContribution = Math.min(LENGTH_RATIO_CONTRIBUTION_CAP, lengthRatio);
         return Math.min(1.0, baseline + lengthContribution);

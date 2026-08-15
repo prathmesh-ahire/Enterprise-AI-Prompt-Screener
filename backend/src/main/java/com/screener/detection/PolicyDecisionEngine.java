@@ -68,8 +68,16 @@ public class PolicyDecisionEngine {
             Decision.REVIEW, "Sent to a human reviewer.",
             Decision.BLOCK, "Not sent anywhere.");
 
+    /** Reads the four thresholds itself. Kept for tests and any non-pipeline caller. */
     public DecisionResult decide(double riskScore, List<DetectionFinding> findings, List<RiskSignalResult> signals) {
-        Decision decision = bandFor(riskScore);
+        return decide(riskScore, findings, signals, loadThresholds());
+    }
+
+    // 43.2/43.3: the prompt pipeline passes thresholds in from the per-request snapshot, so a
+    // decision costs zero config queries instead of up to four.
+    public DecisionResult decide(double riskScore, List<DetectionFinding> findings,
+                                  List<RiskSignalResult> signals, RiskThresholds thresholds) {
+        Decision decision = bandFor(riskScore, thresholds);
 
         Set<EntityType> entityTypes = findings.stream()
                 .map(DetectionFinding::getEntityType)
@@ -91,20 +99,28 @@ public class PolicyDecisionEngine {
         return new DecisionResult(decision, riskScore, EXPLANATIONS.get(decision), SAFE_ACTIONS.get(decision));
     }
 
-    private Decision bandFor(double riskScore) {
-        if (riskScore >= resolveThreshold(BLOCK_THRESHOLD_KEY, DEFAULT_BLOCK_THRESHOLD)) {
+    private Decision bandFor(double riskScore, RiskThresholds thresholds) {
+        if (riskScore >= thresholds.block()) {
             return Decision.BLOCK;
         }
-        if (riskScore >= resolveThreshold(REVIEW_THRESHOLD_KEY, DEFAULT_REVIEW_THRESHOLD)) {
+        if (riskScore >= thresholds.review()) {
             return Decision.REVIEW;
         }
-        if (riskScore >= resolveThreshold(CONFIRM_THRESHOLD_KEY, DEFAULT_CONFIRM_THRESHOLD)) {
+        if (riskScore >= thresholds.confirm()) {
             return Decision.CONFIRM;
         }
-        if (riskScore >= resolveThreshold(MASK_THRESHOLD_KEY, DEFAULT_MASK_THRESHOLD)) {
+        if (riskScore >= thresholds.mask()) {
             return Decision.MASK;
         }
         return Decision.ALLOW;
+    }
+
+    private RiskThresholds loadThresholds() {
+        return new RiskThresholds(
+                resolveThreshold(MASK_THRESHOLD_KEY, DEFAULT_MASK_THRESHOLD),
+                resolveThreshold(CONFIRM_THRESHOLD_KEY, DEFAULT_CONFIRM_THRESHOLD),
+                resolveThreshold(REVIEW_THRESHOLD_KEY, DEFAULT_REVIEW_THRESHOLD),
+                resolveThreshold(BLOCK_THRESHOLD_KEY, DEFAULT_BLOCK_THRESHOLD));
     }
 
     // 42.3: a non-numeric threshold row used to throw here on every prompt submission.

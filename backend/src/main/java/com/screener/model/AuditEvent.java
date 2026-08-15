@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +15,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "audit_events")
+@Table(name = "audit_events", indexes = {
+        @Index(name = "idx_audit_events_user_created", columnList = "user_id, created_at"),
+        @Index(name = "idx_audit_events_created_at", columnList = "created_at")
+})
 @Getter
 @Setter
 @NoArgsConstructor

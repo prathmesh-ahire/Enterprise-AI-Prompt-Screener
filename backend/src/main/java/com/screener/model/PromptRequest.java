@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +18,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "prompt_requests")
+@Table(name = "prompt_requests", indexes = {
+        @Index(name = "idx_prompt_requests_request_id", columnList = "request_id"),
+        @Index(name = "idx_prompt_requests_user_id", columnList = "user_id"),
+        @Index(name = "idx_prompt_requests_status", columnList = "status"),
+        @Index(name = "idx_prompt_requests_submitted_at", columnList = "submitted_at")
+})
 @Getter
 @Setter
 @NoArgsConstructor

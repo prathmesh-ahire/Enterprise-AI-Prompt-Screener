@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "risk_signals")
+@Table(name = "risk_signals", indexes = @Index(name = "idx_risk_signals_request_id", columnList = "request_id"))
 @Getter
 @Setter
 @NoArgsConstructor
