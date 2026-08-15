@@ -10,7 +10,6 @@ import com.screener.detection.RiskSubScoreCalculator;
 import com.screener.detection.RiskSubScores;
 import com.screener.dto.PromptHistoryItemDto;
 import com.screener.dto.PromptResponseDto;
-import com.screener.config.SystemConfigValues;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.PromptRequest;
@@ -18,7 +17,6 @@ import com.screener.model.PromptStatus;
 import com.screener.model.Role;
 import com.screener.model.RiskSignal;
 import com.screener.model.ScreeningDecision;
-import com.screener.model.SystemConfig;
 import com.screener.repository.DetectionFindingRepository;
 import com.screener.repository.PromptRequestRepository;
 import com.screener.repository.RiskSignalRepository;
@@ -405,21 +403,11 @@ public class PromptService {
         return cleaned.toString();
     }
 
-    // 42.3: both fall back to the documented default (with a WARN) rather than throwing on a
-    // hand-edited, non-numeric config row - which previously broke every submission.
-    private int resolveMaxLength() {
-        return systemConfigRepository.findByConfigKey(MAX_LENGTH_CONFIG_KEY)
-                .map(SystemConfig::getConfigValue)
-                .map(value -> SystemConfigValues.parseInt(MAX_LENGTH_CONFIG_KEY, value, DEFAULT_MAX_LENGTH))
-                .orElse(DEFAULT_MAX_LENGTH);
-    }
-
-    private int resolvePolicyVersion() {
-        return systemConfigRepository.findByConfigKey(POLICY_VERSION_CONFIG_KEY)
-                .map(SystemConfig::getConfigValue)
-                .map(value -> SystemConfigValues.parseInt(POLICY_VERSION_CONFIG_KEY, value, DEFAULT_POLICY_VERSION))
-                .orElse(DEFAULT_POLICY_VERSION);
-    }
+    // 43.3 removed the per-key resolveMaxLength()/resolvePolicyVersion() helpers that used to
+    // live here. Both values now come from the single SystemConfigSnapshot taken at the top of
+    // processPrompt, so reading them again mid-method would reintroduce exactly the extra
+    // queries that phase removed. The public key/default constants above are kept: AdminService
+    // and SystemConfigSnapshot both read them, so they are still the one source of truth.
 
     private String sha256Hex(String text) {
         try {
