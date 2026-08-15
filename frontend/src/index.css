@@ -37,7 +37,13 @@
   /* --- text ------------------------------------------------------------- */
   --text-primary: #f2f7fa;
   --text-secondary: #a7becd;
-  --text-muted: #6f8496;
+  /* Was #6f8496. That cleared AA on the page surface (5.1:1) but NOT on the surfaces
+     muted text actually sits on most often: 4.34:1 on --surface-raised (every table
+     header in the app) and 4.27:1 on the auth page's tinted wash. Phase 45 measured
+     this token against --surface-page only, which is why it passed then. Nudged 4%
+     toward white so the WORST surface clears the bar with headroom: page 5.5,
+     card 5.1, raised 4.6, auth wash 4.6. Found by docs/ui-checks-49.mjs (49.1). */
+  --text-muted: #75899a;
 
   /* --- lines & depth ---------------------------------------------------- */
   --border: rgba(255, 255, 255, 0.09);
@@ -142,8 +148,12 @@
   --text-secondary: #3d5f77;
   /* Was #6b8296, which measured 3.7:1 on the light page - under the 4.5:1 AA bar for
      normal text, and it carries real content (table headers, stat-card labels, the
-     pagination position). Darkened to 4.7:1. Found by the Phase 45 browser check. */
-  --text-muted: #5c7186;
+     pagination position). Darkened to 4.7:1. Found by the Phase 45 browser check.
+     Darkened again in Phase 49 (#5c7186 -> #566a7e) for the same reason the dark theme
+     was: 4.7:1 was measured against the PAGE, but the same token sits on
+     --surface-raised (4.42:1) and the auth wash (4.14:1), both under the bar. Now
+     page 5.2, card 5.6, raised 4.9, auth wash 4.6. */
+  --text-muted: #566a7e;
 
   --border: rgba(11, 34, 51, 0.14);
   --border-strong: rgba(11, 34, 51, 0.28);

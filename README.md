@@ -32,7 +32,31 @@ with masking, human review, and audit logging built in.
    ```
    (or whichever model name you set as `OLLAMA_MODEL` in `.env`)
 6. Open [http://localhost:5173](http://localhost:5173) - you should see the login page.
-   Log in with the `ADMIN_USERNAME`/`ADMIN_PASSWORD` from your `.env`.
+   Log in with the `ADMIN_USERNAME`/`ADMIN_PASSWORD` from your `.env`. The seeded admin
+   holds both the `ADMIN` and `USER` roles, so it can submit prompts as well as administer.
+
+### Upgrading a database created before V1.1
+
+Fresh installs need nothing extra - Hibernate creates the unique constraint and the
+indexes when it creates the tables. A database that already existed does **not** get them,
+because `ddl-auto: update` adds new tables and columns but silently declines to add a
+constraint or index to an existing one. Apply them once:
+
+```
+docker exec -i screener-mysql mysql -uroot -p"$DB_PASSWORD" screener_db \
+  < backend/src/main/resources/schema-upgrade.sql
+```
+
+The script checks `information_schema` before each statement, so it is safe to re-run.
+
+## Rebuilding after a code change
+
+Both apps are built into their images; there is no bind mount. After editing backend or
+frontend source, rebuild rather than restarting:
+
+```
+docker compose up --build -d
+```
 
 ## Offline operation
 
