@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
+import { EntityBreakdownChart, ProcessingTimePanel, RiskBandDonut, type RiskBandStat } from '../components/DashboardCharts'
 import { decisionBadgeClass } from '../components/decisionBadge'
 import type { PageResponse } from '../api/types'
 
@@ -60,10 +61,6 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
 }
 
-function formatMs(ms: number | null): string {
-  return ms !== null ? `${Math.round(ms)} ms` : '—'
-}
-
 // Triggers a browser download for a blob response - axios doesn't do this on its own.
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
@@ -82,6 +79,8 @@ export function AdminPage() {
   const [entityStats, setEntityStats] = useState<EntityStat[]>([])
   const [recentBlocked, setRecentBlocked] = useState<RecentBlocked[]>([])
   const [processingTime, setProcessingTime] = useState<ProcessingTimeStats | null>(null)
+  // 48.3: the risk-distribution endpoint already existed (Phase 30) but nothing rendered it.
+  const [riskBands, setRiskBands] = useState<RiskBandStat[]>([])
   const [repeatedViolations, setRepeatedViolations] = useState<RepeatedViolation[]>([])
   const [dashboardLoading, setDashboardLoading] = useState(true)
   const [dashboardError, setDashboardError] = useState<string | null>(null)
@@ -109,14 +108,16 @@ export function AdminPage() {
       apiClient.get<RecentBlocked[]>('/api/dashboard/recent-blocked'),
       apiClient.get<ProcessingTimeStats>('/api/dashboard/processing-time'),
       apiClient.get<RepeatedViolation[]>('/api/dashboard/repeated-violations'),
+      apiClient.get<RiskBandStat[]>('/api/dashboard/risk-distribution'),
     ])
-      .then(([summaryRes, entityRes, blockedRes, processingRes, violationsRes]) => {
+      .then(([summaryRes, entityRes, blockedRes, processingRes, violationsRes, riskRes]) => {
         if (cancelled) return
         setSummary(summaryRes.data)
         setEntityStats(entityRes.data)
         setRecentBlocked(blockedRes.data)
         setProcessingTime(processingRes.data)
         setRepeatedViolations(violationsRes.data)
+        setRiskBands(riskRes.data)
       })
       .catch((err) => {
         if (!cancelled) setDashboardError(extractErrorMessage(err))
@@ -186,8 +187,6 @@ export function AdminPage() {
     }
   }
 
-  const maxEntityCount = Math.max(1, ...entityStats.map((s) => s.count))
-
   return (
     <div className="page-content page-content-wide">
       {/* The description states the window caveat up front. These panels genuinely use
@@ -236,22 +235,13 @@ export function AdminPage() {
             </div>
           </section>
 
-          <section className="admin-section">
-            <h2>Entity Stats</h2>
-            {entityStats.length === 0 ? <EmptyState title="No detections recorded yet." /> : (
-              <div className="bar-chart">
-                {entityStats.map((stat) => (
-                  <div className="bar-row" key={stat.entityType}>
-                    <span className="bar-label">{stat.entityType}</span>
-                    <div className="bar-track">
-                      <div className="bar-fill" style={{ width: `${(stat.count / maxEntityCount) * 100}%` }} />
-                    </div>
-                    <span className="bar-count">{stat.count}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+          {/* 48.2/48.3/48.4: the hand-rolled CSS bar chart that used to sit here is
+              replaced by real charts. Each states its own window on itself, because this
+              page mixes today-only, all-time and 7-day figures. */}
+          <div className="chart-grid">
+            <RiskBandDonut data={riskBands} />
+            <EntityBreakdownChart data={entityStats} />
+          </div>
 
           <section className="admin-section">
             <h2>Recent Blocked</h2>
@@ -356,19 +346,10 @@ export function AdminPage() {
             )}
           </section>
 
-          <section className="admin-section">
-            <h2>Processing Time</h2>
-            <div className="stat-cards">
-              <div className="stat-card">
-                <div className="stat-card-value">{formatMs(processingTime?.averageMs ?? null)}</div>
-                <div className="stat-card-label">Average</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-card-value">{formatMs(processingTime?.maxMs ?? null)}</div>
-                <div className="stat-card-label">Max</div>
-              </div>
-            </div>
-          </section>
+          {/* 48.5: now shows the live figures against the recorded V1.0 baseline, so the
+              dashboard demonstrates the Phase 43 optimisation instead of only the report
+              claiming it. */}
+          <ProcessingTimePanel data={processingTime} />
         </>
       )}
 
