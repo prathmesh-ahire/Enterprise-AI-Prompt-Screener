@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,10 +52,18 @@ public class PromptController {
         return ResponseEntity.ok(promptService.confirmAndSend(requestId, user.getId()));
     }
 
+    // Newest first, and the sort is explicit for two separate reasons. The visible one:
+    // without it the page came back oldest-first, so a user's most recent prompt sat on
+    // the LAST page - submit a prompt, open History, and it appears to be missing. The
+    // latent one matters more: an unsorted query gives SQL no ordering obligation at all,
+    // so pagination is only accidentally stable, and Phase 43's twelve new indexes can
+    // change the access path and therefore the natural order. A row could then appear on
+    // two pages, or on none, with nothing reporting an error. (V1.1 Phase 47 finding.)
     @GetMapping("/my-history")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<PromptHistoryItemDto>> myHistory(@AuthenticationPrincipal UserDetails userDetails,
-                                                                   @PageableDefault(size = 10) Pageable pageable) {
+                                                                   @PageableDefault(size = 10, sort = "submittedAt",
+                                                                           direction = Sort.Direction.DESC) Pageable pageable) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
         return ResponseEntity.ok(promptService.getMyHistory(user.getId(), pageable));

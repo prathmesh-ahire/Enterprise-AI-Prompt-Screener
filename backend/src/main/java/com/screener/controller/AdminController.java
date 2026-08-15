@@ -20,6 +20,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -52,8 +54,10 @@ public class AdminController {
     private final PromptService promptService;
     private final AiGatewayService aiGatewayService;
 
+    // Alphabetical rather than newest-first: this is a lookup table an admin scans for a
+    // known name, not a feed. Explicit for the stable-pagination reason above either way.
     @GetMapping("/users")
-    public ResponseEntity<Page<AdminUserDto>> users(Pageable pageable) {
+    public ResponseEntity<Page<AdminUserDto>> users(@PageableDefault(size = 20, sort = "username") Pageable pageable) {
         return ResponseEntity.ok(adminService.getUsers(pageable));
     }
 
@@ -62,7 +66,9 @@ public class AdminController {
     // masked-text-only PromptHistoryItemDto a user gets for their own history) - the only
     // difference is the userId comes from the path instead of the caller's own JWT.
     @GetMapping("/users/{id}/history")
-    public ResponseEntity<Page<PromptHistoryItemDto>> userHistory(@PathVariable Long id, Pageable pageable) {
+    public ResponseEntity<Page<PromptHistoryItemDto>> userHistory(@PathVariable Long id,
+                                                                  @PageableDefault(size = 10, sort = "submittedAt",
+                                                                          direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(promptService.getMyHistory(id, pageable));
     }
 

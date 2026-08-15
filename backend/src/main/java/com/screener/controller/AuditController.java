@@ -8,6 +8,8 @@ import com.screener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,7 +36,8 @@ public class AuditController {
     @GetMapping("/my-history")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<AuditEventDto>> myHistory(@AuthenticationPrincipal UserDetails userDetails,
-                                                            Pageable pageable) {
+                                                            @PageableDefault(size = 20, sort = "createdAt",
+                                                                    direction = Sort.Direction.DESC) Pageable pageable) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
         return ResponseEntity.ok(auditEventRepository.findByUserId(user.getId(), pageable).map(this::toDto));
@@ -42,7 +45,8 @@ public class AuditController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<AuditEventDto>> all(Pageable pageable) {
+    public ResponseEntity<Page<AuditEventDto>> all(@PageableDefault(size = 20, sort = "createdAt",
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(auditEventRepository.findAll(pageable).map(this::toDto));
     }
 
