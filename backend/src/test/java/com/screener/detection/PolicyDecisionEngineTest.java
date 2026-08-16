@@ -8,6 +8,8 @@ import com.screener.repository.SystemConfigRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 
@@ -72,6 +75,53 @@ class PolicyDecisionEngineTest {
     @Test
     void passwordSecretForcesAtLeastMask() {
         assertEquals(Decision.MASK, engine.decide(0.0, List.of(finding(EntityType.PASSWORD_SECRET)), List.of()).decision());
+    }
+
+    // ---------------------------------------------------------------------
+    // Phase 51.1 - ANY detected entity forces at least MASK.
+    //
+    // The score alone could not protect a single piece of sensitive data: one HIGH finding
+    // is worth ~10.5 points against a MASK floor of 25, so it took roughly two of them
+    // before anything was masked. A recall audit confirmed the consequence live - a lone
+    // payment card was detected and then ALLOWed, i.e. forwarded to the model in full.
+    // These cases exist so that can never silently come back.
+    // ---------------------------------------------------------------------
+    @ParameterizedTest
+    @EnumSource(EntityType.class)
+    void anySingleDetectedEntityForcesAtLeastMask(EntityType type) {
+        // Score 0.0 is deep in the ALLOW band - only the override can lift this.
+        Decision decision = engine.decide(0.0, List.of(finding(type)), List.of()).decision();
+        assertNotEquals(Decision.ALLOW, decision,
+                type + " alone must never be forwarded unmasked");
+    }
+
+    @Test
+    void aLonePaymentCardIsMaskedEvenThoughItScoresFarBelowTheMaskFloor() {
+        // The exact case the audit caught: "My card number is 4111 1111 1111 1111" scored
+        // 16.8 against a floor of 25, and was ALLOWed.
+        assertEquals(Decision.MASK, engine.decide(16.8, List.of(finding(EntityType.PAYMENT_CARD)), List.of()).decision());
+    }
+
+    @Test
+    void aLoneEmailIsMaskedRatherThanAllowed() {
+        // Supersedes the long-documented "a lone email genuinely decides ALLOW, by design"
+        // behaviour - see the Phase 51 note in todo.md for why that was retired.
+        assertEquals(Decision.MASK, engine.decide(8.5, List.of(finding(EntityType.PERSONAL_EMAIL)), List.of()).decision());
+    }
+
+    @Test
+    void aPromptWithNoFindingsAtAllIsStillAllowed() {
+        // The rule keys on findings, not on the score - a genuinely clean prompt must not
+        // be dragged into MASK by it.
+        assertEquals(Decision.ALLOW, engine.decide(3.15, List.of(), List.of()).decision());
+    }
+
+    @Test
+    void theMaskFloorNeverDowngradesAHigherBand() {
+        DetectionFinding email = finding(EntityType.PERSONAL_EMAIL);
+        assertEquals(Decision.CONFIRM, engine.decide(55.0, List.of(email), List.of()).decision());
+        assertEquals(Decision.REVIEW, engine.decide(70.0, List.of(email), List.of()).decision());
+        assertEquals(Decision.BLOCK, engine.decide(80.0, List.of(email), List.of()).decision());
     }
 
     @Test

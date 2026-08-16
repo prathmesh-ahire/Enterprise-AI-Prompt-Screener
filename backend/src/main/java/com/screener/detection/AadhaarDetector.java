@@ -17,8 +17,11 @@ import java.util.regex.Pattern;
 @Component
 public class AadhaarDetector implements Detector {
 
+    // V1.2 Phase 52.3: hyphens as well as spaces. The pattern already allowed the common
+    // "2345 6789 0124" grouping but not "2345-6789-0124", which the audit caught. The
+    // Verhoeff checksum in pass 2 already strips non-digits, so nothing else changes.
     private static final Pattern CANDIDATE_PATTERN =
-            Pattern.compile("(?<!\\d)[2-9]\\d{3}\\s?\\d{4}\\s?\\d{4}(?!\\d)");
+            Pattern.compile("(?<!\\d)[2-9]\\d{3}[\\s-]?\\d{4}[\\s-]?\\d{4}(?!\\d)");
 
     private static final double CONFIDENCE = 0.9;
 
@@ -64,7 +67,9 @@ public class AadhaarDetector implements Detector {
 
     @Override
     public double validate(String text, Candidate candidate) {
-        String digits = candidate.value().replace(" ", "");
+        // Strips hyphens as well as spaces (52.3) - pass 1 now accepts both groupings, and
+        // leaving the hyphens in would make this 14 characters and fail the length check.
+        String digits = candidate.value().replaceAll("[\\s-]", "");
         if (digits.length() != 12) {
             return 0.0;
         }

@@ -5,8 +5,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,8 +40,21 @@ public class ApiKeyDetector implements Detector {
     // "private key" is deliberately NOT a keyword - PrivateKeyDetector owns that entity
     // type, and adding it here would raise a second, competing finding for one secret.
     private static final Pattern CANDIDATE_PATTERN = Pattern.compile(
-            "(?i)(?<![A-Za-z0-9])(?:(?:api|secret|access)[\\s_-]?key|apikey|bearer|token)\\b"
+            "(?i)(?<![A-Za-z0-9])(?:(?:api|secret|access)[\\s_-]?key|apikey|bearer|token|credentials?|client[\\s_-]?secret)\\b"
                     + "\\s*[:=]?\\s*(?:(?:is|was)\\s+)?([A-Za-z0-9_\\-.]{16,})");
+
+    // V1.2 Phase 52.4. A pasted key very often arrives with NO keyword near it at all -
+    // somebody copies it straight out of a config file or a provider's dashboard. These are
+    // the well-known issuer prefixes, which are themselves strong evidence: nothing else
+    // looks like "sk-" or "ghp_" followed by twenty-odd high-entropy characters.
+    // The same entropy bar in pass 2 still applies, so "sk-aaaaaaaaaaaaaaaa" is rejected.
+    // AKIA is matched case-sensitively because AWS access key IDs are always upper-case and
+    // a case-insensitive match would fire on ordinary words containing "akia".
+    private static final Pattern BARE_PREFIX_PATTERN = Pattern.compile(
+            "(?<![A-Za-z0-9])(?:(?i:sk|pk|rk)-[A-Za-z0-9_\\-.]{16,}"
+                    + "|(?i:gh[pousr]_)[A-Za-z0-9_]{16,}"
+                    + "|AKIA[A-Z0-9]{12,}"
+                    + "|(?i:xox[baprs]-)[A-Za-z0-9-]{16,})");
 
     private static final double ENTROPY_THRESHOLD = 3.5;
     private static final double CONFIDENCE = 0.8;
@@ -52,11 +67,27 @@ public class ApiKeyDetector implements Detector {
     @Override
     public List<Candidate> findCandidates(String text) {
         List<Candidate> candidates = new ArrayList<>();
+        // De-duplicated by span: a labelled key with a known prefix ("api_key=sk-...")
+        // matches both patterns, and emitting it twice would raise two findings for one
+        // secret and double-count it in the risk score.
+        Set<Long> seenSpans = new HashSet<>();
+
         Matcher matcher = CANDIDATE_PATTERN.matcher(text);
         while (matcher.find()) {
-            candidates.add(new Candidate(matcher.start(1), matcher.end(1), matcher.group(1)));
+            addCandidate(candidates, seenSpans, matcher.start(1), matcher.end(1), matcher.group(1));
+        }
+        Matcher bare = BARE_PREFIX_PATTERN.matcher(text);
+        while (bare.find()) {
+            addCandidate(candidates, seenSpans, bare.start(), bare.end(), bare.group());
         }
         return candidates;
+    }
+
+    private void addCandidate(List<Candidate> candidates, Set<Long> seenSpans,
+                              int start, int end, String value) {
+        if (seenSpans.add(((long) start << 32) | (end & 0xffffffffL))) {
+            candidates.add(new Candidate(start, end, value));
+        }
     }
 
     @Override

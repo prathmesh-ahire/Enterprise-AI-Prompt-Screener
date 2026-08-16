@@ -32,44 +32,58 @@
   {
     "id": "email-1",
     "text": "My email is jane.doe@example.com, please reply there.",
-    "expectedDecision": "ALLOW",
-    "expectedEntityTypes": ["PERSONAL_EMAIL"]
+    "expectedDecision": "MASK",
+    "expectedEntityTypes": [
+      "PERSONAL_EMAIL"
+    ]
   },
   {
     "id": "email-2",
     "text": "You can reach me at contact.person@company-mail.org for further details.",
-    "expectedDecision": "ALLOW",
-    "expectedEntityTypes": ["PERSONAL_EMAIL"]
+    "expectedDecision": "MASK",
+    "expectedEntityTypes": [
+      "PERSONAL_EMAIL"
+    ]
   },
   {
     "id": "email-3",
     "text": "Send the report to alex.smith99@workplace.net when it's ready.",
-    "expectedDecision": "ALLOW",
-    "expectedEntityTypes": ["PERSONAL_EMAIL"]
+    "expectedDecision": "MASK",
+    "expectedEntityTypes": [
+      "PERSONAL_EMAIL"
+    ]
   },
   {
     "id": "phone-1",
     "text": "You can call me at 9876543210 anytime after 6pm.",
-    "expectedDecision": "ALLOW",
-    "expectedEntityTypes": ["PHONE_NUMBER"]
+    "expectedDecision": "MASK",
+    "expectedEntityTypes": [
+      "PHONE_NUMBER"
+    ]
   },
   {
     "id": "phone-2",
     "text": "My contact number is 8123456789 for verification purposes.",
-    "expectedDecision": "ALLOW",
-    "expectedEntityTypes": ["PHONE_NUMBER"]
+    "expectedDecision": "MASK",
+    "expectedEntityTypes": [
+      "PHONE_NUMBER"
+    ]
   },
   {
     "id": "apikey-1",
     "text": "Here is my api_key=Zx9pQ7rT2vLm4wN8sK1dJh6 for the integration.",
     "expectedDecision": "BLOCK",
-    "expectedEntityTypes": ["API_KEY"]
+    "expectedEntityTypes": [
+      "API_KEY"
+    ]
   },
   {
     "id": "apikey-2",
     "text": "Authorization: Bearer sk-Zx9pQ7rT2vLm4wN8sK1dJh6",
     "expectedDecision": "BLOCK",
-    "expectedEntityTypes": ["API_KEY"]
+    "expectedEntityTypes": [
+      "API_KEY"
+    ]
   },
   {
     "id": "injection-1",
@@ -87,25 +101,35 @@
     "id": "privatekey-1",
     "text": "Please store this key safely:\n-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKBwQIDAQAB\n-----END PRIVATE KEY-----",
     "expectedDecision": "BLOCK",
-    "expectedEntityTypes": ["PRIVATE_KEY"]
+    "expectedEntityTypes": [
+      "PRIVATE_KEY"
+    ]
   },
   {
     "id": "privatekey-2",
     "text": "Rotating our RSA key pair - here is the old one for archival:\n-----BEGIN RSA PRIVATE KEY-----\nMIIBOgIBAAJBAKj34GkxFhD91NJfQ5Cx34LMYbMk3gYNfljjeJPeVeaFxb3jJ0mfIWLjbwCFAyfWjZzS0z3xLxAgMBAAE=\n-----END RSA PRIVATE KEY-----",
     "expectedDecision": "BLOCK",
-    "expectedEntityTypes": ["PRIVATE_KEY"]
+    "expectedEntityTypes": [
+      "PRIVATE_KEY"
+    ]
   },
   {
     "id": "combined-1",
     "text": "Please contact me at maria.jones@example.com or call 9876543210 if there are questions.",
-    "expectedDecision": "ALLOW",
-    "expectedEntityTypes": ["PERSONAL_EMAIL", "PHONE_NUMBER"]
+    "expectedDecision": "MASK",
+    "expectedEntityTypes": [
+      "PERSONAL_EMAIL",
+      "PHONE_NUMBER"
+    ]
   },
   {
     "id": "combined-2",
     "text": "My work email is r.patel@corp-domain.io and my mobile is 8234567890.",
-    "expectedDecision": "ALLOW",
-    "expectedEntityTypes": ["PERSONAL_EMAIL", "PHONE_NUMBER"]
+    "expectedDecision": "MASK",
+    "expectedEntityTypes": [
+      "PERSONAL_EMAIL",
+      "PHONE_NUMBER"
+    ]
   },
   {
     "id": "edge-1",

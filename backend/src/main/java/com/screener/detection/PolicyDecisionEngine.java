@@ -92,7 +92,27 @@ public class PolicyDecisionEngine {
         if (signalTypes.contains(SignalType.INSTRUCTION_OVERRIDE) || signalTypes.contains(SignalType.POLICY_BYPASS)) {
             decision = atLeast(decision, Decision.REVIEW);
         }
-        if (entityTypes.contains(EntityType.PASSWORD_SECRET)) {
+        // V1.2 Phase 51.1: ANY detected entity forces at least MASK. This replaces the
+        // narrower PASSWORD_SECRET-only rule, which it subsumes - a password is a finding
+        // like any other.
+        //
+        // Why this had to change. The score alone could not protect a single piece of
+        // sensitive data: one HIGH finding contributes 0.35 x 0.30 x 100 = 10.5 points plus
+        // a ~3 point role baseline, about 13.7 against a MASK floor of 25. So it took
+        // roughly TWO high-severity findings before anything was masked, and a recall audit
+        // confirmed the consequence live - "My card number is 4111 1111 1111 1111 please
+        // save it" was detected as PAYMENT_CARD and then ALLOWed, i.e. forwarded to the
+        // model in full. Lone Aadhaar (13.7), PAN (13.4), phone (8.4) and email (8.5) all
+        // behaved the same way, and even an email AND a card together only reached 19.2.
+        //
+        // This supersedes the "a lone email genuinely decides ALLOW, by design" behaviour
+        // documented since Phase 13. That was defensible while it applied to emails; it was
+        // not once the audit showed the same arithmetic released payment cards and national
+        // ID numbers. "Detected means masked" is also a far simpler promise to state.
+        //
+        // Escalate-only, like the two rules above: this can raise ALLOW to MASK and can
+        // never move CONFIRM, REVIEW or BLOCK down.
+        if (!entityTypes.isEmpty()) {
             decision = atLeast(decision, Decision.MASK);
         }
 

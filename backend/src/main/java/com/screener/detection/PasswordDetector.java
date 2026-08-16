@@ -44,8 +44,12 @@ import java.util.regex.Pattern;
 @Component
 public class PasswordDetector implements Detector {
 
+    // 52.5 added bare "pass". It is also an ordinary English verb, so on its own it would
+    // be a precision risk - but pass 2 requires a secret-shaped value, so "pass the salt"
+    // offers "the" and is rejected, while "pass: Winter235@" is caught. Verified against
+    // the 40-prompt benign corpus rather than assumed.
     private static final Pattern KEYWORD_PATTERN =
-            Pattern.compile("(?i)\\b(?:password|passphrase|passwd|pwd)\\b");
+            Pattern.compile("(?i)\\b(?:password|passphrase|passwd|pwd|pass)\\b");
 
     /** How many tokens after the keyword may be considered. Covers "for the shared account is X". */
     private static final int WINDOW = 6;
