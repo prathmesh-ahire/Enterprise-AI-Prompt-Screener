@@ -192,4 +192,36 @@ class PasswordDetectorTest {
     void findsNothingInAPlainSentenceWithNoKeyword() {
         assertTrue(detector.detect("This is just a normal sentence with no secrets at all").isEmpty());
     }
+
+    // ---------------------------------------------------------------------
+    // Backward scan and plural keywords (todo.md V1.2 Phase 53.7)
+    // ---------------------------------------------------------------------
+
+    // The scan used to run forward only, so a value stated before the keyword was unreachable.
+    @Test
+    void detectsWhenTheValueComesBeforeTheKeyword() {
+        assertTrue(detects("Use Xk9#mQ2vLp as your password"));
+        assertTrue(detects("Winter235@ is my password, please keep it safe"));
+    }
+
+    // Mirror of doesNotReachIntoTheFollowingSentence: going backward, a token that ends a
+    // sentence belongs to the PREVIOUS statement, so the scan must stop before it.
+    @Test
+    void doesNotReachBackIntoThePrecedingSentence() {
+        assertFalse(detects("My cat is called Winter235@. I forgot my password"));
+    }
+
+    // "recite passwords, with X being most repeated" - the plural was not a keyword at all.
+    @Test
+    void detectsPluralAndPasscodeKeywords() {
+        assertTrue(detects("remember and recite passwords, with Winter235@ being most repeated"));
+        assertTrue(detects("please use the passcode N3wPassw0rd! to join"));
+    }
+
+    // "pass" must stay bounded: widening it to a prefix would fire on ordinary words.
+    @Test
+    void doesNotTreatOrdinaryPassWordsAsKeywords() {
+        assertFalse(detects("The passenger boarding Fl1ght#7788 was delayed"));
+        assertFalse(detects("Her passport number Xk9#mQ2vLp is on file"));
+    }
 }
