@@ -1,85 +1,249 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* ==========================================================================
+   DESIGN TOKENS — V1.1 Phase 44.3 / 44.4
+   --------------------------------------------------------------------------
+   Everything above this file's component styles is defined here, once. No
+   component rule should contain a raw colour from here on.
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+   Dark is the BASE theme (plain :root); light is an override applied when
+   the theme toggle writes data-theme="light" onto <html>. That ordering is
+   deliberate — dark is the default the app opens in (44.6).
+
+   Two families, kept strictly apart:
+     * BRAND / CHROME  - the teal ramp. Navbar, buttons, links, focus rings,
+       chart accents. Purely decorative; carries no meaning.
+     * SEMANTIC STATUS - the five decision bands and three severity tiers.
+       These keep traffic-light meaning because an examiner has to read
+       severity instantly, and colour is doing real work there. They are
+       retuned per theme so they stay legible on both surfaces rather than
+       being one fixed hex that only works on white.
+   ========================================================================== */
+
+:root {
+  /* --- brand ramp (ocean/teal) ------------------------------------------ */
+  --accent-deep: #03045e;
+  --accent-strong: #0077b6;
+  --accent: #00b4d8;
+  --accent-soft: #90e0ef;
+  --accent-faint: #caf0f8;
+  --accent-bg: rgba(0, 180, 216, 0.14);
+  --accent-border: rgba(0, 180, 216, 0.45);
+  --on-accent: #ffffff;
+
+  /* --- surfaces --------------------------------------------------------- */
+  --surface-page: #060a0f;
+  --surface-card: #0e141b;
+  --surface-raised: #161e27;
+
+  /* --- text ------------------------------------------------------------- */
+  --text-primary: #f2f7fa;
+  --text-secondary: #a7becd;
+  /* Was #6f8496. That cleared AA on the page surface (5.1:1) but NOT on the surfaces
+     muted text actually sits on most often: 4.34:1 on --surface-raised (every table
+     header in the app) and 4.27:1 on the auth page's tinted wash. Phase 45 measured
+     this token against --surface-page only, which is why it passed then. Nudged 4%
+     toward white so the WORST surface clears the bar with headroom: page 5.5,
+     card 5.1, raised 4.6, auth wash 4.6. Found by docs/ui-checks-49.mjs (49.1). */
+  --text-muted: #75899a;
+
+  /* --- lines & depth ---------------------------------------------------- */
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.3);
+
+  /* --- decision bands (traffic-light meaning is load-bearing) ------------ */
+  --decision-allow: #34d399;
+  --decision-allow-bg: rgba(52, 211, 153, 0.14);
+  --decision-allow-border: rgba(52, 211, 153, 0.45);
+  --decision-mask: #fbbf24;
+  --decision-mask-bg: rgba(251, 191, 36, 0.14);
+  --decision-mask-border: rgba(251, 191, 36, 0.45);
+  /* CONFIRM and REVIEW deliberately share one band: PolicyDecisionEngine
+     splits 50-74 at 65, but the project defines only four colour steps for
+     the 0-100 range, so both sit in orange. */
+  --decision-confirm: #fb923c;
+  --decision-confirm-bg: rgba(251, 146, 60, 0.14);
+  --decision-confirm-border: rgba(251, 146, 60, 0.45);
+  --decision-block: #f87171;
+  --decision-block-bg: rgba(248, 113, 113, 0.14);
+  --decision-block-border: rgba(248, 113, 113, 0.45);
+
+  /* --- severity tiers, mirroring RiskSubScoreCalculator.SEVERITY_WEIGHT --- */
+  --severity-critical: #f87171;
+  --severity-critical-bg: rgba(248, 113, 113, 0.14);
+  --severity-critical-border: rgba(248, 113, 113, 0.4);
+  --severity-high: #fbbf24;
+  --severity-high-bg: rgba(251, 191, 36, 0.14);
+  --severity-high-border: rgba(251, 191, 36, 0.4);
+  --severity-medium: #67d9ef;
+  --severity-medium-bg: rgba(103, 217, 239, 0.14);
+  --severity-medium-border: rgba(103, 217, 239, 0.4);
+
+  /* --- gradients (45.1/45.2/45.3) ---------------------------------------
+     The reference design's signature is a multi-stop accent gradient slid
+     across on hover. Defined here rather than in components.css because a
+     gradient is a colour value, and colour values live in this file only.
+
+     --gradient-accent is deliberately kept in the navy-to-mid-blue part of
+     the ramp rather than running up to --accent (#00b4d8): these carry white
+     text, and white on the bright cyan measures ~2.3:1, well under AA. Its
+     lightest stop is #0077b6, which holds 4.9:1 against white - so the label
+     stays readable at rest, on hover, AND mid-sweep. (The first version of
+     this used #0096c7 in the middle, which measures 3.4:1; the browser check
+     caught it. Any new stop added here has to be verified the same way.) It
+     needs no light override - a brand-coloured button is the same object on
+     either surface.
+
+     --gradient-accent-bright is for thin lines and clipped text (nav
+     underline, wordmark), which carry no text on top and so can use the
+     bright end. That one DOES flip per theme: the pale stops vanish on a
+     white page. */
+  --gradient-accent: linear-gradient(90deg, #03045e, #0066a0, #0077b6, #0066a0, #03045e);
+  --gradient-accent-bright: linear-gradient(90deg, #0077b6, #00b4d8, #90e0ef, #00b4d8, #0077b6);
+  --gradient-danger: linear-gradient(90deg, #7f1d1d, #b91c1c, #dc2626, #b91c1c, #7f1d1d);
+
+  /* --- typography (self-hosted via @fontsource, see main.tsx) ------------ */
+  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Source Sans 3', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  /* The legacy aliases (--bg, --text-h, --text, --code-bg, --shadow) lived here
+     from Phase 44 and were DELETED in Phase 47, on schedule. They existed so the
+     app could re-theme in one step without a half-restyled UI while Phases 45-47
+     rewrote the components underneath them: 44 usages at the start, 13 after
+     Phase 45's component library, 0 now. Deleting the definitions rather than
+     leaving them harmlessly in place is the point - a stray usage now fails to
+     resolve and shows up immediately, instead of silently inheriting. */
+
+  color-scheme: dark;
+  font: 16px/1.55 var(--sans);
+  color: var(--text-secondary);
+  background: var(--surface-page);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* ==========================================================================
+   LIGHT THEME — only the tokens that actually change
+   ========================================================================== */
+:root[data-theme='light'] {
+  --accent: #0077b6;
+  --accent-strong: #03045e;
+  --accent-soft: #48b8d8;
+  --accent-bg: rgba(0, 119, 182, 0.10);
+  --accent-border: rgba(0, 119, 182, 0.40);
+  --on-accent: #ffffff;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+  --surface-page: #f4f8fb;
+  --surface-card: #ffffff;
+  --surface-raised: #e9f1f7;
+
+  --text-primary: #0b2233;
+  --text-secondary: #3d5f77;
+  /* Was #6b8296, which measured 3.7:1 on the light page - under the 4.5:1 AA bar for
+     normal text, and it carries real content (table headers, stat-card labels, the
+     pagination position). Darkened to 4.7:1. Found by the Phase 45 browser check.
+     Darkened again in Phase 49 (#5c7186 -> #566a7e) for the same reason the dark theme
+     was: 4.7:1 was measured against the PAGE, but the same token sits on
+     --surface-raised (4.42:1) and the auth wash (4.14:1), both under the bar. Now
+     page 5.2, card 5.6, raised 4.9, auth wash 4.6. */
+  --text-muted: #566a7e;
+
+  --border: rgba(11, 34, 51, 0.14);
+  --border-strong: rgba(11, 34, 51, 0.28);
+  --shadow-sm: 0 1px 2px rgba(11, 34, 51, 0.08);
+  --shadow-md: 0 10px 24px rgba(11, 34, 51, 0.10), 0 3px 8px rgba(11, 34, 51, 0.06);
+
+  /* Darkened so they carry the same weight against white that the dark-theme
+     values carry against near-black. Same meanings, different luminance.
+     Green needed a second darkening pass in Phase 45: at #157f4a the ALLOW
+     badge measured 4.1:1 against its own tinted pill, just under AA. Green is
+     always the hardest of the four to land, because the eye reads it as
+     lighter than its luminance actually is. Now 5.6:1. */
+  --decision-allow: #12683d;
+  --decision-allow-bg: rgba(18, 104, 61, 0.10);
+  --decision-allow-border: rgba(18, 104, 61, 0.40);
+  --decision-mask: #a16207;
+  --decision-mask-bg: rgba(161, 98, 7, 0.10);
+  --decision-mask-border: rgba(161, 98, 7, 0.40);
+  --decision-confirm: #c2410c;
+  --decision-confirm-bg: rgba(194, 65, 12, 0.10);
+  --decision-confirm-border: rgba(194, 65, 12, 0.40);
+  --decision-block: #b91c1c;
+  --decision-block-bg: rgba(185, 28, 28, 0.10);
+  --decision-block-border: rgba(185, 28, 28, 0.40);
+
+  --severity-critical: #b91c1c;
+  --severity-critical-bg: rgba(185, 28, 28, 0.10);
+  --severity-critical-border: rgba(185, 28, 28, 0.35);
+  --severity-high: #a16207;
+  --severity-high-bg: rgba(161, 98, 7, 0.10);
+  --severity-high-border: rgba(161, 98, 7, 0.35);
+  /* Also a Phase 45 correction: 4.4:1 -> 5.9:1. */
+  --severity-medium: #0b5f76;
+  --severity-medium-bg: rgba(11, 95, 118, 0.10);
+  --severity-medium-border: rgba(11, 95, 118, 0.35);
+
+  /* Darkened: the dark theme's pale stops (#90e0ef) all but disappear against
+     a white page, leaving the nav underline looking like it failed to render. */
+  --gradient-accent-bright: linear-gradient(90deg, #03045e, #0077b6, #00b4d8, #0077b6, #03045e);
+
+  color-scheme: light;
 }
 
+/* 44.2: the fixed 1126px centred, side-bordered box was the Vite starter
+   template's own demo-page layout - the single biggest reason every screen
+   read as narrow and generic. The app shell in Phase 46 builds on this. */
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  background: var(--surface-page);
 }
 
 body {
   margin: 0;
+  background: var(--surface-page);
 }
 
+/* Visible keyboard focus everywhere, on the brand colour (accessibility pass
+   in 49.1 verifies this; defining it here keeps it consistent from the start). */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Inter for headings, Source Sans 3 for body - the pairing from the reference
+   design. 44.5 self-hosts both; the reference project named them but never
+   actually loaded them, so it was silently falling back to system fonts. */
+/* Weight must be one of the faces actually imported in main.tsx (500/600/700).
+   `font-synthesis: none` is set, and @fontsource ships discrete static weights
+   rather than a variable font, so an in-between value like 650 would silently
+   fall back to the nearest face instead of rendering as asked. */
 h1,
-h2 {
+h2,
+h3 {
   font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
+/* Was 56px - the Vite template's landing-page hero scale, far too loud for an
+   application screen. Phase 46.2 introduces the real page-header pattern. */
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 0 0 20px;
   @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+    font-size: 24px;
   }
 }
 h2 {
@@ -95,17 +259,313 @@ p {
   margin: 0;
 }
 
-code,
-.counter {
+/* 44.1: `.counter` removed here - it was the Vite starter template's demo
+   click-counter, matched by nothing in this app. */
+code {
   font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
-  color: var(--text-h);
+  color: var(--text-primary);
 }
 
 code {
   font-size: 15px;
   line-height: 135%;
   padding: 4px 8px;
-  background: var(--code-bg);
+  background: var(--surface-raised);
+}
+
+/* Phase 25+ shared form/nav styles - kept plain (no CSS framework in the locked stack). */
+.auth-page {
+  width: 100%;
+  max-width: 380px;
+  margin: 64px auto;
+  text-align: left;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.form-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   THEME SWITCH — Phase 44.7
+   The visible control is the slider span; the checkbox behind it stays a real
+   focusable input so keyboard and screen-reader behaviour come for free.
+   ========================================================================== */
+.theme-switch {
+  --switch-w: 3.1em;
+  --switch-h: 1.7em;
+  --knob: 1.2em;
+  --knob-gap: 0.25em;
+  position: relative;
+  display: inline-block;
+  width: var(--switch-w);
+  height: var(--switch-h);
+  flex: none;
+}
+
+.theme-switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.theme-switch-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  transition: background 0.3s ease, border-color 0.3s ease;
+  pointer-events: none;
+}
+
+/* Light theme (unchecked): a sun-ish knob carrying the brand gradient. */
+.theme-switch-slider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--knob-gap);
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(40deg, var(--accent-deep), var(--accent) 70%);
+  transition: left 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Dark theme (checked): knob slides right and the inset shadow carves it into
+   a crescent moon - the same trick the reference design uses. */
+.theme-switch-input:checked + .theme-switch-slider::before {
+  left: calc(100% - (var(--knob) + var(--knob-gap)));
+  background: #2a3441;
+  box-shadow:
+    inset -3px -2px 5px -2px var(--accent-strong),
+    inset -10px -4px 0 0 var(--accent-faint);
+}
+
+.theme-switch-input:focus-visible + .theme-switch-slider {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch-slider,
+  .theme-switch-slider::before {
+    transition: none;
+  }
+}
+
+/* Phase 26+ prompt submission / results.
+   46.1: the gutters and vertical rhythm moved to .app-main in the shell, so this
+   is now purely a reading-width constraint. Keeping the padding here as well
+   would double the gutter to 40px on every page. */
+.page-content {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.results-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.masked-text {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  line-height: 160%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ai-response-box {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+}
+
+/* Phase 27+ review/pending states, risk score bar */
+.request-id {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.explanation-text {
+  margin: 12px 0;
+  color: var(--text-primary);
+}
+
+.summary-text {
+  margin: 0 0 12px;
+  color: var(--text-primary);
+}
+
+.risk-score-bar-wrap {
+  margin: 12px 0;
+}
+
+.risk-score-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.risk-score-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.risk-score-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.risk-score-green {
+  background: var(--decision-allow);
+}
+
+.risk-score-yellow {
+  background: var(--decision-mask);
+}
+
+.risk-score-orange {
+  background: var(--decision-confirm);
+}
+
+.risk-score-red {
+  background: var(--decision-block);
+}
+
+/* Phase 28+ history page: the filter's own layout (the select inside it is
+   styled as a form control in styles/components.css). */
+.history-filter {
+  max-width: 260px;
+  margin-bottom: 16px;
+}
+
+/* Phase 30+ admin dashboard */
+/* Dashboards and admin tables use the shell's full width — .app-main already
+   caps it at 1180px, so this only needs to lift the reading-width limit. */
+.page-content-wide {
+  max-width: 100%;
+}
+
+/* 47.5/47.6: .admin-section became a real panel — see styles/components.css. */
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.bar-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+}
+
+.bar-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* Phase 31+ policy management: detector toggles, threshold grid, org-terms list */
+.detector-toggle-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.detector-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.threshold-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0 16px;
+}
+
+.term-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.term-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.term-add-form {
+  display: flex;
+  gap: 10px;
+}
+
+/* Layout only — the input's appearance comes from styles/components.css. */
+.term-add-form input {
+  flex: 1;
+}
+
+/* Phase 32+ model configuration: status row */
+.model-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }

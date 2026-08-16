@@ -20,6 +20,47 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
+  # Phase 33.1. DB_URL/OLLAMA_BASE_URL are deliberately NOT taken from the root .env here -
+  # that file's values (localhost:3306/localhost:11434) are correct for running the backend
+  # as a native process on the host (Phase 2/15's dev workflow), but inside this compose
+  # network "localhost" would mean the backend container itself, not the mysql/ollama
+  # containers - so those two are hardcoded to the Compose service names instead.
+  backend:
+    build:
+      context: ./backend
+    container_name: screener-backend
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/screener_db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      OLLAMA_MODEL: ${OLLAMA_MODEL}
+      OLLAMA_BASE_URL: http://ollama:11434
+      AI_GATEWAY_TIMEOUT_MS: ${AI_GATEWAY_TIMEOUT_MS}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+    ports:
+      - "8080:8080"
+
+  # VITE_API_BASE_URL, unlike the two above, stays as the root .env's own value
+  # (http://localhost:8080) unchanged - it's baked into the static bundle at build time and
+  # fetched from the *browser* on the host machine, not from inside the Docker network.
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    container_name: screener-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
 volumes:
   mysql_data:
   ollama_data:
