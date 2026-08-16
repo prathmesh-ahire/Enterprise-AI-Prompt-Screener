@@ -18,3 +18,7 @@ dist/
 # deliverable (todo.md Phase 23.4), so it's carved out of the otherwise-local-only docs/.
 docs/*
 !docs/postman_collection.json
+
+# Screenshots written into the repo root by docs/ui-checks-48.mjs on every run.
+# Disposable output, regenerated each time - never a deliverable.
+phase*-admin-*.png
