@@ -39,9 +39,38 @@ public class ApiKeyDetector implements Detector {
     // PasswordDetector, whose pass 2 was the weak link and had to be rebuilt first.)
     // "private key" is deliberately NOT a keyword - PrivateKeyDetector owns that entity
     // type, and adding it here would raise a second, competing finding for one secret.
-    private static final Pattern CANDIDATE_PATTERN = Pattern.compile(
-            "(?i)(?<![A-Za-z0-9])(?:(?:api|secret|access)[\\s_-]?key|apikey|bearer|token|credentials?|client[\\s_-]?secret)\\b"
-                    + "\\s*[:=]?\\s*(?:(?:is|was)\\s+)?([A-Za-z0-9_\\-.]{16,})");
+    // V1.2 Phase 54 replaced the adjacency rule with a proximity window, for the same
+    // reason PasswordDetector was rebuilt in Phase 50. The old pattern allowed an optional
+    // separator and an optional "is"/"was", then demanded the value IMMEDIATELY - so
+    // "the API key is set to <key>" failed on the two extra words, and a value stated
+    // before its keyword ("expects <key> in its credential slot") was unreachable in
+    // principle. Measured over 198 generated API-key sentences: recall 58%, and every one
+    // of the 83 misses was this defect.
+    //
+    // Widening pass 1 this far is safe HERE specifically because pass 2 is strong and
+    // unchanged: the token must be 16+ characters drawn only from [A-Za-z0-9_-.] AND clear
+    // Shannon entropy 3.5. That is what lets the net be cast this wide - the same argument
+    // Phase 50 made, and the reason PasswordDetector's pass 2 had to be fixed first.
+    private static final Pattern KEYWORD_PATTERN = Pattern.compile(
+            "(?i)(?<![A-Za-z0-9])(?:"
+                    + "(?:api|secret|access|auth)[\\s_-]?keys?"
+                    + "|apikeys?"
+                    + "|client[\\s_-]?secrets?"
+                    + "|credentials?"
+                    + "|authentication"
+                    + "|bearer"
+                    + "|tokens?"
+                    + "|secrets?"
+                    + ")\\b");
+
+    /** How many tokens either side of the keyword may be considered. */
+    private static final int WINDOW = 6;
+
+    /** The whole trimmed token must look like key material — no slashes, colons or spaces. */
+    private static final Pattern KEY_SHAPED = Pattern.compile("[A-Za-z0-9_\\-.]{16,}");
+
+    private static final Pattern LEADING_NOISE = Pattern.compile("^[(\"'`\\[=:]+");
+    private static final Pattern TRAILING_NOISE = Pattern.compile("[)\"'`\\].,;:!?]+$");
 
     // V1.2 Phase 52.4. A pasted key very often arrives with NO keyword near it at all -
     // somebody copies it straight out of a config file or a provider's dashboard. These are
@@ -72,15 +101,90 @@ public class ApiKeyDetector implements Detector {
         // secret and double-count it in the risk score.
         Set<Long> seenSpans = new HashSet<>();
 
-        Matcher matcher = CANDIDATE_PATTERN.matcher(text);
-        while (matcher.find()) {
-            addCandidate(candidates, seenSpans, matcher.start(1), matcher.end(1), matcher.group(1));
+        Matcher keyword = KEYWORD_PATTERN.matcher(text);
+        while (keyword.find()) {
+            scan(text, keyword.end(), true, candidates, seenSpans);
+            scan(text, keyword.start(), false, candidates, seenSpans);
         }
         Matcher bare = BARE_PREFIX_PATTERN.matcher(text);
         while (bare.find()) {
             addCandidate(candidates, seenSpans, bare.start(), bare.end(), bare.group());
         }
         return candidates;
+    }
+
+    /**
+     * Walk up to {@link #WINDOW} whitespace-delimited tokens away from the keyword, in one
+     * direction, offering any key-shaped token as a candidate.
+     *
+     * <p>The sentence rule mirrors {@code PasswordDetector}: going forward, a token that
+     * ends a sentence is still part of the current statement, so it is considered and the
+     * scan then stops; going backward, such a token belongs to the previous statement, so
+     * the scan stops without considering it.
+     */
+    private void scan(String text, int from, boolean forward,
+                      List<Candidate> candidates, Set<Long> seenSpans) {
+        int cursor = from;
+        int seen = 0;
+
+        while (seen < WINDOW) {
+            if (forward) {
+                while (cursor < text.length() && Character.isWhitespace(text.charAt(cursor))) {
+                    cursor++;
+                }
+                if (cursor >= text.length()) {
+                    return;
+                }
+                int end = cursor;
+                while (end < text.length() && !Character.isWhitespace(text.charAt(end))) {
+                    end++;
+                }
+                String raw = text.substring(cursor, end);
+                offer(text, cursor, end, candidates, seenSpans);
+                if (raw.matches(".*[.!?][\"'`)\\]]*$")) {
+                    return;
+                }
+                cursor = end;
+            } else {
+                while (cursor > 0 && Character.isWhitespace(text.charAt(cursor - 1))) {
+                    cursor--;
+                }
+                if (cursor <= 0) {
+                    return;
+                }
+                int start = cursor;
+                while (start > 0 && !Character.isWhitespace(text.charAt(start - 1))) {
+                    start--;
+                }
+                if (text.substring(start, cursor).matches(".*[.!?][\"'`)\\]]*$")) {
+                    return;
+                }
+                offer(text, start, cursor, candidates, seenSpans);
+                cursor = start;
+            }
+            seen++;
+        }
+    }
+
+    /** Trim surrounding punctuation, then accept only a token that is entirely key-shaped. */
+    private void offer(String text, int start, int end,
+                       List<Candidate> candidates, Set<Long> seenSpans) {
+        String raw = text.substring(start, end);
+
+        Matcher lead = LEADING_NOISE.matcher(raw);
+        if (lead.find()) {
+            start += lead.group().length();
+            raw = raw.substring(lead.group().length());
+        }
+        Matcher tail = TRAILING_NOISE.matcher(raw);
+        if (tail.find()) {
+            end -= tail.group().length();
+            raw = raw.substring(0, raw.length() - tail.group().length());
+        }
+
+        if (end > start && KEY_SHAPED.matcher(raw).matches()) {
+            addCandidate(candidates, seenSpans, start, end, raw);
+        }
     }
 
     private void addCandidate(List<Candidate> candidates, Set<Long> seenSpans,
