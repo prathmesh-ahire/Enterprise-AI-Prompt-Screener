@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# UI screenshot output (frontend/uicheck/*.mjs are committed; their PNG output is not).
+# Two full runs are ~5MB of binaries that change on every capture - the scripts
+# regenerate them in a minute, so there is nothing to gain by versioning them.
+uicheck/baseline/
+uicheck/final/
+uicheck/out/
+uicheck/step*/
