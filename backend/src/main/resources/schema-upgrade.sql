@@ -28,6 +28,7 @@
 -- AFTER RUNNING, VERIFY (do not trust a silent success):
 --   SHOW INDEX FROM users;            -- expect uk_users_username
 --   SHOW INDEX FROM prompt_requests;  -- expect idx_prompt_requests_*
+--   SHOW CREATE TABLE screening_decisions;  -- expect the seven V2 breakdown columns
 -- ============================================================================
 
 DELIMITER $$
@@ -74,6 +75,21 @@ BEGIN
     END IF;
 END$$
 
+-- V2 55.3: adds a nullable column only if absent. ddl-auto: update does add new columns
+-- on its own (unlike indexes), but this keeps the script the single record of every
+-- schema change and makes the upgrade explicit for a database the backend never started on.
+DROP PROCEDURE IF EXISTS add_column_if_missing$$
+CREATE PROCEDURE add_column_if_missing(IN tbl VARCHAR(64), IN col VARCHAR(64), IN coldef VARCHAR(255))
+BEGIN
+    IF (SELECT COUNT(*) FROM information_schema.COLUMNS
+        WHERE table_schema = DATABASE() AND table_name = tbl AND column_name = col) = 0 THEN
+        SET @ddl = CONCAT('ALTER TABLE ', tbl, ' ADD COLUMN ', col, ' ', coldef);
+        PREPARE stmt FROM @ddl;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END IF;
+END$$
+
 DELIMITER ;
 
 -- ---------------------------------------------------------------------------
@@ -117,7 +133,21 @@ CALL add_index_if_missing('audit_events', 'idx_audit_events_created_at', 'create
 -- findRoleNamesByUserId - runs on every login and every prompt submission
 CALL add_index_if_missing('user_roles', 'idx_user_roles_user_id', 'user_id');
 
+-- ---------------------------------------------------------------------------
+-- V2 55.3 - the score breakdown on screening_decisions. All nullable: rows screened
+-- before V2 have no breakdown, and null means "not recorded". Never back-filled.
+-- Types match what Hibernate generates for these fields on MySQL.
+-- ---------------------------------------------------------------------------
+CALL add_column_if_missing('screening_decisions', 'sensitive_data_score', 'DOUBLE NULL');
+CALL add_column_if_missing('screening_decisions', 'injection_score', 'DOUBLE NULL');
+CALL add_column_if_missing('screening_decisions', 'secret_criticality_score', 'DOUBLE NULL');
+CALL add_column_if_missing('screening_decisions', 'policy_context_score', 'DOUBLE NULL');
+CALL add_column_if_missing('screening_decisions', 'obfuscation_score', 'DOUBLE NULL');
+CALL add_column_if_missing('screening_decisions', 'score_band', "ENUM('ALLOW','BLOCK','CONFIRM','MASK','REVIEW') NULL");
+CALL add_column_if_missing('screening_decisions', 'applied_overrides', 'VARCHAR(255) NULL');
+
 DROP PROCEDURE add_index_if_missing;
 DROP PROCEDURE add_unique_if_missing;
+DROP PROCEDURE add_column_if_missing;
 
-SELECT 'schema-upgrade.sql complete - verify with SHOW INDEX FROM users / prompt_requests' AS result;
+SELECT 'schema-upgrade.sql complete - verify with SHOW INDEX FROM users / prompt_requests and SHOW CREATE TABLE screening_decisions' AS result;

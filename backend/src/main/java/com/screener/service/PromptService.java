@@ -131,7 +131,7 @@ public class PromptService {
 
         saveFindings(requestId, findings);
         saveSignals(requestId, signals);
-        saveDecision(requestId, decisionResult, processingTimeMs, config.policyVersion());
+        saveDecision(requestId, decisionResult, subScores, processingTimeMs, config.policyVersion());
 
         // 17.2: one event for the intake itself, one for the decision outcome. The
         // decision's action is always decision.name() (ALLOW/MASK/CONFIRM/REVIEW/BLOCK) -
@@ -332,7 +332,10 @@ public class PromptService {
         riskSignalRepository.saveAll(entities);
     }
 
-    private void saveDecision(UUID requestId, DecisionResult decisionResult, long processingTimeMs, int policyVersion) {
+    // 55.3: the breakdown is stored from the sub-scores and decision already computed above -
+    // nothing is recomputed, and nothing from the prompt itself is stored here.
+    private void saveDecision(UUID requestId, DecisionResult decisionResult, RiskSubScores subScores,
+                              long processingTimeMs, int policyVersion) {
         ScreeningDecision decision = new ScreeningDecision();
         decision.setRequestId(requestId);
         decision.setDecision(decisionResult.decision());
@@ -341,6 +344,15 @@ public class PromptService {
         decision.setPolicyVersion(policyVersion);
         decision.setTimestamp(LocalDateTime.now());
         decision.setProcessingTimeMs(processingTimeMs);
+        decision.setSensitiveDataScore(subScores.sensitiveDataScore());
+        decision.setInjectionScore(subScores.injectionScore());
+        decision.setSecretCriticalityScore(subScores.secretCriticalityScore());
+        decision.setPolicyContextScore(subScores.policyContextScore());
+        decision.setObfuscationScore(subScores.obfuscationScore());
+        decision.setScoreBand(decisionResult.scoreBand());
+        decision.setAppliedOverrides(decisionResult.appliedOverrides().stream()
+                .map(Enum::name)
+                .collect(Collectors.joining(",")));
         screeningDecisionRepository.save(decision);
     }
 

@@ -47,4 +47,25 @@ public class ScreeningDecision {
     private LocalDateTime timestamp;
 
     private Long processingTimeMs;
+
+    // V2 Phase 55.3 - the score breakdown. Every column is nullable: rows screened before V2
+    // have none of it, and null means "not recorded", never zero. Never back-filled - a
+    // re-screen today would use today's thresholds and history, not the ones that decided.
+    private Double sensitiveDataScore;
+
+    private Double injectionScore;
+
+    private Double secretCriticalityScore;
+
+    private Double policyContextScore;
+
+    private Double obfuscationScore;
+
+    // The band the score alone gave, before any hard override.
+    @Enumerated(EnumType.STRING)
+    private Decision scoreBand;
+
+    // OverrideRule names that raised the decision, comma-separated in rule order.
+    // "" means none applied; null means not recorded.
+    private String appliedOverrides;
 }
