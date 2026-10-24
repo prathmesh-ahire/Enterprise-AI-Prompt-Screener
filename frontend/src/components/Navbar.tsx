@@ -61,12 +61,47 @@ export function Navbar() {
         )}
 
         {/* 45.2: the account controls carry their own class so they don't inherit the
-            uppercase link treatment or the gradient underline meant for navigation. */}
+            uppercase link treatment or the gradient underline meant for navigation.
+            V1.2 UI pass: they are now wrapped, so they travel as one unit. On the
+            desktop bar this changes nothing visible; in the collapsed mobile panel
+            (which stacks its children) it is what finally delivers the "account
+            controls sit together on one row" the 46.3 comment has always claimed —
+            before the wrapper they stacked one per line, four rows deep. */}
+        <div className="navbar-account">
         <span className="navbar-user">{username}</span>
         {role && <span className="role-badge">{role}</span>}
         {/* 44.7: theme switch sits with the account controls, not the navigation links */}
         <ThemeToggle />
-        <button type="button" className="btn-link" onClick={handleLogout}>Logout</button>
+        {/* V1.2 UI pass: was a `.btn-link` — a bare underlined hyperlink sitting
+            between a pill-shaped role badge and the theme switch, which read as a
+            stray link rather than as the one control that ends the session. It is
+            now a compact outlined pill in the same uppercase micro type as the role
+            badge beside it, so the three account controls read as one cluster. The
+            icon is inline rather than from public/icons.svg: that sprite is Vite
+            template leftovers (bluesky, discord, github) and carries nothing we use. */}
+        <button type="button" className="navbar-logout" onClick={handleLogout}>
+          <svg
+            className="navbar-logout-icon"
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            {/* A door with the arrow leaving it: the panel is open on the exit side
+                so the arrow reads as passing through rather than pointing at a wall. */}
+            <path d="M6 14H3.5A1.5 1.5 0 0 1 2 12.5v-9A1.5 1.5 0 0 1 3.5 2H6" />
+            <path d="M10.5 11 14 8l-3.5-3" />
+            <path d="M14 8H6" />
+          </svg>
+          Logout
+        </button>
+        </div>
       </div>
     </nav>
   )

@@ -107,6 +107,116 @@
   --sans: 'Source Sans 3', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
+  /* --- SCALE: type ------------------------------------------------------
+     V1.2 UI pass. Before this there was no type scale at all: 13 distinct
+     font sizes were in use (11/12/13/14/15/17/18/20/22/24/28/30px and one
+     stray `0.9em`), each chosen by eye at the moment it was needed, and
+     line-height and letter-spacing were set on only a handful of them. Five
+     near-identical small steps are not a hierarchy - nothing distinguishes
+     13px from 14px except which day it was written - and that is what reads
+     as "unfinished" long before anyone looks at the colours.
+
+     Each step below is a ROLE, and each carries its own line-height and
+     tracking, because those are what actually separate a label from a
+     heading. Tracking opens up on small uppercase type (it is unreadable set
+     tight) and tightens on large type (which looks loose set at 0). The
+     one-off 17/20/22px sizes are gone, folded into the 18/24px steps.
+
+     WEIGHTS ARE CONSTRAINED. main.tsx imports Inter 500/600/700 and Source
+     Sans 3 400/600 only, and `font-synthesis: none` is set, so any other
+     value silently falls back to the nearest imported face rather than
+     rendering as asked. Nothing here may ask for 650. */
+  --fs-micro: 11px;     /* uppercase instrument labels: table headers, eyebrows */
+  --lh-micro: 14px;
+  --ls-micro: 0.06em;
+
+  --fs-label: 12px;     /* badges, chips, legends, stat-card captions */
+  --lh-label: 16px;
+  --ls-label: 0.03em;
+
+  --fs-caption: 13px;   /* form labels, hints, errors, footer */
+  --lh-caption: 18px;
+
+  --fs-body-sm: 14px;   /* secondary prose, nav links, empty states */
+  --lh-body-sm: 20px;
+
+  --fs-body: 15px;      /* controls, inputs, buttons, card titles */
+  --lh-body: 22px;
+
+  --fs-lead: 16px;      /* the sentence under a page title */
+  --lh-lead: 26px;
+
+  --fs-h3: 18px;
+  --lh-h3: 24px;
+  --ls-h3: -0.01em;
+
+  --fs-h2: 24px;
+  --lh-h2: 32px;
+  --ls-h2: -0.015em;
+
+  --fs-h1: 28px;
+  --lh-h1: 36px;
+  --ls-h1: -0.02em;
+
+  --fs-stat: 30px;      /* a headline figure on a stat card */
+  --lh-stat: 32px;
+  --ls-stat: -0.03em;
+
+  /* --- SCALE: spacing ----------------------------------------------------
+     A 4px base step, named so a card and the section around it cannot drift
+     apart. The padding values in this app were previously all one-offs -
+     `3px 10px`, `7px 11px`, `9px 18px`, `36px 12px`, `28px 26px` - so no two
+     components sat on the same grid and nothing lined up optically. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 28px;
+  --sp-8: 32px;
+  --sp-9: 36px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-14: 56px;
+  --sp-16: 64px;
+
+  /* --- SCALE: radius -----------------------------------------------------
+     Was nine different values (2/3/4/6/8/10/12px, 50%, 999px). Four steps
+     plus the pill, kept deliberately tight: chips and inputs read sharper
+     when they are not rounded to the point of looking like toys. */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --r-xl: 14px;
+  --r-pill: 999px;
+
+  /* --- SCALE: layout ----------------------------------------------------- */
+  --content-w: 1200px;
+  --gutter: var(--sp-4);        /* phone  */
+  --gutter-md: var(--sp-6);     /* tablet */
+  --gutter-lg: var(--sp-10);    /* desktop */
+  --block-gap: var(--sp-8);     /* between the major blocks of one page */
+
+  /* --- ELEVATION ---------------------------------------------------------
+     --shadow-sm/md above are the originals and stay. These three are the
+     named roles the restyle uses: a barely-there resting shadow so a panel
+     is separated from the page without looking like it is floating, and an
+     accent-tinted glow for hover, which is what makes a grid of identical
+     panels feel responsive to the pointer. */
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-raised: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 16px 40px -12px rgba(0, 180, 216, 0.28);
+
+  /* --- MOTION ------------------------------------------------------------
+     One easing curve and three durations, so every transition in the app is
+     timed the same way. The curve is a strong ease-out: things arrive fast
+     and settle, which reads as responsive rather than floaty. */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur-med: 240ms;
+  --dur-slow: 420ms;
+
   /* The legacy aliases (--bg, --text-h, --text, --code-bg, --shadow) lived here
      from Phase 44 and were DELETED in Phase 47, on schedule. They existed so the
      app could re-theme in one step without a half-restyled UI while Phases 45-47
@@ -125,7 +235,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 15px;
+    font-size: 15px; /* scale-lint-ignore: the document base, not a type step */
   }
 }
 
@@ -159,6 +269,12 @@
   --border-strong: rgba(11, 34, 51, 0.28);
   --shadow-sm: 0 1px 2px rgba(11, 34, 51, 0.08);
   --shadow-md: 0 10px 24px rgba(11, 34, 51, 0.10), 0 3px 8px rgba(11, 34, 51, 0.06);
+  /* The dark theme's shadows are black at high alpha, which on a white page
+     reads as dirt rather than depth. On light, depth comes mostly from the
+     border; the shadow only has to lift the panel a little. */
+  --shadow-panel: 0 1px 2px rgba(11, 34, 51, 0.06);
+  --shadow-raised: 0 12px 32px -8px rgba(11, 34, 51, 0.16);
+  --shadow-glow: 0 16px 40px -12px rgba(0, 119, 182, 0.22);
 
   /* Darkened so they carry the same weight against white that the dark-theme
      values carry against near-black. Same meanings, different luminance.
@@ -204,7 +320,100 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: var(--surface-page);
+  /* Transparent, not --surface-page: the page ground is painted by <body>, and the
+     depth layer below sits between the two. If #root kept an opaque background it
+     would cover the layer completely. */
+  background: transparent;
+}
+
+/* ==========================================================================
+   DEPTH LAYER — V1.2 UI pass
+   Two fixed, pointer-events-none sheets behind the whole app. Before this the
+   background was one flat near-black fill, which is the main reason every screen
+   read as "a form on a void" rather than as a surface: there was nothing behind the
+   panels for them to sit ON.
+
+   Both are `z-index: -1`, so they paint above <body>'s background colour and behind
+   every panel - and every panel has its own opaque --surface-card, so this only ever
+   shows through the gaps between them, which is the whole intent.
+
+   Drawn from the brand tokens rather than new colours, and kept very low alpha: this
+   should register as atmosphere, never as a shape anyone could point at.
+   ========================================================================== */
+#root::before,
+#root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Three wide, soft washes - two warm-side accents top left and top right, one faint
+   pool at the bottom so a long page does not end on dead flat black. */
+#root::before {
+  background-image:
+    radial-gradient(60% 50% at 10% -8%, rgba(0, 180, 216, 0.1), transparent 70%),
+    radial-gradient(55% 45% at 103% 14%, rgba(0, 119, 182, 0.13), transparent 72%),
+    radial-gradient(80% 50% at 50% 112%, rgba(144, 224, 239, 0.05), transparent 70%);
+}
+
+/* A calibration grid, masked so it fades out before the fold. An instrument reading
+   reads as measured when it sits on a grid; at this alpha it is barely perceptible
+   and simply stops the upper page feeling empty. */
+#root::after {
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right, rgba(0, 180, 216, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 180, 216, 0.05) 1px, transparent 1px);
+  -webkit-mask-image: radial-gradient(75% 55% at 50% -5%, #000, transparent 100%);
+  mask-image: radial-gradient(75% 55% at 50% -5%, #000, transparent 100%);
+}
+
+/* On a white page the same washes read as smudges, and the grid as print bleed, so
+   both are pulled right down rather than reused at full strength. */
+:root[data-theme='light'] #root::before {
+  background-image:
+    radial-gradient(60% 50% at 10% -8%, rgba(0, 119, 182, 0.07), transparent 70%),
+    radial-gradient(55% 45% at 103% 14%, rgba(0, 119, 182, 0.06), transparent 72%),
+    radial-gradient(80% 50% at 50% 112%, rgba(0, 119, 182, 0.04), transparent 70%);
+}
+
+:root[data-theme='light'] #root::after {
+  background-image:
+    linear-gradient(to right, rgba(3, 4, 94, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(3, 4, 94, 0.04) 1px, transparent 1px);
+}
+
+/* ==========================================================================
+   SCROLLBARS
+   The platform default is a wide light slab that reads as part of the page on a
+   dark surface. A thin token-coloured bar is the one piece of chrome a dense
+   dashboard shows on every screen, so it is worth styling.
+   ========================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--r-pill);
+  background-color: var(--border-strong);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent-border);
 }
 
 body {
@@ -217,7 +426,7 @@ body {
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--r-sm);
 }
 
 /* Inter for headings, Source Sans 3 for body - the pairing from the reference
@@ -239,20 +448,23 @@ h3 {
 /* Was 56px - the Vite template's landing-page hero scale, far too loud for an
    application screen. Phase 46.2 introduces the real page-header pattern. */
 h1 {
-  font-size: 28px;
-  line-height: 1.25;
-  margin: 0 0 20px;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  margin: 0 0 var(--sp-5);
   @media (max-width: 1024px) {
-    font-size: 24px;
+    font-size: var(--fs-h2);
   }
 }
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
+  font-size: var(--fs-h2);
+  /* Was `118%` and `-0.24px` - a percentage line-height and a tracking value in px,
+     neither of which matched anything else in the file. Both now come from the h2
+     step, so a heading and the label under it are related by the scale. */
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
+  margin: 0 0 var(--sp-2);
   @media (max-width: 1024px) {
-    font-size: 20px;
+    font-size: var(--fs-h3);
   }
 }
 p {
@@ -264,32 +476,29 @@ p {
 code {
   font-family: var(--mono);
   display: inline-flex;
-  border-radius: 4px;
+  border-radius: var(--r-sm);
   color: var(--text-primary);
 }
 
 code {
-  font-size: 15px;
+  font-size: var(--fs-body);
   line-height: 135%;
-  padding: 4px 8px;
+  padding: var(--sp-1) var(--sp-2);
   background: var(--surface-raised);
 }
 
 /* Phase 25+ shared form/nav styles - kept plain (no CSS framework in the locked stack). */
-.auth-page {
-  width: 100%;
-  max-width: 380px;
-  margin: 64px auto;
-  text-align: left;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
+/* V1.2 UI pass: the Phase 25 `.auth-page` rule that sat here (380px wide, a 64px top
+   margin, its own 16px padding) was superseded by Phase 47's centred card and then left
+   behind. components.css loads after this file and redefines width and margin, so only
+   the stale padding was still landing - 16px of inset nothing else in the auth column
+   accounted for. Removed rather than overridden. */
 
 .form-links {
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
-  font-size: 14px;
+  margin-top: var(--sp-3);
+  font-size: var(--fs-body-sm);
 }
 
 /* ==========================================================================
@@ -321,7 +530,7 @@ code {
 .theme-switch-slider {
   position: absolute;
   inset: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--surface-raised);
   border: 1px solid var(--border-strong);
   transition: background 0.3s ease, border-color 0.3s ease;
@@ -377,14 +586,14 @@ code {
 }
 
 .results-section {
-  margin-top: 24px;
-  padding-top: 16px;
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-4);
   border-top: 1px solid var(--border);
 }
 
 .masked-text {
-  padding: 12px 14px;
-  border-radius: 6px;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
   background: var(--surface-raised);
   border: 1px solid var(--border);
   line-height: 160%;
@@ -393,8 +602,8 @@ code {
 }
 
 .ai-response-box {
-  padding: 12px 14px;
-  border-radius: 6px;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
   background: var(--surface-raised);
   border: 1px solid var(--border);
   white-space: pre-wrap;
@@ -403,35 +612,35 @@ code {
 /* Phase 27+ review/pending states, risk score bar */
 .request-id {
   font-family: var(--mono);
-  font-size: 0.9em;
+  font-size: var(--fs-caption);
 }
 
 .explanation-text {
-  margin: 12px 0;
+  margin: var(--sp-3) 0;
   color: var(--text-primary);
 }
 
 .summary-text {
-  margin: 0 0 12px;
+  margin: 0 0 var(--sp-3);
   color: var(--text-primary);
 }
 
 .risk-score-bar-wrap {
-  margin: 12px 0;
+  margin: var(--sp-3) 0;
 }
 
 .risk-score-label {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: var(--fs-caption);
   color: var(--text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: var(--sp-1);
 }
 
 .risk-score-track {
   width: 100%;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--surface-raised);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -439,7 +648,7 @@ code {
 
 .risk-score-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   transition: width 0.3s ease;
 }
 
@@ -463,7 +672,7 @@ code {
    styled as a form control in styles/components.css). */
 .history-filter {
   max-width: 260px;
-  margin-bottom: 16px;
+  margin-bottom: var(--sp-4);
 }
 
 /* Phase 30+ admin dashboard */
@@ -478,24 +687,24 @@ code {
 .bar-chart {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--sp-3);
 }
 
 .bar-row {
   display: grid;
   grid-template-columns: 160px 1fr 40px;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-3);
 }
 
 .bar-label {
-  font-size: 13px;
+  font-size: var(--fs-caption);
   color: var(--text-primary);
 }
 
 .bar-track {
   height: 12px;
-  border-radius: 6px;
+  border-radius: var(--r-md);
   background: var(--surface-raised);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -504,11 +713,11 @@ code {
 .bar-fill {
   height: 100%;
   background: var(--accent);
-  border-radius: 6px;
+  border-radius: var(--r-md);
 }
 
 .bar-count {
-  font-size: 13px;
+  font-size: var(--fs-caption);
   color: var(--text-secondary);
   text-align: right;
 }
@@ -517,14 +726,14 @@ code {
 .detector-toggle-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 20px;
+  gap: var(--sp-2) var(--sp-5);
 }
 
 .detector-toggle {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: var(--sp-2);
+  font-size: var(--fs-body-sm);
   color: var(--text-primary);
   font-weight: 400;
 }
@@ -532,30 +741,30 @@ code {
 .threshold-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0 16px;
+  gap: 0 var(--sp-4);
 }
 
 .term-list {
   list-style: none;
-  margin: 0 0 16px;
+  margin: 0 0 var(--sp-4);
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--sp-1);
 }
 
 .term-list-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
+  padding: var(--sp-2) var(--sp-3);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--r-md);
 }
 
 .term-add-form {
   display: flex;
-  gap: 10px;
+  gap: var(--sp-3);
 }
 
 /* Layout only — the input's appearance comes from styles/components.css. */
@@ -567,5 +776,5 @@ code {
 .model-status-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--sp-3);
 }

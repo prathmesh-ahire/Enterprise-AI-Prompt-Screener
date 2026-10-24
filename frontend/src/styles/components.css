@@ -26,14 +26,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--sp-2);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   font-weight: 600;
-  letter-spacing: 0.3px;
-  padding: 9px 18px;
+  letter-spacing: var(--ls-label);
+  padding: var(--sp-2) var(--sp-5);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   color: var(--on-accent);
   background-color: transparent;
@@ -106,12 +107,12 @@
 
 .btn-row {
   display: flex;
-  gap: 10px;
+  gap: var(--sp-3);
 }
 
 .review-actions {
   flex-wrap: wrap;
-  margin-top: 8px;
+  margin-top: var(--sp-2);
 }
 
 /* ==========================================================================
@@ -139,8 +140,9 @@
 .loading-inline {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: var(--sp-2);
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
   color: var(--text-muted);
 }
 
@@ -151,26 +153,42 @@
    region growing, not by a fixed position — a short page still fills the
    viewport and a long one still scrolls normally.
    ========================================================================== */
+/* V1.2 UI pass. Was a fixed `24px` gutter at every width and a 1180px column.
+   Page margins now step 16 / 24 / 40px across phone / tablet / desktop, which is
+   what stops a desktop screen reading as a phone layout that was stretched. */
 .app-main {
   flex: 1;
   width: 100%;
-  max-width: 1180px;
+  max-width: var(--content-w);
   margin: 0 auto;
-  padding: 28px 24px 56px;
+  padding: var(--sp-8) var(--gutter) var(--sp-16);
   box-sizing: border-box;
   text-align: left;
+}
+
+@media (min-width: 640px) {
+  .app-main {
+    padding-inline: var(--gutter-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-main {
+    padding-inline: var(--gutter-lg);
+  }
 }
 
 .app-footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 16px 24px;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-6);
   border-top: 1px solid var(--border);
   background: var(--surface-card);
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
 }
 
 /* ==========================================================================
@@ -185,8 +203,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 24px;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-6);
   border-bottom: 1px solid var(--border);
   /* Opaque, not translucent: content scrolls underneath it, and a see-through
      bar over a table of decision badges is unreadable in both themes. */
@@ -204,7 +222,7 @@
   height: 40px;
   padding: 0;
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: var(--r-lg);
   background: transparent;
   cursor: pointer;
   transition: border-color 0.25s ease, background-color 0.25s ease;
@@ -223,7 +241,7 @@
   display: block;
   width: 18px;
   height: 2px;
-  border-radius: 2px;
+  border-radius: var(--r-sm);
   background: var(--text-primary);
 }
 
@@ -238,14 +256,15 @@
 }
 
 .navbar-toggle-bars::after {
-  top: 4px;
+  top: var(--sp-1);
 }
 
 .navbar-brand {
   font-family: var(--heading);
-  font-size: 18px;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ls-h3);
   color: var(--text-primary);
   transition: opacity 0.3s ease;
 }
@@ -265,15 +284,16 @@
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: var(--sp-6);
 }
 
 .navbar-links a {
   position: relative;
-  padding: 4px 0;
-  font-size: 13px;
+  padding: var(--sp-1) 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--ls-micro);
   text-transform: uppercase;
   text-decoration: none;
   color: var(--text-secondary);
@@ -294,7 +314,7 @@
   left: 50%;
   width: 0;
   height: 2px;
-  border-radius: 2px;
+  border-radius: var(--r-sm);
   background-image: var(--gradient-accent-bright);
   pointer-events: none;
   transition: width 0.25s ease, left 0.25s ease;
@@ -309,8 +329,79 @@
 /* The account controls beside the links are not navigation — they must not
    pick up the uppercase link treatment or the underline. */
 .navbar-user {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
   color: var(--text-secondary);
+}
+
+/* The account cluster: username, role, theme switch, logout. Grouped so the four
+   stay together when the bar wraps, and so the collapsed mobile panel lays them out
+   as one row instead of stacking them four rows deep. */
+.navbar-account {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+/* ==========================================================================
+   LOGOUT — V1.2 UI pass
+   Previously `.btn-link`: an underlined accent-coloured hyperlink, dropped
+   between the role badge (a bordered pill) and the theme switch (a bordered
+   track). Three controls, three unrelated shapes, and the only one that ends
+   your session looked like the least significant of them.
+
+   It is now a pill in the same uppercase micro type as the role badge, so the
+   account cluster reads as one group. It stays OUTLINED rather than filled:
+   signing out is a deliberate, infrequent act, and a solid button here would
+   compete with the page's real primary action for attention on every screen.
+
+   Hover moves it onto the BLOCK band's colour rather than the brand accent.
+   That is the one place in the app where a decision colour is used for
+   something that is not a screening decision, and it is deliberate: red here
+   means "this ends something", which is what the control does. It is a hover
+   state only, so it never sits on screen competing with a real BLOCK badge.
+   ========================================================================== */
+.navbar-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--heading);
+  font-size: var(--fs-micro);
+  line-height: var(--lh-micro);
+  font-weight: 600;
+  letter-spacing: var(--ls-micro);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+.navbar-logout:hover {
+  color: var(--decision-block);
+  border-color: var(--decision-block-border);
+  background: var(--decision-block-bg);
+}
+
+.navbar-logout:active {
+  transform: scale(0.97);
+}
+
+/* The arrow slides a touch toward the door on hover — the one piece of motion
+   on the control, and it says "leaving" better than any colour change can. */
+.navbar-logout-icon {
+  flex: none;
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.navbar-logout:hover .navbar-logout-icon {
+  transform: translateX(2px);
 }
 
 /* ==========================================================================
@@ -322,7 +413,7 @@
 @media (max-width: 900px) {
   .navbar {
     flex-wrap: wrap;
-    padding: 12px 16px;
+    padding: var(--sp-3) var(--sp-4);
   }
 
   .navbar-toggle {
@@ -336,9 +427,9 @@
     flex-basis: 100%;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
-    margin-top: 12px;
-    padding-top: 12px;
+    gap: var(--sp-1);
+    margin-top: var(--sp-3);
+    padding-top: var(--sp-3);
     border-top: 1px solid var(--border);
   }
 
@@ -348,8 +439,8 @@
 
   .navbar-links a {
     width: 100%;
-    padding: 10px 0;
-    font-size: 14px;
+    padding: var(--sp-2) 0;
+    font-size: var(--fs-body-sm);
   }
 
   /* The centre-growing underline reads as an accident on a stacked list —
@@ -360,14 +451,18 @@
   }
 
   .navbar-links a.active {
-    padding-left: 10px;
+    padding-left: var(--sp-3);
     border-left: 3px solid var(--accent);
   }
 
-  /* Account controls sit together on one row under the links. */
-  .navbar-user,
-  .role-badge {
-    margin-top: 4px;
+  /* Account controls sit together on one row under the links — delivered by
+     .navbar-account's own flex row now, not by a margin on two of the four. */
+  .navbar-account {
+    flex-wrap: wrap;
+    margin-top: var(--sp-3);
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    width: 100%;
   }
 }
 
@@ -378,13 +473,14 @@
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: var(--sp-2);
+  font-size: var(--fs-micro);
+  line-height: var(--lh-micro);
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--ls-micro);
   text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 999px;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
   color: var(--text-primary);
@@ -405,14 +501,15 @@
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-bottom: 16px;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-4);
   text-align: left;
 }
 
 .form-field label,
 .field-label {
-  font-size: 13px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -425,12 +522,13 @@
 .history-filter select,
 .term-add-form input {
   font: inherit;
-  font-size: 15px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   width: 100%;
-  padding: 10px 12px;
+  padding: var(--sp-3) var(--sp-3);
   box-sizing: border-box;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--r-lg);
   color: var(--text-primary);
   background-color: var(--surface-card);
   background-image: var(--gradient-accent-bright);
@@ -510,21 +608,25 @@
 .form-field-error {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 13px;
+  gap: var(--sp-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--decision-block);
 }
 
 .form-field-hint {
-  font-size: 13px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--text-muted);
 }
 
 .char-counter {
-  font-size: 13px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--text-muted);
   text-align: right;
-  margin-top: 4px;
+  margin-top: var(--sp-1);
+  font-variant-numeric: tabular-nums;
 }
 
 .char-counter-over {
@@ -539,170 +641,172 @@
 }
 
 /* ==========================================================================
-   45.4 CARDS
-   Three separable behaviours, so a card only takes the ones it should:
-     .card            surface only — safe for tables and long text
-     .card-lift       upward lift + shadow on hover
-     .card-curtain    two panels that slide apart sideways to reveal the
-                      card surface beneath
-     .card-tilt       the reference's 3D tilt at ~a third strength (3.5deg
-                      against its 10deg), per the locked motion decision
+   45.4 CARDS  (rewritten in the V1.2 UI pass)
+   Two things only:
+     .card          a surface — border, radius, resting shadow
+     .panel-hover   the shared hover response: a 3px lift, an accent-tinted
+                    glow, and one specular sweep across the panel
 
-   The curtain panels sit BEHIND the content (z-index 0 vs 1), not over it,
-   so text is legible throughout the transition rather than being wiped
-   across. That is a deliberate change from the reference, which slides its
-   panels over the top.
+   Phase 45 also defined `.card-lift`, `.card-curtain` (two panels sliding
+   apart) and `.card-tilt` (a 3.5deg perspective rotate). Every one of them
+   was dead — no .tsx in src/ ever applied them — and all three were the loud
+   kind of hover that dates a UI. They are gone rather than left to rot.
    ========================================================================== */
 .card {
   position: relative;
-  padding: 16px 18px;
+  padding: var(--sp-4) var(--sp-5);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-xl);
   background: var(--surface-card);
+  box-shadow: var(--shadow-panel);
   overflow: hidden;
   transition:
-    transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
-    box-shadow 0.4s ease,
-    border-color 0.3s ease;
+    transform var(--dur-med) var(--ease),
+    box-shadow var(--dur-med) var(--ease),
+    border-color var(--dur-med) var(--ease);
 }
 
-.card-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+/* V1.2 UI pass. `.card-lift`, `.card-curtain` and `.card-tilt` were defined in
+   Phase 45 and then used by nothing - confirmed against every .tsx in src/. The
+   curtain (two panels sliding apart) and the tilt (a 3.5deg perspective rotate)
+   were the loud, 2021-template kind of hover; what reads as considered now is a
+   small lift, an accent-tinted glow and one specular sweep. Those three are
+   folded into `.panel-hover` below and applied to the surfaces that actually
+   exist, so there is no dead vocabulary left in this file.
+
+   The sweep is a decorative band: aria-hidden by virtue of being a pseudo-element,
+   pointer-events-none, invisible at rest, and it only animates under motion-safe
+   (the reduced-motion block at the foot of this file). */
+.panel-hover,
+.stat-card,
+.chart-card,
+.admin-section {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--dur-med) var(--ease),
+    box-shadow var(--dur-med) var(--ease),
+    border-color var(--dur-med) var(--ease);
+}
+
+.panel-hover::after,
+.stat-card::after,
+.chart-card::after,
+.admin-section::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: -60%;
+  width: 40%;
+  pointer-events: none;
+  opacity: 0;
+  transform: skewX(-12deg);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.panel-hover:hover,
+.stat-card:hover,
+.chart-card:hover,
+.admin-section:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-glow);
   border-color: var(--accent-border);
 }
 
-.card-curtain::before,
-.card-curtain::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  z-index: 0;
-  width: 50%;
-  height: 100%;
-  background: var(--surface-raised);
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+.panel-hover:hover::after,
+.stat-card:hover::after,
+.chart-card:hover::after,
+.admin-section:hover::after {
+  opacity: 1;
+  animation: panel-sheen var(--dur-slow) var(--ease);
 }
 
-.card-curtain::before {
-  left: 0;
-}
-
-.card-curtain::after {
-  right: 0;
-}
-
-.card-curtain:hover::before {
-  transform: translateX(-100%);
-}
-
-.card-curtain:hover::after {
-  transform: translateX(100%);
-}
-
-.card-curtain > * {
-  position: relative;
-  z-index: 1;
-}
-
-.card-tilt {
-  transform-style: preserve-3d;
-}
-
-.card-tilt:hover {
-  transform: perspective(900px) rotateX(3.5deg) rotateY(3.5deg) translateY(-4px) scale(1.02);
+@keyframes panel-sheen {
+  from {
+    transform: translateX(0) skewX(-12deg);
+  }
+  to {
+    transform: translateX(420%) skewX(-12deg);
+  }
 }
 
 .card-header {
   font-family: var(--heading);
-  font-size: 15px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 10px;
+  margin-bottom: var(--sp-3);
 }
 
-/* Stat cards get all three effects. Nothing containing a table or a
-   paragraph of text ever gets .card-tilt — rotating readable copy is what
-   made the reference's tilt too strong to keep at full power. */
-/* 46.3: a grid rather than a flex row, so the cards REFLOW onto more rows
-   instead of shrinking. auto-fit with a 150px floor means five cards go
-   5-up on a desktop and 2-up at 375px, always at a readable size — flex
-   would have let them squeeze down until a four-digit count wrapped. */
+/* V1.2 UI pass. The stat card was a centred number in a thin box with the
+   curtain + tilt effects behind it. Three changes, all aimed at making a row
+   of them read as a readout rather than as five empty boxes:
+     * left-aligned, because a column of left-aligned figures is scannable and
+       a row of centred ones is not;
+     * a 2px accent rule along the top, which is what distinguishes a headline
+       figure from an ordinary panel at a glance;
+     * the shared `.panel-hover` response instead of the bespoke tilt.
+   46.3's grid is unchanged: auto-fit with a floor means five cards go 5-up on
+   a desktop and 2-up at 375px rather than squeezing until a figure wraps. */
 .stat-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--sp-3);
 }
 
 .stat-card {
   position: relative;
-  padding: 16px;
+  padding: var(--sp-5) var(--sp-5) var(--sp-4);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-xl);
   background: var(--surface-card);
-  text-align: center;
+  box-shadow: var(--shadow-panel);
+  text-align: left;
   overflow: hidden;
-  transform-style: preserve-3d;
-  transition:
-    transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
-    box-shadow 0.4s ease,
-    border-color 0.3s ease;
 }
 
-.stat-card::before,
-.stat-card::after {
+/* The accent rule. A pseudo-element rather than a border-top so it sits inside
+   the card's rounded corners instead of squaring them off. */
+.stat-card::before {
   content: '';
   position: absolute;
+  inset-inline: 0;
   top: 0;
-  z-index: 0;
-  width: 50%;
-  height: 100%;
-  background: var(--surface-raised);
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.stat-card::before {
-  left: 0;
-}
-
-.stat-card::after {
-  right: 0;
+  height: 2px;
+  background-image: var(--gradient-accent-bright);
+  opacity: 0.55;
+  transition: opacity var(--dur-med) var(--ease);
 }
 
 .stat-card:hover::before {
-  transform: translateX(-100%);
-}
-
-.stat-card:hover::after {
-  transform: translateX(100%);
-}
-
-.stat-card:hover {
-  transform: perspective(900px) rotateX(3.5deg) rotateY(3.5deg) translateY(-4px) scale(1.02);
-  box-shadow: var(--shadow-md);
-  border-color: var(--accent-border);
-}
-
-.stat-card > * {
-  position: relative;
-  z-index: 1;
+  opacity: 1;
 }
 
 .stat-card-value {
   font-family: var(--heading);
-  font-size: 30px;
+  font-size: var(--fs-stat);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: var(--lh-stat);
+  letter-spacing: var(--ls-stat);
   color: var(--text-primary);
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .stat-card-label {
-  font-size: 12px;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--ls-micro);
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-top: 6px;
+  margin-top: var(--sp-2);
 }
 
 /* ==========================================================================
@@ -715,14 +819,14 @@
    ========================================================================== */
 .badge {
   display: inline-block;
-  font-size: 12px;
+  font-size: var(--fs-label);
   font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 4px 11px;
-  border-radius: 999px;
+  letter-spacing: var(--ls-label);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
   border: 1px solid transparent;
-  line-height: 1.35;
-  margin-bottom: 8px;
+  line-height: var(--lh-label);
+  margin-bottom: var(--sp-2);
   white-space: nowrap;
 }
 
@@ -768,17 +872,19 @@
 .signal-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 8px 0 16px;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0 var(--sp-4);
 }
 
 .entity-chip,
 .signal-chip {
   display: inline-block;
-  font-size: 12px;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--ls-label);
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 999px;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
   border: 1px solid transparent;
   white-space: nowrap;
 }
@@ -810,13 +916,13 @@
 
 .placeholder-chip {
   display: inline-block;
-  padding: 0 5px;
-  border-radius: 4px;
+  padding: 0 var(--sp-1);
+  border-radius: var(--r-sm);
   background: var(--accent-bg);
   border: 1px solid var(--accent-border);
   color: var(--text-primary);
   font-family: var(--mono);
-  font-size: 0.9em;
+  font-size: var(--fs-caption);
 }
 
 /* ==========================================================================
@@ -830,10 +936,109 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
+  padding: var(--sp-8) var(--sp-4);
   background-image:
     radial-gradient(60ch 60ch at 15% 0%, var(--accent-bg), transparent 70%),
     radial-gradient(70ch 70ch at 90% 100%, var(--accent-bg), transparent 70%);
+}
+
+/* V1.2 UI pass: the split. One column below 960px (the panel is removed, not just
+   visually hidden, so its text is not announced twice), two above it. The card column
+   is a fixed comfortable width and the panel takes the rest, rather than both being
+   1fr - a sign-in form stretched to 600px looks wrong at any viewport. */
+.auth-split {
+  display: grid;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  gap: var(--sp-16);
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .auth-split {
+    grid-template-columns: minmax(0, 1fr) 400px;
+  }
+}
+
+.auth-hero {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .auth-hero {
+    display: block;
+    max-width: 52ch;
+  }
+}
+
+.auth-hero-mark {
+  margin: 0 0 var(--sp-5);
+  font-family: var(--heading);
+  font-size: var(--fs-micro);
+  line-height: var(--lh-micro);
+  font-weight: 600;
+  letter-spacing: var(--ls-micro);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Deliberately larger than any heading inside the app shell. This is the one
+   marketing-weight statement in the product, and it is the first thing seen. */
+.auth-hero-title {
+  margin: 0 0 var(--sp-5);
+  font-family: var(--heading);
+  font-size: clamp(30px, 1.4rem + 1.9vw, 46px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* One word in the brand gradient, never the whole sentence - the rest has to keep
+   full text contrast, and a gradient-filled paragraph is unreadable. */
+.auth-hero-accent {
+  background-image: var(--gradient-accent-bright);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.auth-hero-lede {
+  margin: 0 0 var(--sp-8);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+  color: var(--text-secondary);
+}
+
+.auth-hero-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.auth-hero-points li {
+  position: relative;
+  padding-left: var(--sp-7);
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
+  color: var(--text-secondary);
+}
+
+/* A check mark drawn from two borders rather than a glyph, so it needs no icon font
+   and inherits the accent on both themes. */
+.auth-hero-points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 4px;
+  width: 7px;
+  height: 12px;
+  border: solid var(--accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .auth-page {
@@ -844,14 +1049,17 @@
   box-sizing: border-box;
 }
 
+
+
 .auth-brand {
   display: block;
-  margin-bottom: 16px;
+  margin-bottom: var(--sp-4);
   text-align: center;
   font-family: var(--heading);
-  font-size: 15px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-label);
   color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.25s ease;
@@ -861,19 +1069,33 @@
   color: var(--accent);
 }
 
+/* Once the split panel is on screen it carries the wordmark, so the card's own copy
+   would be the second one in view. Scoped under .auth-page (and so more specific than
+   `.auth-brand` above) because a media query adds no specificity of its own - the
+   first attempt at this rule sat earlier in the file and silently lost on source
+   order, which is exactly the trap that makes "it works in devtools" so common. */
+@media (min-width: 960px) {
+  .auth-page > .auth-brand {
+    display: none;
+  }
+}
+
 .auth-card {
-  padding: 28px 26px;
+  padding: var(--sp-7) var(--sp-7);
   box-shadow: var(--shadow-md);
 }
 
 .auth-title {
-  font-size: 22px;
-  margin: 0 0 4px;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
+  margin: 0 0 var(--sp-1);
 }
 
 .auth-subtitle {
-  margin-bottom: 20px;
-  font-size: 14px;
+  margin-bottom: var(--sp-5);
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
   color: var(--text-secondary);
 }
 
@@ -884,9 +1106,10 @@
 }
 
 .auth-footnote {
-  margin-top: 18px;
+  margin-top: var(--sp-5);
   text-align: center;
-  font-size: 12px;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
   color: var(--text-muted);
 }
 
@@ -898,8 +1121,8 @@
    carries its decision word in the badge as well.
    ========================================================================== */
 .result-card {
-  padding: 18px 20px;
-  border-radius: 12px;
+  padding: var(--sp-5) var(--sp-5);
+  border-radius: var(--r-xl);
   border: 1px solid var(--border);
   border-left: 4px solid var(--border-strong);
   background: var(--surface-card);
@@ -930,14 +1153,16 @@
 .result-head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-3);
   flex-wrap: wrap;
-  margin-bottom: 4px;
+  margin-bottom: var(--sp-1);
 }
 
 .result-title {
   font-family: var(--heading);
-  font-size: 17px;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -946,17 +1171,18 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--sp-3);
 }
 
 .section-label {
   font-family: var(--heading);
-  font-size: 11px;
+  font-size: var(--fs-micro);
+  line-height: var(--lh-micro);
   font-weight: 600;
-  letter-spacing: 0.07em;
+  letter-spacing: var(--ls-micro);
   text-transform: uppercase;
   color: var(--text-muted);
-  margin: 16px 0 6px;
+  margin: var(--sp-4) 0 var(--sp-2);
 }
 
 /* ==========================================================================
@@ -968,21 +1194,23 @@
    "grouped form sections": no markup changed, every page gets it at once.
    ========================================================================== */
 .admin-section {
-  margin: 20px 0;
-  padding: 20px 22px;
+  margin: var(--sp-5) 0;
+  padding: var(--sp-5) var(--sp-6);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-xl);
   background: var(--surface-card);
 }
 
 .admin-section h2 {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-3);
   flex-wrap: wrap;
-  font-size: 17px;
-  margin: 0 0 14px;
-  padding-bottom: 10px;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  margin: 0 0 var(--sp-4);
+  padding-bottom: var(--sp-3);
   border-bottom: 1px solid var(--border);
 }
 
@@ -994,7 +1222,7 @@
 
 @media (max-width: 700px) {
   .admin-section {
-    padding: 16px;
+    padding: var(--sp-4);
   }
 }
 
@@ -1018,14 +1246,14 @@
      floor in min() lets the track collapse to the container width instead.
      Caught by re-running ui-checks-46.mjs after this phase. */
   grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
-  gap: 16px;
-  margin: 20px 0;
+  gap: var(--sp-4);
+  margin: var(--sp-5) 0;
 }
 
 .chart-card {
-  padding: 18px 20px;
+  padding: var(--sp-5) var(--sp-5);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--r-xl);
   background: var(--surface-card);
   min-width: 0; /* lets a grid child actually shrink instead of overflowing */
 }
@@ -1034,21 +1262,23 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
 }
 
 .chart-title {
   font-family: var(--heading);
-  font-size: 15px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
 
 .chart-subtitle {
-  margin-top: 4px;
-  font-size: 13px;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   color: var(--text-secondary);
   max-width: 60ch;
 }
@@ -1059,14 +1289,15 @@
 .chart-period {
   flex: none;
   align-self: flex-start;
-  padding: 3px 10px;
-  border-radius: 999px;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
   border: 1px solid var(--accent-border);
   background: var(--accent-bg);
   color: var(--text-primary);
-  font-size: 11px;
+  font-size: var(--fs-micro);
+  line-height: var(--lh-micro);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--ls-micro);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1076,10 +1307,11 @@
 }
 
 .chart-empty {
-  padding: 36px 12px;
+  padding: var(--sp-9) var(--sp-3);
   text-align: center;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
 }
 
 /* Custom donut legend — recharts' own sorts alphabetically, which reorders the
@@ -1088,7 +1320,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px 14px;
+  gap: var(--sp-2) var(--sp-4);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1097,17 +1329,18 @@
 .chart-legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: var(--sp-2);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--ls-label);
   color: var(--text-primary);
 }
 
 .chart-legend-swatch {
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   flex: none;
 }
 
@@ -1116,13 +1349,14 @@
 .chart-tooltip {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  padding: 7px 11px;
-  border-radius: 8px;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-lg);
   border: 1px solid var(--border-strong);
   background: var(--surface-raised);
   box-shadow: var(--shadow-md);
-  font-size: 13px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
 }
 
 .chart-tooltip-label {
@@ -1140,7 +1374,7 @@
 .chart-body .recharts-wrapper:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--r-lg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1159,10 +1393,10 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--sp-4);
   flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: var(--sp-6);
+  padding-bottom: var(--sp-4);
   border-bottom: 1px solid var(--border);
 }
 
@@ -1171,16 +1405,17 @@
 }
 
 .page-header-description {
-  margin-top: 6px;
+  margin-top: var(--sp-2);
   max-width: 68ch;
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
 }
 
 .page-header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-3);
   flex-wrap: wrap;
 }
 
@@ -1189,17 +1424,18 @@
    ========================================================================== */
 .data-state {
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
 
 .data-state-loading {
-  padding: 20px 0;
+  padding: var(--sp-5) 0;
 }
 
 .data-state-empty {
-  padding: 28px 20px;
+  padding: var(--sp-7) var(--sp-5);
   border: 1px dashed var(--border-strong);
-  border-radius: 12px;
+  border-radius: var(--r-xl);
   background: var(--surface-card);
   text-align: center;
 }
@@ -1211,13 +1447,14 @@
 }
 
 .data-state-hint {
-  margin-top: 6px;
-  font-size: 14px;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
   color: var(--text-muted);
 }
 
 .data-state-action {
-  margin-top: 12px;
+  margin-top: var(--sp-3);
 }
 
 /* ==========================================================================
@@ -1241,17 +1478,19 @@
 .history-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
 }
 
 .data-table th,
 .history-table th {
   text-align: left;
-  padding: 10px 12px;
+  padding: var(--sp-3) var(--sp-3);
   font-family: var(--heading);
-  font-size: 11px;
+  font-size: var(--fs-micro);
+  line-height: var(--lh-micro);
   font-weight: 600;
-  letter-spacing: 0.07em;
+  letter-spacing: var(--ls-micro);
   text-transform: uppercase;
   color: var(--text-muted);
   background: var(--surface-raised);
@@ -1261,25 +1500,80 @@
 
 .data-table th:first-child,
 .history-table th:first-child {
-  border-top-left-radius: 8px;
+  border-top-left-radius: var(--r-lg);
 }
 
 .data-table th:last-child,
 .history-table th:last-child {
-  border-top-right-radius: 8px;
+  border-top-right-radius: var(--r-lg);
 }
 
 .data-table td,
 .history-table td {
-  padding: 11px 12px;
+  padding: var(--sp-3) var(--sp-3);
   border-bottom: 1px solid var(--border);
   color: var(--text-secondary);
   vertical-align: top;
 }
 
+/* V1.2 UI pass. Three additions, all about making a long table scannable:
+
+   Zebra striping, at a very low alpha - enough that the eye can follow a row
+   across four columns without a ruler, not enough to read as two colours.
+
+   Tabular figures on every cell, so a column of risk scores, counts and
+   timestamps lines up digit under digit. Without it the proportional face
+   gives each digit its own width and a numeric column visibly ripples.
+
+   A slightly tighter row on a wide screen, because the previous padding was
+   tuned for a phone and left a desktop table looking half empty. */
+.data-table tbody td,
+.history-table tbody td {
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table tbody tr:nth-child(even) > td,
+.history-table tbody tr:nth-child(even) > td {
+  background: rgba(255, 255, 255, 0.018);
+}
+
+:root[data-theme='light'] .data-table tbody tr:nth-child(even) > td,
+:root[data-theme='light'] .history-table tbody tr:nth-child(even) > td {
+  background: rgba(11, 34, 51, 0.022);
+}
+
 .data-table tbody tr,
 .history-table tbody tr {
-  transition: background-color 0.2s ease;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+/* A button sitting in a table row is a per-row secondary action, not the
+   page's primary one. At full button size and a solid red fill, ten "Disable"
+   buttons were the loudest thing on the admin dashboard - louder than the
+   figures the page exists to show. Compact, and outlined until hovered, so
+   the row reads as data with an action available rather than as a wall of
+   buttons. The reviewer queue's Reject stays solid: there it IS the primary
+   action, and it is not in a table. */
+.data-table .btn,
+.history-table .btn {
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+.data-table .btn-danger,
+.history-table .btn-danger {
+  background-image: none;
+  background-color: transparent;
+  border-color: var(--decision-block-border);
+  color: var(--decision-block);
+}
+
+.data-table .btn-danger:hover:not(:disabled),
+.history-table .btn-danger:hover:not(:disabled) {
+  background-image: var(--gradient-danger);
+  border-color: transparent;
+  color: var(--on-accent);
 }
 
 .data-table tbody tr:hover,
@@ -1301,19 +1595,21 @@
 }
 
 .history-detail {
-  padding: 8px 4px;
+  padding: var(--sp-2) var(--sp-1);
 }
 
 .pagination {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 16px;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
 }
 
 .pagination-label {
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================================================
@@ -1324,12 +1620,13 @@
 .alert {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 10px;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-lg);
   border: 1px solid var(--border);
   background: var(--surface-raised);
-  font-size: 14px;
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
   color: var(--text-secondary);
 }
 
@@ -1341,7 +1638,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  font-size: 12px;
+  font-size: var(--fs-label);
   font-weight: 700;
   line-height: 1;
   color: var(--on-accent);
@@ -1355,7 +1652,7 @@
   font-family: var(--heading);
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 2px;
+  margin-bottom: var(--sp-1);
 }
 
 .alert-success {
@@ -1397,11 +1694,12 @@
 /* Banners are the page-level form of the same thing (auth pages, save
    confirmations). 22 call sites, so the class names stay as they are. */
 .banner {
-  padding: 11px 14px;
-  border-radius: 10px;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-lg);
   border: 1px solid var(--border);
-  font-size: 14px;
-  margin-bottom: 16px;
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
+  margin-bottom: var(--sp-4);
   color: var(--text-secondary);
 }
 
@@ -1421,8 +1719,8 @@
    app, so it gets the heaviest treatment: full-height accent rule, raised
    weight, block-red throughout. */
 .alert-block {
-  padding: 14px 16px;
-  border-radius: 10px;
+  padding: var(--sp-4) var(--sp-4);
+  border-radius: var(--r-lg);
   background: var(--decision-block-bg);
   border: 1px solid var(--decision-block-border);
   border-left: 4px solid var(--decision-block);
@@ -1430,13 +1728,13 @@
 }
 
 .alert-review {
-  padding: 14px 16px;
-  border-radius: 10px;
+  padding: var(--sp-4) var(--sp-4);
+  border-radius: var(--r-lg);
   background: var(--decision-confirm-bg);
   border: 1px solid var(--decision-confirm-border);
   border-left: 4px solid var(--decision-confirm);
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin-bottom: var(--sp-4);
 }
 
 .alert-review p {
@@ -1444,7 +1742,53 @@
 }
 
 .alert-review p + p {
-  margin-top: 6px;
+  margin-top: var(--sp-2);
+}
+
+/* ==========================================================================
+   ENTRANCE — V1.2 UI pass
+   A short fade-and-rise on the major blocks of a page, with a small stagger, so
+   navigating somewhere reads as the page arriving rather than as a hard cut.
+
+   Written as `prefers-reduced-motion: no-preference` rather than as a plain rule
+   with a `reduce` override, and that direction is deliberate: the animation's
+   `both` fill holds the element at `opacity: 0` before it starts, so ANY failure
+   to run it would leave the page blank. Scoped this way, the default state - and
+   the state under `reduce`, and in any engine that does not match the query - is
+   simply "visible, no animation". A stagger is not worth a blank page.
+
+   The stagger stops at the fourth child on purpose: beyond ~200ms of accumulated
+   delay the last panel reads as lagging rather than as arriving with the rest.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .page-content > *,
+  .auth-split > * {
+    animation: reveal-up var(--dur-slow) var(--ease) both;
+  }
+
+  .page-content > *:nth-child(2),
+  .auth-split > *:nth-child(2) {
+    animation-delay: 60ms;
+  }
+
+  .page-content > *:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  .page-content > *:nth-child(n + 4) {
+    animation-delay: 180ms;
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ==========================================================================
@@ -1453,6 +1797,7 @@
    this file is neutralised here and replaced with a colour, border or
    shadow change so the affordance survives.
    ========================================================================== */
+
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .btn-link,
@@ -1460,11 +1805,11 @@
   .navbar-links a,
   .navbar-links a::after,
   .card,
-  .card-curtain::before,
-  .card-curtain::after,
+  .panel-hover,
   .stat-card,
+  .chart-card,
+  .admin-section,
   .stat-card::before,
-  .stat-card::after,
   .data-table tbody tr,
   .history-table tbody tr,
   .form-field input,
@@ -1486,23 +1831,34 @@
     transform: none;
   }
 
-  /* The curtain stays shut and the tilt is dropped. Both cards keep their
-     border/shadow hover response, so hover is still visibly acknowledged —
-     and because the closed curtain is --surface-raised, the resting
-     appearance is identical either way. */
-  .card-lift:hover,
-  .card-tilt:hover,
-  .stat-card:hover {
+  /* Logout keeps its full colour response; only the arrow's nudge and the
+     press-scale are dropped. */
+  .navbar-logout:active {
     transform: none;
-    box-shadow: var(--shadow-md);
+  }
+
+  .navbar-logout:hover .navbar-logout-icon {
+    transform: none;
+  }
+
+  /* The lift is dropped and the specular sweep never runs, but the glow and the
+     border change stay, so hover is still unmistakably acknowledged — the
+     affordance never depends on something moving. */
+  .panel-hover:hover,
+  .stat-card:hover,
+  .chart-card:hover,
+  .admin-section:hover {
+    transform: none;
+    box-shadow: var(--shadow-glow);
     border-color: var(--accent-border);
   }
 
-  .card-curtain:hover::before,
-  .card-curtain:hover::after,
-  .stat-card:hover::before,
-  .stat-card:hover::after {
-    transform: none;
+  .panel-hover:hover::after,
+  .stat-card:hover::after,
+  .chart-card:hover::after,
+  .admin-section:hover::after {
+    opacity: 0;
+    animation: none;
   }
 
   .form-field input:focus,
@@ -1519,5 +1875,15 @@
      always accompanied by text, so the meaning does not rest on the motion. */
   .spinner {
     animation-duration: 2s;
+  }
+
+  /* Belt and braces: the entrance above is already scoped to
+     `no-preference`, so it never runs here. This restates the resting state in
+     case that scoping is ever loosened. */
+  .page-content > *,
+  .auth-split > * {
+    opacity: 1;
+    transform: none;
+    animation: none;
   }
 }
