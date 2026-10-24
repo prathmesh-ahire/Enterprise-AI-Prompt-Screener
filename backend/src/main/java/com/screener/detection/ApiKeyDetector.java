@@ -68,7 +68,25 @@ public class ApiKeyDetector implements Detector {
 
     /** The whole trimmed token must look like key material — no slashes, colons or spaces. */
     private static final Pattern KEY_SHAPED = Pattern.compile("[A-Za-z0-9_\\-.]{16,}");
+    // Post-54 bugfix. KEY_SHAPED's charset has no '/' or '+', so base64 key material was
+    // unreachable whenever those characters fell inside it - and they are two of the 64
+    // base64 characters. The headline miss was an AWS secret access key: 40 base64
+    // characters, which "aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    // split into 13/7/18-character fragments, none of which reached the 16-character bar,
+    // so the prompt screened ALLOW with no findings at all and the secret was forwarded.
+    //
+    // Simply adding '/' and '+' to KEY_SHAPED was NOT safe: it would also admit URLs and
+    // file paths, and those clear the entropy bar comfortably (measured: an API doc URL
+    // 4.11 bits/char, a log path 3.87, against 4.66 for the AWS key above and a 3.5
+    // threshold), so "the auth token endpoint is api.example.com/v1/users/profile" would
+    // have become a false-positive BLOCK. Entropy cannot separate these; character-class
+    // composition can. Hence a SEPARATE shape with its own extra bars, applied only to
+    // tokens that actually carry a '/' or '+' - every token without one still goes through
+    // KEY_SHAPED on exactly the path it did before, so no existing behaviour moves.
+    private static final Pattern BASE64_SHAPED = Pattern.compile("[A-Za-z0-9_.+/-]{20,}={0,2}");
 
+    /** Most '/' characters a base64 candidate may carry before it reads as a path. */
+    private static final int MAX_BASE64_SLASHES = 3;
     private static final Pattern LEADING_NOISE = Pattern.compile("^[(\"'`\\[=:]+");
     private static final Pattern TRAILING_NOISE = Pattern.compile("[)\"'`\\].,;:!?]+$");
 
@@ -182,9 +200,56 @@ public class ApiKeyDetector implements Detector {
             raw = raw.substring(0, raw.length() - tail.group().length());
         }
 
-        if (end > start && KEY_SHAPED.matcher(raw).matches()) {
+        if (end > start && (KEY_SHAPED.matcher(raw).matches() || base64KeyShaped(raw))) {
             addCandidate(candidates, seenSpans, start, end, raw);
         }
+    }
+
+    /**
+     * Whether a token carrying '/' or '+' reads as base64 key material rather than as a
+     * URL or a file path. Only such tokens reach here; anything {@link #KEY_SHAPED} already
+     * accepted is decided exactly as it was before.
+     *
+     * <p>The discriminator is character-class composition, not entropy. Random base64 of
+     * this length practically always carries all three of upper case, lower case and a
+     * digit, whereas a URL or a path is overwhelmingly lower case
+     * ("api.example.com/v1/users/profile", "/var/log/application/output.log") - one has to
+     * be deliberately camel-cased AND carry a digit to survive, which the slash cap then
+     * narrows further. A leading '/' (absolute path) and a "//" (URL remainder) are
+     * rejected outright. A token with a scheme cannot reach here at all, since ':' is
+     * outside the charset.
+     *
+     * <p>Known residual: a mixed-case path with a digit and at most three segments, e.g.
+     * "S3/Bucket1/MyFolder/Data", still passes. Accepted deliberately - tightening further
+     * starts costing real keys, and that is a shape people write rarely.
+     */
+    private boolean base64KeyShaped(String raw) {
+        // Neither character present means this is KEY_SHAPED's business, not ours.
+        if (raw.indexOf('/') < 0 && raw.indexOf('+') < 0) {
+            return false;
+        }
+        if (!BASE64_SHAPED.matcher(raw).matches()) {
+            return false;
+        }
+        if (raw.startsWith("/") || raw.contains("//")) {
+            return false;
+        }
+        if (raw.chars().filter(c -> c == '/').count() > MAX_BASE64_SLASHES) {
+            return false;
+        }
+        boolean upper = false;
+        boolean lower = false;
+        boolean digit = false;
+        for (char c : raw.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                upper = true;
+            } else if (Character.isLowerCase(c)) {
+                lower = true;
+            } else if (Character.isDigit(c)) {
+                digit = true;
+            }
+        }
+        return upper && lower && digit;
     }
 
     private void addCandidate(List<Candidate> candidates, Set<Long> seenSpans,

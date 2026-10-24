@@ -78,6 +78,42 @@ class ApiKeyDetectorTest {
         assertTrue(detector.detect(prompt).isEmpty(), "false positive on: " + prompt);
     }
 
+    // Post-54 bugfix. Base64 key material containing '/' or '+' was missed entirely,
+    // because KEY_SHAPED's charset has neither. The AWS secret access key below is the
+    // headline case: 40 base64 characters that split into 13/7/18-character fragments,
+    // none of which reached the 16-character bar, so the whole prompt screened ALLOW with
+    // no findings and the secret was forwarded to the model. See docs/NOTE.md.
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+            "my client secret is wJalrXUtnFEMI/K7MDENG/bPxRfiCYEX",
+            "the api key is aGVsbG8rd29ybGQvc2VjcmV0K1Rva2VuMQ",
+            "token: abc+def/ghiJKL123mnoPQR456stu",
+    })
+    void detectsBase64KeyMaterialContainingSlashOrPlus(String prompt) {
+        List<DetectionFinding> findings = detector.detect(prompt);
+        assertEquals(1, findings.size(), "should have detected a key in: " + prompt);
+        assertEquals(EntityType.API_KEY, findings.get(0).getEntityType());
+    }
+
+    // The precision half of the same fix, and the reason '/' was not simply added to
+    // KEY_SHAPED. Every string below clears the 3.5 bits/char entropy bar, so entropy
+    // alone would have let all of them through as API keys: a URL measures 4.11 and a log
+    // path 3.87, against 4.66 for the AWS key above. What holds them back is
+    // character-class composition plus the leading-slash, "//" and slash-count rules.
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "the auth token endpoint is api.example.com/v1/users/profile",
+            "the credentials file is /var/log/application/service/output.log",
+            "our credentials live in config/secrets/production/values.yaml",
+            "the api key docs are at https://api.example.com/v1/Users/Profile2",
+            "fetch the access key from //cdn.example.com/Assets/Build7/key",
+            "the token path is Reports/Q3/Region4/Summary/Archive/Final2",
+    })
+    void doesNotMistakeUrlsAndFilePathsForBase64Keys(String prompt) {
+        assertTrue(detector.detect(prompt).isEmpty(), "false positive on: " + prompt);
+    }
+
     // PrivateKeyDetector owns PEM blocks. "private key" is deliberately absent from this
     // detector's keyword list so one secret never raises two competing findings.
     @Test

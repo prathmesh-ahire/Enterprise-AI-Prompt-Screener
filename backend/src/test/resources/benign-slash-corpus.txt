@@ -1,0 +1,208 @@
+# Benign corpus for the post-54 ApiKeyDetector base64 widening (docs/NOTE.md).
+# Every line is harmless and must produce ZERO API_KEY findings. Lines deliberately
+# pair an ApiKeyDetector keyword with a '/'- or '+'-bearing token, because that is the
+# only combination the widening can fire on. Kept in the repo on purpose: the 12,000-row
+# corpus that validated earlier detector changes was deleted after use, which later left
+# no safe way to confirm a PhoneDetector widening. Not repeating that.
+Where do I send the api key for https://api.example.com/v1/users/profile ?
+Where do I send the api_key for https://api.stripe.com/v2/orders/list ?
+Where do I send the access key for https://docs.github.com/oauth2/token ?
+Where do I send the secret key for https://login.microsoftonline.com/docs/reference/keys ?
+Where do I send the client secret for https://gateway.internal.corp/v1/accounts/settings ?
+Where do I send the credentials for https://api.openai.com/api/v3/projects ?
+Where do I send the token for https://service.acme.io/health/status ?
+Where do I send the bearer token for https://auth.company.net/v1/billing/invoices ?
+Where do I send the auth token for https://api.example.com/docs/guides/authentication ?
+Where do I send the secret for https://api.stripe.com/v2/sessions/current ?
+The secret key is documented at http://docs.github.com/v1/users/profile in the developer portal.
+The client secret is documented at http://login.microsoftonline.com/v2/orders/list in the developer portal.
+The credentials is documented at http://gateway.internal.corp/oauth2/token in the developer portal.
+The token is documented at http://api.openai.com/docs/reference/keys in the developer portal.
+The bearer token is documented at http://service.acme.io/v1/accounts/settings in the developer portal.
+The auth token is documented at http://auth.company.net/api/v3/projects in the developer portal.
+The secret is documented at http://docs.github.com/health/status in the developer portal.
+The authentication is documented at http://login.microsoftonline.com/v1/billing/invoices in the developer portal.
+The apikey is documented at http://gateway.internal.corp/docs/guides/authentication in the developer portal.
+The secret key is documented at http://api.openai.com/v2/sessions/current in the developer portal.
+Our api key endpoint is api.example.com/v1/users/profile behind the load balancer.
+Our api_key endpoint is api.stripe.com/v2/orders/list behind the load balancer.
+Our access key endpoint is docs.github.com/oauth2/token behind the load balancer.
+Our secret key endpoint is login.microsoftonline.com/docs/reference/keys behind the load balancer.
+Our client secret endpoint is gateway.internal.corp/v1/accounts/settings behind the load balancer.
+Our credentials endpoint is api.openai.com/api/v3/projects behind the load balancer.
+Our token endpoint is service.acme.io/health/status behind the load balancer.
+Our bearer token endpoint is auth.company.net/v1/billing/invoices behind the load balancer.
+Our auth token endpoint is api.example.com/docs/guides/authentication behind the load balancer.
+Our secret endpoint is api.stripe.com/v2/sessions/current behind the load balancer.
+Call auth.company.net/v1/users/profile first, then refresh the apikey.
+Call service.acme.io/v2/orders/list first, then refresh the authentication.
+Call api.openai.com/oauth2/token first, then refresh the secret.
+Call gateway.internal.corp/docs/reference/keys first, then refresh the auth token.
+Call login.microsoftonline.com/v1/accounts/settings first, then refresh the bearer token.
+Call docs.github.com/api/v3/projects first, then refresh the token.
+Call api.stripe.com/health/status first, then refresh the credentials.
+Call api.example.com/v1/billing/invoices first, then refresh the client secret.
+Call auth.company.net/docs/guides/authentication first, then refresh the secret key.
+Call service.acme.io/v2/sessions/current first, then refresh the access key.
+The api key is read from /var/log/application/output.log at boot.
+The api_key is read from /etc/nginx/conf.d/default.conf at boot.
+The access key is read from /home/deploy/releases/current/config.yml at boot.
+The secret key is read from /usr/local/share/certs/ca.pem at boot.
+The client secret is read from /opt/app/shared/config/database.yml at boot.
+The credentials is read from /var/lib/docker/volumes/data at boot.
+The token is read from /srv/www/public/assets/main.css at boot.
+The bearer token is read from /mnt/backups/daily/archive.tar.gz at boot.
+The auth token is read from /var/log/application/output.log at boot.
+The secret is read from /etc/nginx/conf.d/default.conf at boot.
+The authentication is read from /home/deploy/releases/current/config.yml at boot.
+The apikey is read from /usr/local/share/certs/ca.pem at boot.
+The api key is read from /opt/app/shared/config/database.yml at boot.
+The api_key is read from /var/lib/docker/volumes/data at boot.
+The access key is read from /srv/www/public/assets/main.css at boot.
+The secret key is read from /mnt/backups/daily/archive.tar.gz at boot.
+Check /var/log/application/output.log to see whether the credentials loaded correctly.
+Check /etc/nginx/conf.d/default.conf to see whether the token loaded correctly.
+Check /home/deploy/releases/current/config.yml to see whether the bearer token loaded correctly.
+Check /usr/local/share/certs/ca.pem to see whether the auth token loaded correctly.
+Check /opt/app/shared/config/database.yml to see whether the secret loaded correctly.
+Check /var/lib/docker/volumes/data to see whether the authentication loaded correctly.
+Check /srv/www/public/assets/main.css to see whether the apikey loaded correctly.
+Check /mnt/backups/daily/archive.tar.gz to see whether the credentials loaded correctly.
+Check /var/log/application/output.log to see whether the token loaded correctly.
+Check /etc/nginx/conf.d/default.conf to see whether the bearer token loaded correctly.
+Check /home/deploy/releases/current/config.yml to see whether the auth token loaded correctly.
+Check /usr/local/share/certs/ca.pem to see whether the secret loaded correctly.
+Check /opt/app/shared/config/database.yml to see whether the authentication loaded correctly.
+Check /var/lib/docker/volumes/data to see whether the apikey loaded correctly.
+Check /srv/www/public/assets/main.css to see whether the credentials loaded correctly.
+Check /mnt/backups/daily/archive.tar.gz to see whether the token loaded correctly.
+We keep the api key out of config/secrets/production/values.yaml on purpose.
+We keep the api_key out of src/main/resources/application.yml on purpose.
+We keep the access key out of app/services/auth/handler.js on purpose.
+We keep the secret key out of docs/api/reference/endpoints.md on purpose.
+We keep the client secret out of terraform/modules/network/main.tf on purpose.
+We keep the credentials out of scripts/deploy/release/run.sh on purpose.
+We keep the token out of frontend/src/components/Button.tsx on purpose.
+We keep the bearer token out of backend/src/main/java/App.java on purpose.
+We keep the auth token out of config/secrets/production/values.yaml on purpose.
+We keep the secret out of src/main/resources/application.yml on purpose.
+We keep the authentication out of app/services/auth/handler.js on purpose.
+We keep the apikey out of docs/api/reference/endpoints.md on purpose.
+We keep the api key out of terraform/modules/network/main.tf on purpose.
+We keep the api_key out of scripts/deploy/release/run.sh on purpose.
+We keep the access key out of frontend/src/components/Button.tsx on purpose.
+We keep the secret key out of backend/src/main/java/App.java on purpose.
+Move the access key lookup into config/secrets/production/values.yaml during the refactor.
+Move the secret key lookup into src/main/resources/application.yml during the refactor.
+Move the client secret lookup into app/services/auth/handler.js during the refactor.
+Move the credentials lookup into docs/api/reference/endpoints.md during the refactor.
+Move the token lookup into terraform/modules/network/main.tf during the refactor.
+Move the bearer token lookup into scripts/deploy/release/run.sh during the refactor.
+Move the auth token lookup into frontend/src/components/Button.tsx during the refactor.
+Move the secret lookup into backend/src/main/java/App.java during the refactor.
+Move the authentication lookup into config/secrets/production/values.yaml during the refactor.
+Move the apikey lookup into src/main/resources/application.yml during the refactor.
+Move the access key lookup into app/services/auth/handler.js during the refactor.
+Move the secret key lookup into docs/api/reference/endpoints.md during the refactor.
+Move the client secret lookup into terraform/modules/network/main.tf during the refactor.
+Move the credentials lookup into scripts/deploy/release/run.sh during the refactor.
+Move the token lookup into frontend/src/components/Button.tsx during the refactor.
+Move the bearer token lookup into backend/src/main/java/App.java during the refactor.
+The api key summary lives in Reports/Q3/Region4/Summary/Archive/Final2 on the share drive.
+The api_key summary lives in Builds/Release7/Artifacts/Output/Bundle3 on the share drive.
+The access key summary lives in Docs/Section2/Chapter4/Appendix/NotesV2 on the share drive.
+The secret key summary lives in Data/Year2026/Month10/Day09/Export1 on the share drive.
+The client secret summary lives in Reports/Q3/Region4/Summary/Archive/Final2 on the share drive.
+The credentials summary lives in Builds/Release7/Artifacts/Output/Bundle3 on the share drive.
+The token summary lives in Docs/Section2/Chapter4/Appendix/NotesV2 on the share drive.
+The bearer token summary lives in Data/Year2026/Month10/Day09/Export1 on the share drive.
+The auth token summary lives in Reports/Q3/Region4/Summary/Archive/Final2 on the share drive.
+The secret summary lives in Builds/Release7/Artifacts/Output/Bundle3 on the share drive.
+The authentication summary lives in Docs/Section2/Chapter4/Appendix/NotesV2 on the share drive.
+The apikey summary lives in Data/Year2026/Month10/Day09/Export1 on the share drive.
+Fetch the api key from //api.example.com/v1/users/profile if the CDN is warm.
+Fetch the api_key from //api.stripe.com/v2/orders/list if the CDN is warm.
+Fetch the access key from //docs.github.com/oauth2/token if the CDN is warm.
+Fetch the secret key from //login.microsoftonline.com/docs/reference/keys if the CDN is warm.
+Fetch the client secret from //gateway.internal.corp/v1/accounts/settings if the CDN is warm.
+Fetch the credentials from //api.openai.com/api/v3/projects if the CDN is warm.
+The api key rotation runs 24/7 without manual steps.
+The api_key rotation runs 12/31/2026 without manual steps.
+The access key rotation runs and/or without manual steps.
+The secret key rotation runs input/output without manual steps.
+The client secret rotation runs read/write without manual steps.
+The credentials rotation runs TCP/IP without manual steps.
+The token rotation runs CI/CD without manual steps.
+The bearer token rotation runs HTTP/1.1 without manual steps.
+The auth token rotation runs UTF-8/ASCII without manual steps.
+The secret rotation runs km/h without manual steps.
+The authentication rotation runs 9/10 without manual steps.
+The apikey rotation runs 2026/10/09 without manual steps.
+The api key rotation runs A/B without manual steps.
+The api_key rotation runs yes/no without manual steps.
+The access key rotation runs GET/POST without manual steps.
+The secret key rotation runs client/server without manual steps.
+The client secret rotation runs 24/7 without manual steps.
+The credentials rotation runs 12/31/2026 without manual steps.
+The token rotation runs and/or without manual steps.
+The bearer token rotation runs input/output without manual steps.
+The auth token rotation runs read/write without manual steps.
+The secret rotation runs TCP/IP without manual steps.
+The authentication rotation runs CI/CD without manual steps.
+The apikey rotation runs HTTP/1.1 without manual steps.
+The api key rotation runs UTF-8/ASCII without manual steps.
+The api_key rotation runs km/h without manual steps.
+The access key rotation runs 9/10 without manual steps.
+The secret key rotation runs 2026/10/09 without manual steps.
+The client secret rotation runs A/B without manual steps.
+The credentials rotation runs yes/no without manual steps.
+The token rotation runs GET/POST without manual steps.
+The bearer token rotation runs client/server without manual steps.
+The api key placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the api key to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The api_key placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the api_key to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The access key placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the access key to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The secret key placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the secret key to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The client secret placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the client secret to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The credentials placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the credentials to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The token placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the token to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The bearer token placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the bearer token to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The auth token placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the auth token to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The secret placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the secret to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The authentication placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the authentication to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+The apikey placeholder is abcdefghijklmnop/qrstuvwxyzabcdef for now.
+Set the apikey to AAAAAAAAAAAAAAAA/BBBBBBBBBBBBBBBB in the template.
+What is a api key and why does the gateway need one?
+Please explain how api key rotation works in production.
+What is a api_key and why does the gateway need one?
+Please explain how api_key rotation works in production.
+What is a access key and why does the gateway need one?
+Please explain how access key rotation works in production.
+What is a secret key and why does the gateway need one?
+Please explain how secret key rotation works in production.
+What is a client secret and why does the gateway need one?
+Please explain how client secret rotation works in production.
+What is a credentials and why does the gateway need one?
+Please explain how credentials rotation works in production.
+What is a token and why does the gateway need one?
+Please explain how token rotation works in production.
+What is a bearer token and why does the gateway need one?
+Please explain how bearer token rotation works in production.
+What is a auth token and why does the gateway need one?
+Please explain how auth token rotation works in production.
+What is a secret and why does the gateway need one?
+Please explain how secret rotation works in production.
+What is a authentication and why does the gateway need one?
+Please explain how authentication rotation works in production.
+What is a apikey and why does the gateway need one?
+Please explain how apikey rotation works in production.
