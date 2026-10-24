@@ -14,6 +14,9 @@ public record ReviewDetailsDto(
         List<String> entityTypes,
         Double riskScore,
         List<String> matchedSignals,
-        String explanation
+        String explanation,
+        // V2 55.5: why it reached the queue - usually the injection override, not the score.
+        // Null for prompts screened before V2.
+        ScoreBreakdownDto scoreBreakdown
 ) {
 }

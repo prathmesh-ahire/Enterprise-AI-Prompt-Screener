@@ -2,6 +2,7 @@ package com.screener.service;
 
 import com.screener.dto.PromptResponseDto;
 import com.screener.dto.ReviewDetailsDto;
+import com.screener.dto.ScoreBreakdownDto;
 import com.screener.dto.ReviewQueueItemDto;
 import com.screener.model.PromptRequest;
 import com.screener.model.PromptStatus;
@@ -75,7 +76,8 @@ public class ReviewService {
                 .toList();
 
         return new ReviewDetailsDto(requestId, reviewerVisibleText(promptRequest), entityTypes,
-                decision.getRiskScore(), matchedSignals, decision.getExplanation());
+                decision.getRiskScore(), matchedSignals, decision.getExplanation(),
+                ScoreBreakdownDto.from(decision));
     }
 
     public PromptResponseDto decide(UUID requestId, Long reviewerId, ReviewAction action, String reason) {
