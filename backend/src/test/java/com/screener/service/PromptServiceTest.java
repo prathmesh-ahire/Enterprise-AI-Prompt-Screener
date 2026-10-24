@@ -9,9 +9,11 @@ import com.screener.detection.RiskSubScoreCalculator;
 import com.screener.detection.RiskSubScores;
 import com.screener.dto.PromptHistoryItemDto;
 import com.screener.dto.PromptResponseDto;
+import com.screener.dto.ScoreBreakdownDto;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
+import com.screener.model.OverrideRule;
 import com.screener.model.PromptRequest;
 import com.screener.model.PromptStatus;
 import com.screener.model.ScreeningDecision;
@@ -38,6 +40,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -159,6 +163,88 @@ class PromptServiceTest {
         assertEquals(30.0, saved.getRiskScore());
         assertEquals("masked explanation", saved.getExplanation());
         assertEquals(PromptService.DEFAULT_POLICY_VERSION, saved.getPolicyVersion());
+    }
+
+    // V2 55.7: the breakdown is stored from the sub-scores and the DecisionResult the
+    // pipeline already had, and the same values come back on the response.
+    @Test
+    void fullPipelinePersistsAndReturnsTheScoreBreakdown() {
+        DetectionFinding apiKey = finding(EntityType.API_KEY);
+        RiskSubScores subScores = new RiskSubScores(0.5, 0.0, 0.8, 0.31, 0.0);
+        when(detectionEngine.detectAll(anyString(), any())).thenReturn(List.of(apiKey));
+        when(riskSubScoreCalculator.compute(any(), any(), anyString(),
+                org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.anyInt()))
+                .thenReturn(subScores);
+        when(maskingService.getMaskedPreview(anyString(), any())).thenReturn("key [SECRET_REMOVED]");
+        when(riskScorer.score(subScores)).thenReturn(36.6);
+        when(policyDecisionEngine.decide(eq(36.6), any(), any(), any()))
+                .thenReturn(new DecisionResult(Decision.BLOCK, 36.6, "blocked", "not sent",
+                        Decision.MASK, List.of(OverrideRule.CRITICAL_SECRET)));
+
+        PromptResponseDto result = promptService.processPrompt("key sk-UniqueSecretValue123", USER_ID);
+
+        ArgumentCaptor<ScreeningDecision> captor = ArgumentCaptor.forClass(ScreeningDecision.class);
+        verify(screeningDecisionRepository).save(captor.capture());
+        ScreeningDecision saved = captor.getValue();
+        assertEquals(0.5, saved.getSensitiveDataScore());
+        assertEquals(0.0, saved.getInjectionScore());
+        assertEquals(0.8, saved.getSecretCriticalityScore());
+        assertEquals(0.31, saved.getPolicyContextScore());
+        assertEquals(0.0, saved.getObfuscationScore());
+        assertEquals(Decision.MASK, saved.getScoreBand());
+        assertEquals("CRITICAL_SECRET", saved.getAppliedOverrides());
+
+        ScoreBreakdownDto breakdown = result.scoreBreakdown();
+        assertNotNull(breakdown);
+        assertEquals("MASK", breakdown.scoreBand());
+        assertEquals(List.of("CRITICAL_SECRET"),
+                breakdown.appliedOverrides().stream().map(ScoreBreakdownDto.AppliedOverride::rule).toList());
+        // Numbers and rule names only: nothing from the prompt reaches the breakdown.
+        assertFalse(breakdown.toString().contains("UniqueSecretValue"));
+        assertFalse(breakdown.toString().contains("[SECRET_REMOVED]"));
+    }
+
+    @Test
+    void noOverrideIsStoredAsAnEmptyStringNotNull() {
+        when(detectionEngine.detectAll(anyString(), any())).thenReturn(List.of());
+        when(policyDecisionEngine.decide(eq(0.0), any(), any(), any()))
+                .thenReturn(new DecisionResult(Decision.ALLOW, 0.0, "safe", "sent"));
+        when(aiGatewayService.send("Hello there")).thenReturn("hi");
+        when(responseSafetyChecker.check(eq("hi"), anyString(), any(), any(), eq(USER_ID), eq("ALLOW")))
+                .thenReturn(new SafetyCheckResult(true, "hi"));
+
+        PromptResponseDto result = promptService.processPrompt("Hello there", USER_ID);
+
+        ArgumentCaptor<ScreeningDecision> captor = ArgumentCaptor.forClass(ScreeningDecision.class);
+        verify(screeningDecisionRepository).save(captor.capture());
+        assertEquals("", captor.getValue().getAppliedOverrides());
+        assertEquals(Decision.ALLOW, captor.getValue().getScoreBand());
+        assertEquals(List.of(), result.scoreBreakdown().appliedOverrides());
+    }
+
+    // A decision recorded before V2 has null breakdown columns - "not recorded", which must
+    // come back as a null breakdown, not an exception and not a breakdown of zeros.
+    @Test
+    void getMyPromptDetailsReturnsANullBreakdownForADecisionRecordedBeforeV2() {
+        UUID requestId = UUID.randomUUID();
+        PromptRequest promptRequest = new PromptRequest();
+        promptRequest.setRequestId(requestId);
+        promptRequest.setUserId(USER_ID);
+        promptRequest.setStatus(PromptStatus.COMPLETED);
+
+        ScreeningDecision legacy = new ScreeningDecision();
+        legacy.setRequestId(requestId);
+        legacy.setDecision(Decision.MASK);
+        legacy.setRiskScore(30.0);
+
+        when(promptRequestRepository.findByRequestId(requestId)).thenReturn(Optional.of(promptRequest));
+        when(screeningDecisionRepository.findByRequestId(requestId)).thenReturn(Optional.of(legacy));
+
+        PromptResponseDto result = promptService.getMyPromptDetails(requestId, USER_ID);
+
+        assertEquals("MASK", result.decision());
+        assertEquals(30.0, result.riskScore());
+        assertNull(result.scoreBreakdown());
     }
 
     @Test

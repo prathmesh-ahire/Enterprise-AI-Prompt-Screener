@@ -3,6 +3,7 @@ package com.screener.detection;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
+import com.screener.model.OverrideRule;
 import com.screener.model.SignalType;
 import com.screener.repository.SystemConfigRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -147,6 +149,100 @@ class PolicyDecisionEngineTest {
 
         assertEquals(59.75, result.riskScore(), 0.0001);
         assertEquals(Decision.BLOCK, result.decision());
+    }
+
+    // ---------------------------------------------------------------------
+    // V2 55.7: scoreBand and appliedOverrides record what happened - for each rule, one
+    // case where it raises the decision and one where it matches but the decision is
+    // already at or above its floor, so it is not "applied".
+    // ---------------------------------------------------------------------
+
+    @Test
+    void criticalSecretRuleIsRecordedWhenItRaisesTheDecision() {
+        DecisionResult result = engine.decide(0.0, List.of(finding(EntityType.API_KEY)), List.of());
+
+        assertEquals(Decision.ALLOW, result.scoreBand());
+        assertEquals(Decision.BLOCK, result.decision());
+        // DETECTED_ENTITY also matched, but BLOCK was already above its MASK floor.
+        assertEquals(List.of(OverrideRule.CRITICAL_SECRET), result.appliedOverrides());
+    }
+
+    @Test
+    void criticalSecretRuleIsNotRecordedWhenTheScoreAlreadyBlocks() {
+        DecisionResult result = engine.decide(80.0, List.of(finding(EntityType.PRIVATE_KEY)), List.of());
+
+        assertEquals(Decision.BLOCK, result.scoreBand());
+        assertEquals(Decision.BLOCK, result.decision());
+        assertEquals(List.of(), result.appliedOverrides());
+    }
+
+    @Test
+    void injectionRuleIsRecordedWhenItRaisesTheDecision() {
+        DecisionResult result = engine.decide(13.0, List.of(), List.of(signal(SignalType.INSTRUCTION_OVERRIDE)));
+
+        assertEquals(Decision.ALLOW, result.scoreBand());
+        assertEquals(Decision.REVIEW, result.decision());
+        assertEquals(List.of(OverrideRule.INJECTION_SIGNAL), result.appliedOverrides());
+    }
+
+    @Test
+    void injectionRuleIsNotRecordedWhenTheScoreIsAlreadyAtReview() {
+        DecisionResult result = engine.decide(70.0, List.of(), List.of(signal(SignalType.POLICY_BYPASS)));
+
+        assertEquals(Decision.REVIEW, result.scoreBand());
+        assertEquals(Decision.REVIEW, result.decision());
+        assertEquals(List.of(), result.appliedOverrides());
+    }
+
+    @Test
+    void detectedEntityRuleIsRecordedWhenItRaisesTheDecision() {
+        DecisionResult result = engine.decide(8.5, List.of(finding(EntityType.PERSONAL_EMAIL)), List.of());
+
+        assertEquals(Decision.ALLOW, result.scoreBand());
+        assertEquals(Decision.MASK, result.decision());
+        assertEquals(List.of(OverrideRule.DETECTED_ENTITY), result.appliedOverrides());
+    }
+
+    @Test
+    void detectedEntityRuleIsNotRecordedWhenTheScoreIsAlreadyAtMask() {
+        DecisionResult result = engine.decide(30.0, List.of(finding(EntityType.PERSONAL_EMAIL)), List.of());
+
+        assertEquals(Decision.MASK, result.scoreBand());
+        assertEquals(Decision.MASK, result.decision());
+        assertEquals(List.of(), result.appliedOverrides());
+    }
+
+    @Test
+    void onlyTheRuleThatRaisedTheDecisionIsRecordedWhenSeveralMatch() {
+        // Injection raises ALLOW to REVIEW; the email then matches DETECTED_ENTITY, but
+        // REVIEW is already above MASK.
+        DecisionResult result = engine.decide(0.0, List.of(finding(EntityType.PERSONAL_EMAIL)),
+                List.of(signal(SignalType.INSTRUCTION_OVERRIDE)));
+
+        assertEquals(Decision.REVIEW, result.decision());
+        assertEquals(List.of(OverrideRule.INJECTION_SIGNAL), result.appliedOverrides());
+    }
+
+    @Test
+    void injectionRuleIsNotRecordedWhenTheSecretRuleAlreadyBlocked() {
+        DecisionResult result = engine.decide(0.0, List.of(finding(EntityType.API_KEY)),
+                List.of(signal(SignalType.INSTRUCTION_OVERRIDE)));
+
+        assertEquals(Decision.BLOCK, result.decision());
+        assertEquals(List.of(OverrideRule.CRITICAL_SECRET), result.appliedOverrides());
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {0, 24, 25, 49, 50, 64, 65, 74, 75, 100})
+    void scoreBandEqualsTheDecisionWhenNoOverrideApplies(double score) {
+        DecisionResult result = engine.decide(score, List.of(), List.of());
+
+        assertEquals(result.decision(), result.scoreBand());
+        assertEquals(List.of(), result.appliedOverrides());
+    }
+
+    private RiskSignalResult signal(SignalType type) {
+        return new RiskSignalResult("s1", type, "desc", 1.0, "ev");
     }
 
     private Decision decide(double score) {
