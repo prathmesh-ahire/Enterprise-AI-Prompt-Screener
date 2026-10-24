@@ -824,13 +824,19 @@
   color: var(--mask);
 }
 
-/* CONFIRM and REVIEW share this one, per the Phase 44 band decision. They
-   stay tellable apart because the badge prints the decision word itself —
-   colour is never the only signal (49.1). */
+/* CONFIRM's orange. REVIEW has its own cyan below (56A.4); before V2 the two
+   shared this band. The badge still prints the decision word, so colour is never
+   the only signal. */
 .badge-band-orange {
   background: var(--confirm-tint);
   border-color: color-mix(in srgb, var(--confirm) 45%, transparent);
   color: var(--confirm);
+}
+
+.badge-band-cyan {
+  background: var(--review-tint);
+  border-color: color-mix(in srgb, var(--review) 45%, transparent);
+  color: var(--review);
 }
 
 .badge-band-red {
@@ -1111,11 +1117,14 @@
   background: color-mix(in srgb, var(--mask) 5%, var(--surface-card));
 }
 
-/* CONFIRM and REVIEW share the orange band, per the Phase 44 decision. */
-.result-card-confirm,
-.result-card-review {
+.result-card-confirm {
   border-left-color: var(--confirm);
   background: color-mix(in srgb, var(--confirm) 5%, var(--surface-card));
+}
+
+.result-card-review {
+  border-left-color: var(--review);
+  background: color-mix(in srgb, var(--review) 5%, var(--surface-card));
 }
 
 .result-card-block {
@@ -1680,9 +1689,9 @@
 .alert-review {
   padding: var(--space-4) var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--confirm-tint);
-  border: 1px solid color-mix(in srgb, var(--confirm) 45%, transparent);
-  border-left: 4px solid var(--confirm);
+  background: var(--review-tint);
+  border: 1px solid color-mix(in srgb, var(--review) 45%, transparent);
+  border-left: 4px solid var(--review);
   color: var(--text-primary);
   margin-bottom: var(--space-4);
 }

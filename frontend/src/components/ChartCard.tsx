@@ -49,6 +49,7 @@ export function useChartTokens() {
       allow: t('--allow'),
       mask: t('--mask'),
       confirm: t('--confirm'),
+      review: t('--review'),
       block: t('--block'),
       critical: t('--sev-critical'),
       high: t('--sev-high'),

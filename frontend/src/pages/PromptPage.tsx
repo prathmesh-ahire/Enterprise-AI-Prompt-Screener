@@ -6,6 +6,7 @@ import { EntityChips, entityLabel } from '../components/EntityChips'
 import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
 import { decisionBadgeClass } from '../components/decisionBadge'
+import type { ScoreBreakdown } from '../api/types'
 
 const MAX_LENGTH = 2000
 
@@ -30,6 +31,7 @@ interface PromptResult {
   aiResponse: string | null
   riskScore: number | null
   entityTypes: string[]
+  scoreBreakdown: ScoreBreakdown | null
 }
 
 // todo.md Phase 26 (ALLOW/MASK+CONFIRM/BLOCK) + Phase 27 (REVIEW, CONFIRM's own
@@ -150,7 +152,7 @@ export function PromptPage() {
               still-pending state (MASK/CONFIRM's preview below, or REVIEW's alert above). */}
           {(awaitingConfirm || pendingReview) && (
             <>
-              <RiskScoreBar score={result.riskScore} />
+              <RiskScoreBar score={result.riskScore} band={result.scoreBreakdown?.scoreBand} decision={result.decision} />
               {result.explanation && <p className="explanation-text">{result.explanation}</p>}
               <EntityChips entityTypes={result.entityTypes} />
             </>

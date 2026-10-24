@@ -31,10 +31,10 @@ const ENTITY_TIER: Record<string, 'critical' | 'high' | 'medium'> = {
 export function RiskBandDonut({ data }: { data: RiskBandStat[] }) {
   const t = useChartTokens()
   // Coloured from the decision-band tokens, so a slice matches its badge colour
-  // everywhere else in the app. CONFIRM and REVIEW share the orange band by the Phase 44
-  // decision; they stay tellable apart because each slice is labelled with its own name.
+  // everywhere else in the app. REVIEW has its own cyan (56A.4); each slice is also
+  // labelled with its own name, so colour is never the only signal.
   const bandColor: Record<string, string> = {
-    ALLOW: t.allow, MASK: t.mask, CONFIRM: t.confirm, REVIEW: t.confirm, BLOCK: t.block,
+    ALLOW: t.allow, MASK: t.mask, CONFIRM: t.confirm, REVIEW: t.review, BLOCK: t.block,
   }
 
   const rows = BAND_ORDER

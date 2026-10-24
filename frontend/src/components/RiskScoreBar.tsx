@@ -1,18 +1,20 @@
-// todo.md Phase 27.4. Band cutoffs match PolicyDecisionEngine's own ALLOW/MASK/CONFIRM/
-// REVIEW/BLOCK bands (backend Phase 11.2.2) exactly - CONFIRM and REVIEW both fall in the
-// same 50-74 "orange" band here since this bar only has the 4 colours todo.md names, not
-// a 5th one to split them further.
-function bandFor(score: number): 'green' | 'yellow' | 'orange' | 'red' {
-  if (score < 25) return 'green'
-  if (score < 50) return 'yellow'
-  if (score < 75) return 'orange'
-  return 'red'
+// todo.md Phase 27.4, reworked in V2 56A.4 (design.md C11, F1). The fill is coloured from
+// the band the API returns (scoreBreakdown.scoreBand) - the live policy's band, so it stays
+// right after an admin changes the thresholds. A prompt screened before breakdowns were
+// stored has no band, so its bar takes the decision's colour instead. The UI never
+// computes a band from the score, and the app shows no fixed 25/50/65/75 notches.
+const BANDS = new Set(['ALLOW', 'MASK', 'CONFIRM', 'REVIEW', 'BLOCK'])
+
+interface RiskScoreBarProps {
+  score: number | null
+  band?: string | null
+  decision?: string | null
 }
 
-export function RiskScoreBar({ score }: { score: number | null }) {
+export function RiskScoreBar({ score, band, decision }: RiskScoreBarProps) {
   if (score === null) return null
   const clamped = Math.max(0, Math.min(100, score))
-  const band = bandFor(clamped)
+  const colourBand = [band, decision].find((b): b is string => !!b && BANDS.has(b))
   return (
     <div className="risk-score-bar-wrap">
       <div className="risk-score-label">
@@ -20,7 +22,10 @@ export function RiskScoreBar({ score }: { score: number | null }) {
         <span>{Math.round(clamped)} / 100</span>
       </div>
       <div className="risk-score-track">
-        <div className={`risk-score-fill risk-score-${band}`} style={{ width: `${clamped}%` }} />
+        <div
+          className={`risk-score-fill${colourBand ? ` risk-score-${colourBand.toLowerCase()}` : ''}`}
+          style={{ width: `${clamped}%` }}
+        />
       </div>
     </div>
   )

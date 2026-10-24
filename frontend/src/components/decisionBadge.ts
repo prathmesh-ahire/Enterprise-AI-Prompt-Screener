@@ -4,11 +4,11 @@
 // as "safe." Same 4-colour language as RiskScoreBar/EntityChips, reused as a mapping of a
 // different key (decision, not score). Shared by HistoryPage (Phase 28) and AdminPage's
 // per-user history view (Phase 30.5), so both colour decisions identically.
-const DECISION_BAND: Record<string, 'green' | 'yellow' | 'orange' | 'red'> = {
+const DECISION_BAND: Record<string, 'green' | 'yellow' | 'orange' | 'cyan' | 'red'> = {
   ALLOW: 'green',
   MASK: 'yellow',
   CONFIRM: 'orange',
-  REVIEW: 'orange',
+  REVIEW: 'cyan',
   BLOCK: 'red',
 }
 

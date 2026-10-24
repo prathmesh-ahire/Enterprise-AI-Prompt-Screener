@@ -5,6 +5,7 @@ import { EntityChips } from '../components/EntityChips'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
+import type { ScoreBreakdown } from '../api/types'
 
 interface QueueItem {
   requestId: string
@@ -22,6 +23,7 @@ interface ReviewDetails {
   riskScore: number | null
   matchedSignals: string[]
   explanation: string | null
+  scoreBreakdown: ScoreBreakdown | null
 }
 
 type ReviewAction = 'APPROVE' | 'REJECT' | 'REQUEST_CORRECTION' | 'FALSE_POSITIVE'
@@ -148,7 +150,12 @@ export function ReviewQueuePage() {
                       )}
                       {details[item.requestId] && (
                         <div className="history-detail">
-                          <RiskScoreBar score={details[item.requestId].riskScore} />
+                          {/* Everything in this queue was decided REVIEW, which is the F1 fallback colour. */}
+                          <RiskScoreBar
+                            score={details[item.requestId].riskScore}
+                            band={details[item.requestId].scoreBreakdown?.scoreBand}
+                            decision="REVIEW"
+                          />
                           {details[item.requestId].explanation && (
                             <p className="explanation-text">{details[item.requestId].explanation}</p>
                           )}
