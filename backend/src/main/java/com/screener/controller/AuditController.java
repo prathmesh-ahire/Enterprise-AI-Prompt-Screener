@@ -18,7 +18,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * todo.md Phase 17.4. {@code my-history} never accepts a target user id from the
@@ -40,18 +44,31 @@ public class AuditController {
                                                                     direction = Sort.Direction.DESC) Pageable pageable) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
-        return ResponseEntity.ok(auditEventRepository.findByUserId(user.getId(), pageable).map(this::toDto));
+        return ResponseEntity.ok(withUsernames(auditEventRepository.findByUserId(user.getId(), pageable)));
     }
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<AuditEventDto>> all(@PageableDefault(size = 20, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(auditEventRepository.findAll(pageable).map(this::toDto));
+        return ResponseEntity.ok(withUsernames(auditEventRepository.findAll(pageable)));
     }
 
-    private AuditEventDto toDto(AuditEvent event) {
-        return new AuditEventDto(event.getId(), event.getUserId(), event.getAction(),
+    // 55.6: one batched user lookup per page, never one query per row - same goal as 41.7's
+    // join for the repeated-violations panel. AuditEvent.userId is a plain Long, not a
+    // relationship, so the names are resolved here rather than fetched with the events.
+    private Page<AuditEventDto> withUsernames(Page<AuditEvent> page) {
+        Set<Long> userIds = page.getContent().stream()
+                .map(AuditEvent::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> usernames = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getId, User::getUsername));
+        return page.map(event -> toDto(event, usernames.get(event.getUserId())));
+    }
+
+    private AuditEventDto toDto(AuditEvent event, String username) {
+        return new AuditEventDto(event.getId(), event.getUserId(), username, event.getAction(),
                 event.getRequestId(), event.getRiskBand(), event.getCreatedAt());
     }
 }
