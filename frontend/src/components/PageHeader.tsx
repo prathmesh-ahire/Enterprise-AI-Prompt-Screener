@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
 
-// todo.md Phase 46.2. One header pattern for every page, so a heading is never a bare
-// <h1> again. The description is not decoration: several of these pages show figures over
-// windows that are easy to misread (the dashboard's cards are today-only while the panels
-// below them are all-time or 7-day), and one line of context at the top is the cheapest
-// place to say so.
+// todo.md Phase 46.2, on the design's app type (56A.7): the page's one h1 (28px) and a
+// lead line capped at the reading width. The description is not decoration: several
+// pages show figures over windows that are easy to misread, and one line of context at
+// the top is the cheapest way to prevent that.
 interface PageHeaderProps {
   title: string
   description?: string
@@ -13,12 +12,12 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
-    <header className="page-header">
-      <div className="page-header-text">
+    <header className="ps-page-head">
+      <div>
         <h1>{title}</h1>
-        {description && <p className="page-header-description">{description}</p>}
+        {description && <p className="ps-page-head__text">{description}</p>}
       </div>
-      {actions && <div className="page-header-actions">{actions}</div>}
+      {actions && <div className="ps-row">{actions}</div>}
     </header>
   )
 }

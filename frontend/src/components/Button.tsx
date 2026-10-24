@@ -1,41 +1,41 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-// todo.md Phase 45.1. Most of the library is plain CSS classes; a button is one of the
-// few places that needs real behaviour, so it gets a component. `loading` sets `disabled`
-// as well as showing the spinner - otherwise an impatient second click fires the same
-// request twice, which on /prompts/submit means two screened prompts and two history rows.
-type ButtonVariant = 'primary' | 'secondary' | 'danger'
+// todo.md Phase 45.1, moved onto the design's Button (56A.7, design.md section 15). Most of
+// the library is plain CSS classes; a button is one of the few places that needs real
+// behaviour, so it gets a component. `loading` sets `disabled` as well as showing the
+// spinner and aria-busy - otherwise an impatient second click fires the same request
+// twice, which on /prompts/submit means two screened prompts and two history rows. The
+// caller changes the label to the ongoing verb ("Screening…") so it always stays visible.
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
+  size?: 'md' | 'sm'
   loading?: boolean
   children: ReactNode
 }
 
 export function Button({
   variant = 'primary',
+  size = 'md',
   loading = false,
   disabled,
   className = '',
   children,
   ...rest
 }: ButtonProps) {
-  // The bare `.btn` class already renders primary, so only the other two add a modifier.
-  const variantClass = variant === 'primary' ? '' : ` btn-${variant}`
-  const extra = className ? ` ${className}` : ''
-
+  const classes = ['ps-btn', `ps-btn--${variant}`, size === 'sm' ? 'ps-btn--sm' : '', className]
+    .filter(Boolean)
+    .join(' ')
   return (
-    // type defaults to "button" but stays overridable by ...rest, so a form's submit
-    // button can still opt in. Left as the default because React's own default is
-    // "submit", which silently submits the surrounding form on any stray click.
     <button
       type="button"
       {...rest}
-      className={`btn${variantClass}${extra}`}
+      className={classes}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
     >
-      {loading && <span className="spinner" aria-hidden="true" />}
+      {loading && <span className="ps-spinner" aria-hidden="true" />}
       {children}
     </button>
   )

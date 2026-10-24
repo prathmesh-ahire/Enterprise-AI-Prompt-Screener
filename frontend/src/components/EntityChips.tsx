@@ -1,8 +1,9 @@
-// todo.md Phase 27.3. Tiering mirrors RiskSubScoreCalculator's SEVERITY_WEIGHT (backend
-// Phase 11.1.1) exactly - CRITICAL = key/password material, HIGH = financial/govt-ID/org
-// data, MEDIUM = basic PII - so a chip's colour always agrees with how much that entity
-// type actually weighs in the risk score. Only ever renders the entity *type*, never the
-// underlying value (PromptResponseDto.entityTypes carries labels only, per AGENTS.md).
+// todo.md Phase 27.3, moved onto the design's EntityChip (56A.7). Tiering mirrors
+// RiskSubScoreCalculator's SEVERITY_WEIGHT (backend Phase 11.1.1) exactly - CRITICAL =
+// key/password material, HIGH = financial/govt-ID/org data, MEDIUM = basic PII - which is
+// the real mapping design.md section 13 says to use instead of the design's placeholder one.
+// Only ever renders the entity *type*, never the underlying value (PromptResponseDto
+// carries labels only). Each chip prints its severity word, so colour is never the only cue.
 const ENTITY_TIERS: Record<string, 'critical' | 'high' | 'medium'> = {
   PRIVATE_KEY: 'critical',
   API_KEY: 'critical',
@@ -15,31 +16,42 @@ const ENTITY_TIERS: Record<string, 'critical' | 'high' | 'medium'> = {
   PERSONAL_EMAIL: 'medium',
 }
 
+// Sentence case (design.md section 2).
 const ENTITY_LABELS: Record<string, string> = {
-  PRIVATE_KEY: 'Private Key',
-  API_KEY: 'API Key',
+  PRIVATE_KEY: 'Private key',
+  API_KEY: 'API key',
   PASSWORD_SECRET: 'Password',
-  PAYMENT_CARD: 'Payment Card',
-  AADHAAR_LIKE_ID: 'Aadhaar-like ID',
-  ORG_CONFIDENTIAL: 'Org Confidential',
-  PAN_LIKE_ID: 'PAN-like ID',
-  PHONE_NUMBER: 'Phone Number',
-  PERSONAL_EMAIL: 'Email',
+  PAYMENT_CARD: 'Payment card',
+  AADHAAR_LIKE_ID: 'Aadhaar number',
+  ORG_CONFIDENTIAL: 'Confidential term',
+  PAN_LIKE_ID: 'PAN number',
+  PHONE_NUMBER: 'Phone number',
+  PERSONAL_EMAIL: 'Email address',
 }
+
+const TIER_WORD = { critical: 'Critical', high: 'High', medium: 'Medium' } as const
 
 export function entityLabel(type: string): string {
   return ENTITY_LABELS[type] ?? type.replace(/_/g, ' ')
 }
 
+function entityTier(type: string): 'critical' | 'high' | 'medium' {
+  return ENTITY_TIERS[type] ?? 'medium'
+}
+
 export function EntityChips({ entityTypes }: { entityTypes: string[] }) {
   if (entityTypes.length === 0) return null
   return (
-    <div className="entity-chips">
-      {entityTypes.map((type) => (
-        <span key={type} className={`entity-chip entity-chip-${ENTITY_TIERS[type] ?? 'medium'}`}>
-          {entityLabel(type)}
-        </span>
-      ))}
+    <div className="ps-chips">
+      {entityTypes.map((type) => {
+        const tier = entityTier(type)
+        return (
+          <span key={type} className={`ps-chip ps-chip--${tier}`}>
+            <span className="ps-chip__sev">{TIER_WORD[tier]}</span>
+            {entityLabel(type)}
+          </span>
+        )
+      })}
     </div>
   )
 }
