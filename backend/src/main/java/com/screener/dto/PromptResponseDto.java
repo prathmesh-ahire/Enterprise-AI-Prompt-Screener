@@ -14,6 +14,8 @@ public record PromptResponseDto(
         String maskedText,
         String aiResponse,
         Double riskScore,
-        List<String> entityTypes
+        List<String> entityTypes,
+        // V2 55.4: null for prompts screened before V2 (no breakdown was recorded).
+        ScoreBreakdownDto scoreBreakdown
 ) {
 }

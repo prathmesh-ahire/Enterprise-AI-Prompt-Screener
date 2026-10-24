@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class RiskScorer {
 
-    private static final double WEIGHT_SENSITIVE_DATA = 0.35;
-    private static final double WEIGHT_INJECTION = 0.25;
-    private static final double WEIGHT_SECRET_CRITICALITY = 0.20;
-    private static final double WEIGHT_POLICY_CONTEXT = 0.10;
-    private static final double WEIGHT_OBFUSCATION = 0.10;
+    // Public since V2 55.4: ScoreBreakdownDto returns these beside each sub-score, so the
+    // formula has one source of truth instead of a copy in the frontend.
+    public static final double WEIGHT_SENSITIVE_DATA = 0.35;
+    public static final double WEIGHT_INJECTION = 0.25;
+    public static final double WEIGHT_SECRET_CRITICALITY = 0.20;
+    public static final double WEIGHT_POLICY_CONTEXT = 0.10;
+    public static final double WEIGHT_OBFUSCATION = 0.10;
 
     public double score(RiskSubScores subScores) {
         return 100 * (

@@ -120,7 +120,7 @@ class ReviewServiceTest {
         init();
         UUID requestId = UUID.randomUUID();
         when(promptService.approveFromReview(requestId))
-                .thenReturn(new PromptResponseDto(requestId, "COMPLETED", "REVIEW", "review", "[EMAIL]", "AI reply", 70.0, List.of("PERSONAL_EMAIL")));
+                .thenReturn(new PromptResponseDto(requestId, "COMPLETED", "REVIEW", "review", "[EMAIL]", "AI reply", 70.0, List.of("PERSONAL_EMAIL"), null));
 
         PromptResponseDto result = reviewService.decide(requestId, REVIEWER_ID, ReviewAction.APPROVE, "looks fine");
 
@@ -165,7 +165,7 @@ class ReviewServiceTest {
         init();
         UUID requestId = UUID.randomUUID();
         when(promptService.approveFromReview(requestId))
-                .thenReturn(new PromptResponseDto(requestId, "COMPLETED", "REVIEW", "review", null, "AI reply", 70.0, List.of()));
+                .thenReturn(new PromptResponseDto(requestId, "COMPLETED", "REVIEW", "review", null, "AI reply", 70.0, List.of(), null));
 
         reviewService.decide(requestId, REVIEWER_ID, ReviewAction.FALSE_POSITIVE, "not actually risky");
 
@@ -178,7 +178,7 @@ class ReviewServiceTest {
         init();
         UUID requestId = UUID.randomUUID();
         when(promptService.rejectFromReview(requestId))
-                .thenReturn(new PromptResponseDto(requestId, "BLOCKED", "REVIEW", "review", null, null, 70.0, List.of()));
+                .thenReturn(new PromptResponseDto(requestId, "BLOCKED", "REVIEW", "review", null, null, 70.0, List.of(), null));
 
         PromptResponseDto result = reviewService.decide(requestId, REVIEWER_ID, ReviewAction.REJECT, "clear injection attempt");
 
@@ -193,7 +193,7 @@ class ReviewServiceTest {
         init();
         UUID requestId = UUID.randomUUID();
         when(promptService.rejectFromReview(requestId))
-                .thenReturn(new PromptResponseDto(requestId, "BLOCKED", "REVIEW", "review", null, null, 70.0, List.of()));
+                .thenReturn(new PromptResponseDto(requestId, "BLOCKED", "REVIEW", "review", null, null, 70.0, List.of(), null));
 
         reviewService.decide(requestId, REVIEWER_ID, ReviewAction.REQUEST_CORRECTION, "please remove the key first");
 

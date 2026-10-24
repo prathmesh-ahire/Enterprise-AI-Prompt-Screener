@@ -10,6 +10,7 @@ import com.screener.detection.RiskSubScoreCalculator;
 import com.screener.detection.RiskSubScores;
 import com.screener.dto.PromptHistoryItemDto;
 import com.screener.dto.PromptResponseDto;
+import com.screener.dto.ScoreBreakdownDto;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.PromptRequest;
@@ -131,7 +132,8 @@ public class PromptService {
 
         saveFindings(requestId, findings);
         saveSignals(requestId, signals);
-        saveDecision(requestId, decisionResult, subScores, processingTimeMs, config.policyVersion());
+        ScreeningDecision savedDecision =
+                saveDecision(requestId, decisionResult, subScores, processingTimeMs, config.policyVersion());
 
         // 17.2: one event for the intake itself, one for the decision outcome. The
         // decision's action is always decision.name() (ALLOW/MASK/CONFIRM/REVIEW/BLOCK) -
@@ -148,7 +150,8 @@ public class PromptService {
             sendToAiAndComplete(promptRequest, findings, decisionResult.decision().name());
         }
 
-        return toDto(promptRequest, decisionResult.decision().name(), decisionResult.explanation(), riskScore);
+        return toDto(promptRequest, decisionResult.decision().name(), decisionResult.explanation(), riskScore,
+                savedDecision);
     }
 
     public PromptResponseDto confirmAndSend(UUID requestId, Long userId) {
@@ -179,7 +182,8 @@ public class PromptService {
                 : textToForward(promptRequest);
         sendToAiAndComplete(promptRequest, textToSend, findings, decision.getDecision().name());
 
-        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore(),
+                decision);
     }
 
     // 18.3: reviewer approves (or marks FALSE_POSITIVE) a PENDING_REVIEW prompt. Forwards
@@ -197,7 +201,8 @@ public class PromptService {
 
         sendToAiAndComplete(promptRequest, textToForward(promptRequest), findings, decision.getDecision().name());
 
-        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore(),
+                decision);
     }
 
     // 41.1: masked text is null whenever DetectionEngine found zero entities - which happens
@@ -221,7 +226,8 @@ public class PromptService {
         promptRequest.setStatus(PromptStatus.BLOCKED);
         promptRequestRepository.save(promptRequest);
 
-        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore());
+        return toDto(promptRequest, decision.getDecision().name(), decision.getExplanation(), decision.getRiskScore(),
+                decision);
     }
 
     // 19.1: paginated, masked-text-only history for the caller's own prompts. Batches the
@@ -247,7 +253,7 @@ public class PromptService {
         String decisionName = decision != null ? decision.getDecision().name() : null;
         String explanation = decision != null ? decision.getExplanation() : null;
         Double riskScore = decision != null ? decision.getRiskScore() : null;
-        return toDto(promptRequest, decisionName, explanation, riskScore);
+        return toDto(promptRequest, decisionName, explanation, riskScore, decision);
     }
 
     private PromptHistoryItemDto toHistoryItem(PromptRequest promptRequest, ScreeningDecision decision) {
@@ -334,8 +340,10 @@ public class PromptService {
 
     // 55.3: the breakdown is stored from the sub-scores and decision already computed above -
     // nothing is recomputed, and nothing from the prompt itself is stored here.
-    private void saveDecision(UUID requestId, DecisionResult decisionResult, RiskSubScores subScores,
-                              long processingTimeMs, int policyVersion) {
+    // Returns the entity it built (not save()'s return value) so the response can carry the
+    // breakdown without a second read.
+    private ScreeningDecision saveDecision(UUID requestId, DecisionResult decisionResult, RiskSubScores subScores,
+                                           long processingTimeMs, int policyVersion) {
         ScreeningDecision decision = new ScreeningDecision();
         decision.setRequestId(requestId);
         decision.setDecision(decisionResult.decision());
@@ -354,6 +362,7 @@ public class PromptService {
                 .map(Enum::name)
                 .collect(Collectors.joining(",")));
         screeningDecisionRepository.save(decision);
+        return decision;
     }
 
     private PromptStatus statusFor(Decision decision) {
@@ -374,7 +383,10 @@ public class PromptService {
     // Phase 27.3/27.4: riskScore and entityTypes ride along on every PromptResponseDto so
     // the frontend result screen can render the score bar + entity chips regardless of
     // which call site produced the response (submit/confirm/review-decide/history-detail).
-    private PromptResponseDto toDto(PromptRequest promptRequest, String decisionName, String explanation, Double riskScore) {
+    // 55.4: scoreBreakdown rides along the same way, from the stored decision (null for a
+    // decision recorded before V2, or no decision at all).
+    private PromptResponseDto toDto(PromptRequest promptRequest, String decisionName, String explanation,
+                                    Double riskScore, ScreeningDecision decision) {
         return new PromptResponseDto(
                 promptRequest.getRequestId(),
                 promptRequest.getStatus().name(),
@@ -383,7 +395,8 @@ public class PromptService {
                 promptRequest.getMaskedText(),
                 promptRequest.getAiResponse(),
                 riskScore,
-                entityTypesFor(promptRequest.getRequestId()));
+                entityTypesFor(promptRequest.getRequestId()),
+                ScoreBreakdownDto.from(decision));
     }
 
     // Entity type labels only - never raw values, matching ReviewDetailsDto's (18.5) same
