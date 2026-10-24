@@ -35,32 +35,26 @@
   border-radius: var(--radius-pill);
   cursor: pointer;
   color: var(--on-brand);
-  background-color: transparent;
-  background-image: none;
-  background-size: 300%;
-  background-position: left center;
+  background-color: var(--brand-strong);
   transition:
-    background-position 0.4s ease,
-    transform 0.15s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    opacity 0.2s ease;
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
 /* Explicit alias. The bare `.btn` already renders primary (17 existing call
    sites rely on that), so this exists for pages that prefer to name it. */
 .btn-primary {
-  background-image: none;
+  background-color: var(--brand-strong);
 }
 
 .btn:hover:not(:disabled) {
-  background-position: right center;
-  box-shadow: var(--shadow-card);
+  box-shadow: inset 0 0 0 1px var(--brand-faint);
 }
 
 .btn:active:not(:disabled) {
-  transform: scale(0.97);
+  background-color: var(--brand-deep);
 }
 
 /* Covers the loading state too — the Button component sets `disabled` when
@@ -72,8 +66,8 @@
 }
 
 .btn-secondary {
-  background-image: none;
-  border-color: var(--line-strong);
+  background-color: var(--surface-card);
+  border-color: var(--line-control);
   color: var(--text-primary);
 }
 
@@ -83,8 +77,14 @@
 }
 
 .btn-danger {
-  background-image: none;
-  color: var(--on-brand);
+  background-color: transparent;
+  border-color: var(--block);
+  color: var(--block);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--block-tint);
+  box-shadow: none;
 }
 
 .btn-link {
@@ -261,19 +261,6 @@
   font-weight: 700;
   letter-spacing: 0;
   color: var(--text-primary);
-  transition: opacity 0.3s ease;
-}
-
-/* Clipping a gradient to the text needs a transparent fill, which means the
-   colour has to come back on its own when the gradient is removed — hence
-   both the -webkit- and standard properties are reset explicitly. */
-.navbar-brand:hover {
-  background-image: linear-gradient(var(--brand-base), var(--brand-base));
-  background-size: 300%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
 }
 
 .navbar-links {
@@ -297,27 +284,6 @@
 .navbar-links a:hover,
 .navbar-links a.active {
   color: var(--text-primary);
-}
-
-/* Grows outward from the centre: zero-width at left:50%, animating both
-   width and left so the two edges travel apart together. */
-.navbar-links a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  border-radius: var(--radius-xs);
-  background-image: linear-gradient(var(--brand-base), var(--brand-base));
-  pointer-events: none;
-  transition: width 0.25s ease, left 0.25s ease;
-}
-
-.navbar-links a:hover::after,
-.navbar-links a.active::after {
-  width: 100%;
-  left: 0;
 }
 
 /* The account controls beside the links are not navigation — they must not
@@ -381,19 +347,8 @@
   background: var(--block-tint);
 }
 
-.navbar-logout:active {
-  transform: scale(0.97);
-}
-
-/* The arrow slides a touch toward the door on hover — the one piece of motion
-   on the control, and it says "leaving" better than any colour change can. */
 .navbar-logout-icon {
   flex: none;
-  transition: transform var(--duration-fast) var(--ease-out);
-}
-
-.navbar-logout:hover .navbar-logout-icon {
-  transform: translateX(2px);
 }
 
 /* ==========================================================================
@@ -519,15 +474,9 @@
   border-radius: var(--radius-md);
   color: var(--text-primary);
   background-color: var(--surface-card);
-  background-image: linear-gradient(var(--brand-base), var(--brand-base));
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: 0% 2px;
   transition:
-    background-size 0.3s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
 }
 
 .form-field input::placeholder,
@@ -554,10 +503,7 @@
 .prompt-textarea:focus,
 .history-filter select:focus,
 .term-add-form input:focus {
-  background-size: 100% 2px;
-  border-color: var(--line-control);
-  box-shadow: 0 4px 14px var(--surface-hover);
-  transform: scale(1.005);
+  border-color: var(--brand-soft);
 }
 
 .form-field input:disabled,
@@ -626,16 +572,9 @@
 }
 
 /* ==========================================================================
-   45.4 CARDS  (rewritten in the V1.2 UI pass)
-   Two things only:
-     .card          a surface — border, radius, resting shadow
-     .panel-hover   the shared hover response: a 3px lift, an accent-tinted
-                    glow, and one specular sweep across the panel
-
-   Phase 45 also defined `.card-lift`, `.card-curtain` (two panels sliding
-   apart) and `.card-tilt` (a 3.5deg perspective rotate). Every one of them
-   was dead — no .tsx in src/ ever applied them — and all three were the loud
-   kind of hover that dates a UI. They are gone rather than left to rot.
+   45.4 CARDS
+   A surface: border, radius, resting shadow. 56A.6 removed the V1.2 hover
+   lift, glow and sweep - the design's app cards have no hover effect.
    ========================================================================== */
 .card {
   position: relative;
@@ -645,80 +584,6 @@
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition:
-    transform var(--duration-base) var(--ease-out),
-    box-shadow var(--duration-base) var(--ease-out),
-    border-color var(--duration-base) var(--ease-out);
-}
-
-/* V1.2 UI pass. `.card-lift`, `.card-curtain` and `.card-tilt` were defined in
-   Phase 45 and then used by nothing - confirmed against every .tsx in src/. The
-   curtain (two panels sliding apart) and the tilt (a 3.5deg perspective rotate)
-   were the loud, 2021-template kind of hover; what reads as considered now is a
-   small lift, an accent-tinted glow and one specular sweep. Those three are
-   folded into `.panel-hover` below and applied to the surfaces that actually
-   exist, so there is no dead vocabulary left in this file.
-
-   The sweep is a decorative band: aria-hidden by virtue of being a pseudo-element,
-   pointer-events-none, invisible at rest, and it only animates under motion-safe
-   (the reduced-motion block at the foot of this file). */
-.panel-hover,
-.stat-card,
-.chart-card,
-.admin-section {
-  position: relative;
-  overflow: hidden;
-  transition:
-    transform var(--duration-base) var(--ease-out),
-    box-shadow var(--duration-base) var(--ease-out),
-    border-color var(--duration-base) var(--ease-out);
-}
-
-.panel-hover::after,
-.stat-card::after,
-.chart-card::after,
-.admin-section::after {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  left: -60%;
-  width: 40%;
-  pointer-events: none;
-  opacity: 0;
-  transform: skewX(-12deg);
-  background-image: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.06),
-    transparent
-  );
-  transition: opacity var(--duration-fast) var(--ease-out);
-}
-
-.panel-hover:hover,
-.stat-card:hover,
-.chart-card:hover,
-.admin-section:hover {
-  transform: translateY(-3px);
-  box-shadow: none;
-  border-color: var(--line-control);
-}
-
-.panel-hover:hover::after,
-.stat-card:hover::after,
-.chart-card:hover::after,
-.admin-section:hover::after {
-  opacity: 1;
-  animation: panel-sheen var(--duration-slow) var(--ease-out);
-}
-
-@keyframes panel-sheen {
-  from {
-    transform: translateX(0) skewX(-12deg);
-  }
-  to {
-    transform: translateX(420%) skewX(-12deg);
-  }
 }
 
 .card-header {
@@ -729,16 +594,7 @@
   margin-bottom: var(--space-3);
 }
 
-/* V1.2 UI pass. The stat card was a centred number in a thin box with the
-   curtain + tilt effects behind it. Three changes, all aimed at making a row
-   of them read as a readout rather than as five empty boxes:
-     * left-aligned, because a column of left-aligned figures is scannable and
-       a row of centred ones is not;
-     * a 2px accent rule along the top, which is what distinguishes a headline
-       figure from an ordinary panel at a glance;
-     * the shared `.panel-hover` response instead of the bespoke tilt.
-   46.3's grid is unchanged: auto-fit with a floor means five cards go 5-up on
-   a desktop and 2-up at 375px rather than squeezing until a figure wraps. */
+/* Stat cards: left-aligned figures in a bordered tile. */
 .stat-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -754,23 +610,6 @@
   box-shadow: var(--shadow-card);
   text-align: left;
   overflow: hidden;
-}
-
-/* The accent rule. A pseudo-element rather than a border-top so it sits inside
-   the card's rounded corners instead of squaring them off. */
-.stat-card::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 2px;
-  background-image: linear-gradient(var(--brand-base), var(--brand-base));
-  opacity: 0.55;
-  transition: opacity var(--duration-base) var(--ease-out);
-}
-
-.stat-card:hover::before {
-  opacity: 1;
 }
 
 .stat-card-value {
@@ -1705,52 +1544,6 @@
 }
 
 /* ==========================================================================
-   ENTRANCE — V1.2 UI pass
-   A short fade-and-rise on the major blocks of a page, with a small stagger, so
-   navigating somewhere reads as the page arriving rather than as a hard cut.
-
-   Written as `prefers-reduced-motion: no-preference` rather than as a plain rule
-   with a `reduce` override, and that direction is deliberate: the animation's
-   `both` fill holds the element at `opacity: 0` before it starts, so ANY failure
-   to run it would leave the page blank. Scoped this way, the default state - and
-   the state under `reduce`, and in any engine that does not match the query - is
-   simply "visible, no animation". A stagger is not worth a blank page.
-
-   The stagger stops at the fourth child on purpose: beyond ~200ms of accumulated
-   delay the last panel reads as lagging rather than as arriving with the rest.
-   ========================================================================== */
-@media (prefers-reduced-motion: no-preference) {
-  .page-content > *,
-  .auth-split > * {
-    animation: reveal-up var(--duration-slow) var(--ease-out) both;
-  }
-
-  .page-content > *:nth-child(2),
-  .auth-split > *:nth-child(2) {
-    animation-delay: 60ms;
-  }
-
-  .page-content > *:nth-child(3) {
-    animation-delay: 120ms;
-  }
-
-  .page-content > *:nth-child(n + 4) {
-    animation-delay: 180ms;
-  }
-}
-
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* ==========================================================================
    REDUCED MOTION — the one place effects opt out
    Nothing above needs its own media query; every transform-based effect in
    this file is neutralised here and replaced with a colour, border or
@@ -1758,91 +1551,19 @@
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .btn,
-  .btn-link,
-  .navbar-brand,
-  .navbar-links a,
-  .navbar-links a::after,
-  .card,
-  .panel-hover,
-  .stat-card,
-  .chart-card,
-  .admin-section,
-  .stat-card::before,
-  .data-table tbody tr,
-  .history-table tbody tr,
-  .form-field input,
-  .form-field select,
-  .form-field textarea,
-  .input,
-  .prompt-textarea,
-  .history-filter select,
-  .term-add-form input {
-    transition-duration: 0.01ms;
+  /* 56A.6: the app keeps only colour and border transitions; under reduced motion
+     they are instant and the spinner stops on a dotted ring (design.md section 10). */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
   }
 
-  /* No gradient slide, no press-scale — hover is signalled by the shadow. */
-  .btn:hover:not(:disabled) {
-    background-position: left center;
-  }
-
-  .btn:active:not(:disabled) {
-    transform: none;
-  }
-
-  /* Logout keeps its full colour response; only the arrow's nudge and the
-     press-scale are dropped. */
-  .navbar-logout:active {
-    transform: none;
-  }
-
-  .navbar-logout:hover .navbar-logout-icon {
-    transform: none;
-  }
-
-  /* The lift is dropped and the specular sweep never runs, but the glow and the
-     border change stay, so hover is still unmistakably acknowledged — the
-     affordance never depends on something moving. */
-  .panel-hover:hover,
-  .stat-card:hover,
-  .chart-card:hover,
-  .admin-section:hover {
-    transform: none;
-    box-shadow: none;
-    border-color: var(--line-control);
-  }
-
-  .panel-hover:hover::after,
-  .stat-card:hover::after,
-  .chart-card:hover::after,
-  .admin-section:hover::after {
-    opacity: 0;
-    animation: none;
-  }
-
-  .form-field input:focus,
-  .form-field select:focus,
-  .form-field textarea:focus,
-  .input:focus,
-  .prompt-textarea:focus,
-  .history-filter select:focus,
-  .term-add-form input:focus {
-    transform: none;
-  }
-
-  /* Slowed, not stopped: a frozen spinner reads as a hung request. It is
-     always accompanied by text, so the meaning does not rest on the motion. */
   .spinner {
-    animation-duration: 2s;
-  }
-
-  /* Belt and braces: the entrance above is already scoped to
-     `no-preference`, so it never runs here. This restates the resting state in
-     case that scoping is ever loosened. */
-  .page-content > *,
-  .auth-split > * {
-    opacity: 1;
-    transform: none;
     animation: none;
+    border-right-color: currentColor;
+    border-style: dotted;
   }
 }

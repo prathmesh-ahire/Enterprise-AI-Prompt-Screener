@@ -176,54 +176,7 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  /* Transparent, not --surface-page: the page ground is painted by <body>, and the
-     depth layer below sits between the two. If #root kept an opaque background it
-     would cover the layer completely. */
-  background: transparent;
-}
-
-/* ==========================================================================
-   DEPTH LAYER — V1.2 UI pass
-   Two fixed, pointer-events-none sheets behind the whole app. Before this the
-   background was one flat near-black fill, which is the main reason every screen
-   read as "a form on a void" rather than as a surface: there was nothing behind the
-   panels for them to sit ON.
-
-   Both are `z-index: -1`, so they paint above <body>'s background colour and behind
-   every panel - and every panel has its own opaque --surface-card, so this only ever
-   shows through the gaps between them, which is the whole intent.
-
-   Drawn from the brand tokens rather than new colours, and kept very low alpha: this
-   should register as atmosphere, never as a shape anyone could point at.
-   ========================================================================== */
-#root::before,
-#root::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* Three wide, soft washes - two warm-side accents top left and top right, one faint
-   pool at the bottom so a long page does not end on dead flat black. */
-#root::before {
-  background-image:
-    radial-gradient(60% 50% at 10% -8%, rgba(0, 180, 216, 0.1), transparent 70%),
-    radial-gradient(55% 45% at 103% 14%, rgba(0, 119, 182, 0.13), transparent 72%),
-    radial-gradient(80% 50% at 50% 112%, rgba(144, 224, 239, 0.05), transparent 70%);
-}
-
-/* A calibration grid, masked so it fades out before the fold. An instrument reading
-   reads as measured when it sits on a grid; at this alpha it is barely perceptible
-   and simply stops the upper page feeling empty. */
-#root::after {
-  background-size: 32px 32px;
-  background-image:
-    linear-gradient(to right, rgba(0, 180, 216, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 180, 216, 0.05) 1px, transparent 1px);
-  -webkit-mask-image: radial-gradient(75% 55% at 50% -5%, #000, transparent 100%);
-  mask-image: radial-gradient(75% 55% at 50% -5%, #000, transparent 100%);
+  background: var(--surface-page);
 }
 
 /* ==========================================================================
@@ -407,7 +360,7 @@ code {
 .risk-score-fill {
   height: 100%;
   border-radius: var(--radius-pill);
-  transition: width 0.3s ease;
+  transition: width var(--duration-slow) var(--ease-out);
 }
 
 /* 56A.4: one fill per decision band, keyed on the band word the API returns. */
