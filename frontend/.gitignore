@@ -30,3 +30,5 @@ uicheck/baseline/
 uicheck/final/
 uicheck/out/
 uicheck/step*/
+uicheck/live/
+uicheck/navbar/
