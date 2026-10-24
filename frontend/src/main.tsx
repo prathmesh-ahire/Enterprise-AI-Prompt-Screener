@@ -14,12 +14,9 @@ import './index.css'
 // ordering means a component rule never has to fight the base with extra specificity.
 import './styles/components.css'
 import App from './App.tsx'
-import { ThemeProvider } from './ThemeContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <App />
   </StrictMode>,
 )

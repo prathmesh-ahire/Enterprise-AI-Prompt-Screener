@@ -10,8 +10,8 @@
  *   node uicheck/shots.mjs <outDir> [baseURL]
  *
  * Logs in with the seeded admin (both ADMIN and USER roles, so every route is
- * reachable from one session), then captures every page in both themes at desktop and
- * phone widths. Run it once before a restyle and once after, then diff the directories.
+ * reachable from one session), then captures every page (dark only since 56A.3) at
+ * desktop and phone widths. Run it once before a restyle and once after, then diff the directories.
  */
 import { chromium } from '@playwright/test'
 import { mkdirSync, readFileSync } from 'node:fs'
@@ -75,7 +75,7 @@ const browser = await chromium.launch({
 mkdirSync(outDir, { recursive: true })
 
 try {
-  /* Log in ONCE and reuse the session for every viewport/theme combination. Two
+  /* Log in ONCE and reuse the session for every viewport. Two
    * reasons: `RateLimitFilter` shares one 5-requests-per-minute bucket across all four
    * auth routes per IP (docs/NOTE.md, Phase 6), so four logins in a row would start
    * returning 429 and the run would fail for environmental reasons; and it is faster. */
@@ -92,40 +92,34 @@ try {
   await loginContext.close()
 
   for (const [vpName, viewport] of VIEWPORTS) {
-    for (const theme of ['dark', 'light']) {
+    {
       // --- signed-out pages: a fresh context with no token ---
       const anon = await browser.newContext({ viewport, deviceScaleFactor: 1 })
-      await anon.addInitScript((t) => {
-        try { localStorage.setItem('theme', t) } catch { /* private mode */ }
-      }, theme)
       const anonPage = await anon.newPage()
       anonPage.on('console', (m) => {
-        if (m.type() === 'error') consoleErrors.push(`[${vpName}/${theme}] ${m.text()}`)
+        if (m.type() === 'error') consoleErrors.push(`[${vpName}] ${m.text()}`)
       })
-      anonPage.on('pageerror', (e) => consoleErrors.push(`[${vpName}/${theme}] ${e.message}`))
+      anonPage.on('pageerror', (e) => consoleErrors.push(`[${vpName}] ${e.message}`))
 
       for (const [name, path] of ROUTES.filter((r) => r[2] === 'anon')) {
         await anonPage.goto(baseURL + path, { waitUntil: 'domcontentloaded' })
         await anonPage.addStyleTag({ content: FREEZE })
-        await shoot(anonPage, `${vpName}-${theme}-${name}`)
+        await shoot(anonPage, `${vpName}-${name}`)
       }
       await anon.close()
 
-      // --- signed-in pages: the saved session, with the theme forced ---
+      // --- signed-in pages: the saved session ---
       const ctx = await browser.newContext({ viewport, deviceScaleFactor: 1, storageState })
-      await ctx.addInitScript((t) => {
-        try { localStorage.setItem('theme', t) } catch { /* private mode */ }
-      }, theme)
       const page = await ctx.newPage()
       page.on('console', (m) => {
-        if (m.type() === 'error') consoleErrors.push(`[${vpName}/${theme}] ${m.text()}`)
+        if (m.type() === 'error') consoleErrors.push(`[${vpName}] ${m.text()}`)
       })
-      page.on('pageerror', (e) => consoleErrors.push(`[${vpName}/${theme}] ${e.message}`))
+      page.on('pageerror', (e) => consoleErrors.push(`[${vpName}] ${e.message}`))
 
       for (const [name, path] of ROUTES.filter((r) => r[2] === 'auth')) {
         await page.goto(baseURL + path, { waitUntil: 'domcontentloaded' })
         await page.addStyleTag({ content: FREEZE })
-        await shoot(page, `${vpName}-${theme}-${name}`)
+        await shoot(page, `${vpName}-${name}`)
       }
 
       /* The prompt result is a state, not a route: submit something that masks so the
@@ -137,7 +131,7 @@ try {
         await page.click('button[type="submit"]')
         await page.waitForSelector('.result-card', { timeout: 90000 }).catch(() => {})
         await page.addStyleTag({ content: FREEZE })
-        await shoot(page, `${vpName}-${theme}-prompt-result`)
+        await shoot(page, `${vpName}-prompt-result`)
       }
       await ctx.close()
     }

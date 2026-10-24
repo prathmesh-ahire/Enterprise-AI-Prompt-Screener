@@ -207,7 +207,7 @@
   padding: var(--sp-4) var(--sp-6);
   border-bottom: 1px solid var(--border);
   /* Opaque, not translucent: content scrolls underneath it, and a see-through
-     bar over a table of decision badges is unreadable in both themes. */
+     bar over a table of decision badges is unreadable. */
   background: var(--surface-card);
   text-align: left;
 }
@@ -1028,7 +1028,7 @@
 }
 
 /* A check mark drawn from two borders rather than a glyph, so it needs no icon font
-   and inherits the accent on both themes. */
+   and inherits the accent colour. */
 .auth-hero-points li::before {
   content: '';
   position: absolute;
@@ -1535,11 +1535,6 @@
 .data-table tbody tr:nth-child(even) > td,
 .history-table tbody tr:nth-child(even) > td {
   background: rgba(255, 255, 255, 0.018);
-}
-
-:root[data-theme='light'] .data-table tbody tr:nth-child(even) > td,
-:root[data-theme='light'] .history-table tbody tr:nth-child(even) > td {
-  background: rgba(11, 34, 51, 0.022);
 }
 
 .data-table tbody tr,

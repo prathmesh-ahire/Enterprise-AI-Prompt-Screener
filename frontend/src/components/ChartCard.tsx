@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 
 // todo.md Phase 48.1. The shared frame every chart on the dashboard sits in.
 //
@@ -33,10 +33,8 @@ export function ChartCard({ title, subtitle, period, children }: ChartCardProps)
 
 // Recharts renders SVG, which cannot read a CSS custom property — `fill="var(--accent)"`
 // resolves to nothing inside an SVG attribute. Every colour therefore has to be handed to
-// it as a literal, which means reading the tokens off the document at runtime and
-// re-reading them when the theme changes. Without the re-read, switching to light mode
-// leaves the charts painted in the dark palette (axis labels included) while everything
-// around them flips — the single most likely way for a themed chart to look broken.
+// it as a literal, which means reading the tokens off the document at runtime. The UI is
+// dark only (56A.3), so the tokens never change after load and are read once.
 export function useChartTokens() {
   const read = () => {
     const s = getComputedStyle(document.documentElement)
@@ -58,17 +56,7 @@ export function useChartTokens() {
     }
   }
 
-  const [tokens, setTokens] = useState(read)
-
-  useEffect(() => {
-    // data-theme is written onto <html> by ThemeProvider (44.6), so observing that one
-    // attribute is enough — no event bus needed, and it also catches the pre-paint value
-    // set by the inline script in index.html.
-    const observer = new MutationObserver(() => setTokens(read()))
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    return () => observer.disconnect()
-  }, [])
-
+  const [tokens] = useState(read)
   return tokens
 }
 

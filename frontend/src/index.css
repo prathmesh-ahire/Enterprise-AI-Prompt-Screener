@@ -4,18 +4,15 @@
    Everything above this file's component styles is defined here, once. No
    component rule should contain a raw colour from here on.
 
-   Dark is the BASE theme (plain :root); light is an override applied when
-   the theme toggle writes data-theme="light" onto <html>. That ordering is
-   deliberate — dark is the default the app opens in (44.6).
+   Dark only (V2 design, todo 56A.3): there is no light theme and no theme
+   toggle, so every token is defined once, here.
 
    Two families, kept strictly apart:
      * BRAND / CHROME  - the teal ramp. Navbar, buttons, links, focus rings,
        chart accents. Purely decorative; carries no meaning.
      * SEMANTIC STATUS - the five decision bands and three severity tiers.
        These keep traffic-light meaning because an examiner has to read
-       severity instantly, and colour is doing real work there. They are
-       retuned per theme so they stay legible on both surfaces rather than
-       being one fixed hex that only works on white.
+       severity instantly, and colour is doing real work there.
    ========================================================================== */
 
 :root {
@@ -239,80 +236,6 @@
   }
 }
 
-/* ==========================================================================
-   LIGHT THEME — only the tokens that actually change
-   ========================================================================== */
-:root[data-theme='light'] {
-  --accent: #0077b6;
-  --accent-strong: #03045e;
-  --accent-soft: #48b8d8;
-  --accent-bg: rgba(0, 119, 182, 0.10);
-  --accent-border: rgba(0, 119, 182, 0.40);
-  --on-accent: #ffffff;
-
-  --surface-page: #f4f8fb;
-  --surface-card: #ffffff;
-  --surface-raised: #e9f1f7;
-
-  --text-primary: #0b2233;
-  --text-secondary: #3d5f77;
-  /* Was #6b8296, which measured 3.7:1 on the light page - under the 4.5:1 AA bar for
-     normal text, and it carries real content (table headers, stat-card labels, the
-     pagination position). Darkened to 4.7:1. Found by the Phase 45 browser check.
-     Darkened again in Phase 49 (#5c7186 -> #566a7e) for the same reason the dark theme
-     was: 4.7:1 was measured against the PAGE, but the same token sits on
-     --surface-raised (4.42:1) and the auth wash (4.14:1), both under the bar. Now
-     page 5.2, card 5.6, raised 4.9, auth wash 4.6. */
-  --text-muted: #566a7e;
-
-  --border: rgba(11, 34, 51, 0.14);
-  --border-strong: rgba(11, 34, 51, 0.28);
-  --shadow-sm: 0 1px 2px rgba(11, 34, 51, 0.08);
-  --shadow-md: 0 10px 24px rgba(11, 34, 51, 0.10), 0 3px 8px rgba(11, 34, 51, 0.06);
-  /* The dark theme's shadows are black at high alpha, which on a white page
-     reads as dirt rather than depth. On light, depth comes mostly from the
-     border; the shadow only has to lift the panel a little. */
-  --shadow-panel: 0 1px 2px rgba(11, 34, 51, 0.06);
-  --shadow-raised: 0 12px 32px -8px rgba(11, 34, 51, 0.16);
-  --shadow-glow: 0 16px 40px -12px rgba(0, 119, 182, 0.22);
-
-  /* Darkened so they carry the same weight against white that the dark-theme
-     values carry against near-black. Same meanings, different luminance.
-     Green needed a second darkening pass in Phase 45: at #157f4a the ALLOW
-     badge measured 4.1:1 against its own tinted pill, just under AA. Green is
-     always the hardest of the four to land, because the eye reads it as
-     lighter than its luminance actually is. Now 5.6:1. */
-  --decision-allow: #12683d;
-  --decision-allow-bg: rgba(18, 104, 61, 0.10);
-  --decision-allow-border: rgba(18, 104, 61, 0.40);
-  --decision-mask: #a16207;
-  --decision-mask-bg: rgba(161, 98, 7, 0.10);
-  --decision-mask-border: rgba(161, 98, 7, 0.40);
-  --decision-confirm: #c2410c;
-  --decision-confirm-bg: rgba(194, 65, 12, 0.10);
-  --decision-confirm-border: rgba(194, 65, 12, 0.40);
-  --decision-block: #b91c1c;
-  --decision-block-bg: rgba(185, 28, 28, 0.10);
-  --decision-block-border: rgba(185, 28, 28, 0.40);
-
-  --severity-critical: #b91c1c;
-  --severity-critical-bg: rgba(185, 28, 28, 0.10);
-  --severity-critical-border: rgba(185, 28, 28, 0.35);
-  --severity-high: #a16207;
-  --severity-high-bg: rgba(161, 98, 7, 0.10);
-  --severity-high-border: rgba(161, 98, 7, 0.35);
-  /* Also a Phase 45 correction: 4.4:1 -> 5.9:1. */
-  --severity-medium: #0b5f76;
-  --severity-medium-bg: rgba(11, 95, 118, 0.10);
-  --severity-medium-border: rgba(11, 95, 118, 0.35);
-
-  /* Darkened: the dark theme's pale stops (#90e0ef) all but disappear against
-     a white page, leaving the nav underline looking like it failed to render. */
-  --gradient-accent-bright: linear-gradient(90deg, #03045e, #0077b6, #00b4d8, #0077b6, #03045e);
-
-  color-scheme: light;
-}
-
 /* 44.2: the fixed 1126px centred, side-bordered box was the Vite starter
    template's own demo-page layout - the single biggest reason every screen
    read as narrow and generic. The app shell in Phase 46 builds on this. */
@@ -368,21 +291,6 @@
     linear-gradient(to bottom, rgba(0, 180, 216, 0.05) 1px, transparent 1px);
   -webkit-mask-image: radial-gradient(75% 55% at 50% -5%, #000, transparent 100%);
   mask-image: radial-gradient(75% 55% at 50% -5%, #000, transparent 100%);
-}
-
-/* On a white page the same washes read as smudges, and the grid as print bleed, so
-   both are pulled right down rather than reused at full strength. */
-:root[data-theme='light'] #root::before {
-  background-image:
-    radial-gradient(60% 50% at 10% -8%, rgba(0, 119, 182, 0.07), transparent 70%),
-    radial-gradient(55% 45% at 103% 14%, rgba(0, 119, 182, 0.06), transparent 72%),
-    radial-gradient(80% 50% at 50% 112%, rgba(0, 119, 182, 0.04), transparent 70%);
-}
-
-:root[data-theme='light'] #root::after {
-  background-image:
-    linear-gradient(to right, rgba(3, 4, 94, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(3, 4, 94, 0.04) 1px, transparent 1px);
 }
 
 /* ==========================================================================
@@ -499,78 +407,6 @@ code {
   justify-content: space-between;
   margin-top: var(--sp-3);
   font-size: var(--fs-body-sm);
-}
-
-/* ==========================================================================
-   THEME SWITCH — Phase 44.7
-   The visible control is the slider span; the checkbox behind it stays a real
-   focusable input so keyboard and screen-reader behaviour come for free.
-   ========================================================================== */
-.theme-switch {
-  --switch-w: 3.1em;
-  --switch-h: 1.7em;
-  --knob: 1.2em;
-  --knob-gap: 0.25em;
-  position: relative;
-  display: inline-block;
-  width: var(--switch-w);
-  height: var(--switch-h);
-  flex: none;
-}
-
-.theme-switch-input {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  cursor: pointer;
-}
-
-.theme-switch-slider {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--r-pill);
-  background: var(--surface-raised);
-  border: 1px solid var(--border-strong);
-  transition: background 0.3s ease, border-color 0.3s ease;
-  pointer-events: none;
-}
-
-/* Light theme (unchecked): a sun-ish knob carrying the brand gradient. */
-.theme-switch-slider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: var(--knob-gap);
-  width: var(--knob);
-  height: var(--knob);
-  border-radius: 50%;
-  transform: translateY(-50%);
-  background: linear-gradient(40deg, var(--accent-deep), var(--accent) 70%);
-  transition: left 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Dark theme (checked): knob slides right and the inset shadow carves it into
-   a crescent moon - the same trick the reference design uses. */
-.theme-switch-input:checked + .theme-switch-slider::before {
-  left: calc(100% - (var(--knob) + var(--knob-gap)));
-  background: #2a3441;
-  box-shadow:
-    inset -3px -2px 5px -2px var(--accent-strong),
-    inset -10px -4px 0 0 var(--accent-faint);
-}
-
-.theme-switch-input:focus-visible + .theme-switch-slider {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .theme-switch-slider,
-  .theme-switch-slider::before {
-    transition: none;
-  }
 }
 
 /* Phase 26+ prompt submission / results.

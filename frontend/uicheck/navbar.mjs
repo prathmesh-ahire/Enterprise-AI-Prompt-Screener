@@ -1,4 +1,4 @@
-/* Close-up of the navbar's account cluster, at rest and hovered, in both themes. */
+/* Close-up of the navbar's account cluster, at rest and hovered (dark only since 56A.3). */
 import { chromium } from '@playwright/test'
 import { readFileSync, mkdirSync } from 'node:fs'
 
@@ -19,16 +19,10 @@ await page.fill('#password', env.ADMIN_PASSWORD)
 await page.click('button[type="submit"]')
 await page.waitForSelector('.navbar-logout', { timeout: 30000 })
 
-for (const theme of ['dark', 'light']) {
-  await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme)
-  await page.waitForTimeout(250)
-  const bar = page.locator('.navbar').first()
-  await bar.screenshot({ path: `${out}/${theme}-rest.png` })
-  await page.hover('.navbar-logout')
-  await page.waitForTimeout(350)
-  await bar.screenshot({ path: `${out}/${theme}-hover.png` })
-  await page.mouse.move(0, 0)
-  await page.waitForTimeout(250)
-}
+const bar = page.locator('.navbar').first()
+await bar.screenshot({ path: `${out}/rest.png` })
+await page.hover('.navbar-logout')
+await page.waitForTimeout(350)
+await bar.screenshot({ path: `${out}/hover.png` })
 await browser.close()
 console.log('navbar close-ups written to ' + out)

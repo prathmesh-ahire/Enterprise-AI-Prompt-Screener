@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { APP_NAME } from './AppShell'
-import { ThemeToggle } from './ThemeToggle'
 
 // todo.md Phase 25.6. Links are additive by role (matches the ADMIN > REVIEWER > USER
 // hierarchy already used elsewhere, e.g. PromptService.resolveRole): REVIEWER sees
@@ -70,8 +69,6 @@ export function Navbar() {
         <div className="navbar-account">
         <span className="navbar-user">{username}</span>
         {role && <span className="role-badge">{role}</span>}
-        {/* 44.7: theme switch sits with the account controls, not the navigation links */}
-        <ThemeToggle />
         {/* V1.2 UI pass: was a `.btn-link` — a bare underlined hyperlink sitting
             between a pill-shaped role badge and the theme switch, which read as a
             stray link rather than as the one control that ends the session. It is

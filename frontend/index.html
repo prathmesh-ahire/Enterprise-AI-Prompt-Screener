@@ -1,29 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Enterprise AI Prompt Screener</title>
-    <!--
-      V1.1 Phase 44.6 - applies the saved theme before the first paint. Without this the
-      document renders in the default dark theme for one frame and then snaps to light for
-      anyone who chose it, which reads as a bug. ThemeProvider re-applies the same value
-      once React mounts; this only removes the flash.
-    -->
-    <script>
-      (function () {
-        try {
-          var stored = localStorage.getItem('theme');
-          document.documentElement.setAttribute(
-            'data-theme',
-            stored === 'light' ? 'light' : 'dark'
-          );
-        } catch (e) {
-          /* private mode / storage blocked - the dark default already on <html> stands */
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
