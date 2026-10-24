@@ -17,9 +17,38 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+// B12/B13: a tampered or deleted token used to still render the page shell, since the old
+// check was only `token !== null` - the invalid token was caught only once an actual API
+// call was made. This decodes the JWT payload and checks `exp` client-side (no signature
+// verification, since that needs the server's secret - a background auth-check call was
+// the other option the test report suggested, but this needs no extra request). Any
+// malformed token (edited, truncated, emptied to '') fails to parse and is treated as absent.
+function isValidToken(token: string | null): boolean {
+  if (!token) {
+    return false
+  }
+  const parts = token.split('.')
+  if (parts.length !== 3) {
+    return false
+  }
+  try {
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    return typeof payload.exp === 'number' && payload.exp * 1000 > Date.now()
+  } catch {
+    return false
+  }
+}
+
 function readInitialState(): AuthState {
+  const token = localStorage.getItem('token')
+  if (!isValidToken(token)) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+    localStorage.removeItem('role')
+    return { token: null, username: null, role: null }
+  }
   return {
-    token: localStorage.getItem('token'),
+    token,
     username: localStorage.getItem('username'),
     role: localStorage.getItem('role') as Role | null,
   }

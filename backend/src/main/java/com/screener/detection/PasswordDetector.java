@@ -157,14 +157,21 @@ public class PasswordDetector implements Detector {
      * {@code ai4privacy/pii-masking-200k}, <b>409</b> put the secret <em>before</em> the
      * keyword and were unreachable — the single largest fixable cause of missed passwords.
      *
-     * <p>The sentence rule is mirrored, not copied. Going forward, a token that ends a
-     * sentence is still the current statement's last word, so it is considered and the scan
-     * then stops. Going backward, a token that ends a sentence is the <em>previous</em>
-     * statement's last word, so the scan stops without considering it at all.
+     * <p>Bugfix (post-54): the original backward sentence rule excluded any token ending in
+     * {@code [.!?]} outright, on the theory that it belonged to a separate, preceding
+     * statement. That made "Sup3rSecretValue! is my password" unreachable — the password
+     * itself ends in {@code !}, and this exact phrasing is the project's headline
+     * value-before-keyword case. The rule now only treats {@code [.!?]} as a real sentence
+     * break when the word immediately after it is capitalised ("Winter235@. I forgot my
+     * password"); otherwise the punctuation is read as part of the value, exactly as the
+     * forward scan already treats a trailing "!" on {@code password: X!}.
      */
     private void scanBackward(String text, int from, List<Candidate> out, Set<Long> seen) {
         int cursor = from;
         int emitted = 0;
+        // Start of the word immediately following the token currently being examined, in
+        // reading order - initially the keyword itself. See the boundary check below.
+        int nextWordStart = from;
 
         while (cursor > 0 && emitted < WINDOW) {
             while (cursor > 0 && Character.isWhitespace(text.charAt(cursor - 1))) {
@@ -178,12 +185,22 @@ public class PasswordDetector implements Detector {
                 tokenStart--;
             }
 
-            if (text.substring(tokenStart, cursor).matches(".*[.!?][\"'`)\\]]*$")) {
+            // A token ending in [.!?] is only a genuine sentence boundary if the word that
+            // follows it starts a new sentence - i.e. is capitalised, as in "Winter235@. I
+            // forgot my password". "Sup3rSecretValue! is my password" also ends in "!", but
+            // "is" that follows stays lower-case: the "!" belongs to the value, not to a
+            // sentence break, and a password is exactly the kind of value likely to end in
+            // punctuation. Without this distinction the value-before-keyword phrasing this
+            // scan exists for ("X! is my password") could never be reached.
+            boolean endsSentence = text.substring(tokenStart, cursor).matches(".*[.!?][\"'`)\\]]*$");
+            if (endsSentence && nextWordStart < text.length()
+                    && Character.isUpperCase(text.charAt(nextWordStart))) {
                 return;
             }
             emit(text, tokenStart, cursor, out, seen);
             emitted++;
             cursor = tokenStart;
+            nextWordStart = tokenStart;
         }
     }
 

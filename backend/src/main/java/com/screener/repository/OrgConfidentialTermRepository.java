@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface OrgConfidentialTermRepository extends JpaRepository<OrgConfidentialTerm, Long> {
     List<OrgConfidentialTerm> findByActiveTrue();
+
+    boolean existsByTermIgnoreCaseAndActiveTrue(String term);
 }

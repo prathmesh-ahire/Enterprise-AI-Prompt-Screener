@@ -122,8 +122,11 @@ public class RiskAnalysisEngine {
         for (String phrase : phrases) {
             Matcher matcher = Pattern.compile(Pattern.quote(phrase), Pattern.CASE_INSENSITIVE).matcher(text);
             while (matcher.find()) {
+                // Store the phrase from our own known-phrase list, not matcher.group() (the
+                // exact submitted text) - risk_signals.evidence_span must never carry a
+                // verbatim copy of prompt content (H14/X12). The two differ only in case.
                 signals.add(new RiskSignalResult(
-                        UUID.randomUUID().toString(), type, description, PHRASE_MATCH_WEIGHT, matcher.group()));
+                        UUID.randomUUID().toString(), type, description, PHRASE_MATCH_WEIGHT, phrase));
             }
         }
         return signals;
@@ -160,8 +163,9 @@ public class RiskAnalysisEngine {
             return new ObfuscationCandidate(0.0, "");
         }
         double strength = Math.min(1.0, longest.length() / 60.0);
-        String evidence = longest.length() > 24 ? longest.substring(0, 24) + "..." : longest;
-        return new ObfuscationCandidate(strength, evidence);
+        // Never store the matched block itself (H14/X12) - it can be a base64-encoded
+        // secret. A length-only description is enough to explain the signal.
+        return new ObfuscationCandidate(strength, "base64-like block detected (" + longest.length() + " characters)");
     }
 
     private ObfuscationCandidate zeroWidthCandidate(String text) {
@@ -186,7 +190,8 @@ public class RiskAnalysisEngine {
         }
         long letterCount = longest.chars().filter(Character::isLetter).count();
         double strength = Math.min(1.0, letterCount / 8.0);
-        return new ObfuscationCandidate(strength, longest);
+        // Never store the spaced-out text itself (H14/X12) - it can spell out a secret.
+        return new ObfuscationCandidate(strength, "spaced-out letters detected (" + letterCount + " characters)");
     }
 
     private ObfuscationCandidate leetspeakCandidate(String text) {
@@ -209,7 +214,10 @@ public class RiskAnalysisEngine {
             return new ObfuscationCandidate(0.0, "");
         }
         double strength = Math.min(1.0, strongestRatio / 0.6);
-        return new ObfuscationCandidate(strength, strongestWord);
+        // Never store the matched word itself (H14/X12) - it can be a leetspeak-obfuscated
+        // secret, which is exactly what this heuristic is designed to catch.
+        return new ObfuscationCandidate(strength,
+                "leetspeak-style substitution detected (" + strongestWord.length() + " characters)");
     }
 
     private record ObfuscationCandidate(double strength, String evidence) {

@@ -107,6 +107,11 @@ public class AdminService {
     }
 
     public OrgTermDto addOrgTerm(String term, Long adminId) {
+        // R8: adding the same term twice used to create two separate active rows -
+        // case-insensitive because OrgConfidentialDetector matches case-insensitively too.
+        if (orgConfidentialTermRepository.existsByTermIgnoreCaseAndActiveTrue(term)) {
+            throw new IllegalStateException("This term is already on the confidential terms list");
+        }
         OrgConfidentialTerm entity = new OrgConfidentialTerm();
         entity.setTerm(term);
         entity.setAddedBy(adminId);
