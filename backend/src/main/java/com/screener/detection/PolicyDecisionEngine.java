@@ -4,12 +4,14 @@ import com.screener.config.SystemConfigValues;
 import com.screener.model.Decision;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
+import com.screener.model.OverrideRule;
 import com.screener.model.SignalType;
 import com.screener.model.SystemConfig;
 import com.screener.repository.SystemConfigRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +79,11 @@ public class PolicyDecisionEngine {
     // decision costs zero config queries instead of up to four.
     public DecisionResult decide(double riskScore, List<DetectionFinding> findings,
                                   List<RiskSignalResult> signals, RiskThresholds thresholds) {
-        Decision decision = bandFor(riskScore, thresholds);
+        Decision scoreBand = bandFor(riskScore, thresholds);
+        Decision decision = scoreBand;
+        // 55.2: records which rules actually raised the decision. Recording only - the
+        // escalate-only arithmetic below is unchanged.
+        List<OverrideRule> applied = new ArrayList<>();
 
         Set<EntityType> entityTypes = findings.stream()
                 .map(DetectionFinding::getEntityType)
@@ -87,10 +93,10 @@ public class PolicyDecisionEngine {
                 .collect(Collectors.toSet());
 
         if (entityTypes.contains(EntityType.PRIVATE_KEY) || entityTypes.contains(EntityType.API_KEY)) {
-            decision = atLeast(decision, Decision.BLOCK);
+            decision = atLeast(decision, OverrideRule.CRITICAL_SECRET, applied);
         }
         if (signalTypes.contains(SignalType.INSTRUCTION_OVERRIDE) || signalTypes.contains(SignalType.POLICY_BYPASS)) {
-            decision = atLeast(decision, Decision.REVIEW);
+            decision = atLeast(decision, OverrideRule.INJECTION_SIGNAL, applied);
         }
         // V1.2 Phase 51.1: ANY detected entity forces at least MASK. This replaces the
         // narrower PASSWORD_SECRET-only rule, which it subsumes - a password is a finding
@@ -113,10 +119,11 @@ public class PolicyDecisionEngine {
         // Escalate-only, like the two rules above: this can raise ALLOW to MASK and can
         // never move CONFIRM, REVIEW or BLOCK down.
         if (!entityTypes.isEmpty()) {
-            decision = atLeast(decision, Decision.MASK);
+            decision = atLeast(decision, OverrideRule.DETECTED_ENTITY, applied);
         }
 
-        return new DecisionResult(decision, riskScore, EXPLANATIONS.get(decision), SAFE_ACTIONS.get(decision));
+        return new DecisionResult(decision, riskScore, EXPLANATIONS.get(decision), SAFE_ACTIONS.get(decision),
+                scoreBand, applied);
     }
 
     private Decision bandFor(double riskScore, RiskThresholds thresholds) {
@@ -151,7 +158,12 @@ public class PolicyDecisionEngine {
                 .orElse(defaultValue);
     }
 
-    private Decision atLeast(Decision current, Decision floor) {
-        return current.ordinal() >= floor.ordinal() ? current : floor;
+    // Raises current to the rule's floor, and records the rule only when it did raise it.
+    private Decision atLeast(Decision current, OverrideRule rule, List<OverrideRule> applied) {
+        if (current.ordinal() >= rule.floor().ordinal()) {
+            return current;
+        }
+        applied.add(rule);
+        return rule.floor();
     }
 }
