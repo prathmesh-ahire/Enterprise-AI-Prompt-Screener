@@ -31,7 +31,7 @@ export function ChartCard({ title, subtitle, period, children }: ChartCardProps)
   )
 }
 
-// Recharts renders SVG, which cannot read a CSS custom property — `fill="var(--accent)"`
+// Recharts renders SVG, which cannot read a CSS custom property — `fill="var(--brand-base)"`
 // resolves to nothing inside an SVG attribute. Every colour therefore has to be handed to
 // it as a literal, which means reading the tokens off the document at runtime. The UI is
 // dark only (56A.3), so the tokens never change after load and are read once.
@@ -40,19 +40,19 @@ export function useChartTokens() {
     const s = getComputedStyle(document.documentElement)
     const t = (name: string) => s.getPropertyValue(name).trim()
     return {
-      accent: t('--accent'),
-      grid: t('--border'),
+      accent: t('--brand-base'),
+      grid: t('--line-subtle'),
       axis: t('--text-muted'),
       text: t('--text-primary'),
       surface: t('--surface-raised'),
-      border: t('--border-strong'),
-      allow: t('--decision-allow'),
-      mask: t('--decision-mask'),
-      confirm: t('--decision-confirm'),
-      block: t('--decision-block'),
-      critical: t('--severity-critical'),
-      high: t('--severity-high'),
-      medium: t('--severity-medium'),
+      border: t('--line-strong'),
+      allow: t('--allow'),
+      mask: t('--mask'),
+      confirm: t('--confirm'),
+      block: t('--block'),
+      critical: t('--sev-critical'),
+      high: t('--sev-high'),
+      medium: t('--sev-medium'),
     }
   }
 

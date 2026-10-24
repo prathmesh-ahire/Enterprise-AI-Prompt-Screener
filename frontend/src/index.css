@@ -1,239 +1,172 @@
 /* ==========================================================================
-   DESIGN TOKENS — V1.1 Phase 44.3 / 44.4
+   DESIGN TOKENS — V2 (todo 56A.2)
    --------------------------------------------------------------------------
-   Everything above this file's component styles is defined here, once. No
-   component rule should contain a raw colour from here on.
+   Copied by script from FOR_DEVELOPER_ONLY/design/prompt-screener-ds/tokens.json
+   (names and values exactly as the design gives them), plus the C9 additions
+   from design.md section 4b: a --text-* variable per type style, used as
+   `font: var(--text-<style>)`, and --space-hero-top. design.md is the single
+   source of truth for the look; nothing here may be rounded or renamed.
 
-   Dark only (V2 design, todo 56A.3): there is no light theme and no theme
-   toggle, so every token is defined once, here.
-
-   Two families, kept strictly apart:
-     * BRAND / CHROME  - the teal ramp. Navbar, buttons, links, focus rings,
-       chart accents. Purely decorative; carries no meaning.
-     * SEMANTIC STATUS - the five decision bands and three severity tiers.
-       These keep traffic-light meaning because an examiner has to read
-       severity instantly, and colour is doing real work there.
+   Dark only (todo 56A.3): there is no light theme and no theme toggle, so
+   every token is defined once, here. No component rule may contain a raw
+   colour, a raw font size or an off-grid spacing value.
    ========================================================================== */
 
 :root {
-  /* --- brand ramp (ocean/teal) ------------------------------------------ */
-  --accent-deep: #03045e;
-  --accent-strong: #0077b6;
-  --accent: #00b4d8;
-  --accent-soft: #90e0ef;
-  --accent-faint: #caf0f8;
-  --accent-bg: rgba(0, 180, 216, 0.14);
-  --accent-border: rgba(0, 180, 216, 0.45);
-  --on-accent: #ffffff;
+  /* --- colour ------------------------------------------------------------ */
+  --surface-page: #000000;
+  --surface-card: #0B0B0E;
+  --surface-raised: #131317;
+  --surface-hover: #1B1B21;
+  --surface-selected: #25252D;
+  --line-subtle: #1C1C22;
+  --line-strong: var(--surface-hover);
+  --line-control: #8E7CAA;
+  --text-primary: #F5F0FC;
+  --text-secondary: #CFC3E0;
+  --text-muted: #A390BE;
+  --text-disabled: #6E5D86;
+  --brand-deep: #2A2496;
+  --brand-strong: #4846E8;
+  --brand-base: #5B78FF;
+  --brand-soft: #A3B3FF;
+  --brand-faint: #D6DEFF;
+  --on-brand: #FFFFFF;
+  --link: var(--brand-soft);
+  --link-hover: var(--brand-faint);
+  --focus-ring: var(--brand-soft);
+  --allow: #4ADE80;
+  --allow-tint: #4ADE801F;
+  --mask: #FACC15;
+  --mask-tint: #FACC151F;
+  --confirm: #FB923C;
+  --confirm-tint: #FB923C1F;
+  --review: #22D3EE;
+  --review-tint: #22D3EE1F;
+  --block: #F87171;
+  --block-tint: #F871711F;
+  --on-decision: var(--surface-page);
+  --sev-critical: var(--block);
+  --sev-critical-tint: var(--block-tint);
+  --sev-high: #F5B544;
+  --sev-high-tint: #F5B5441F;
+  --sev-medium: #ADB0B8;
+  --sev-medium-tint: #ADB0B81F;
+  --diagram-node: #101014;
+  --diagram-node-border: #7E6C99;
+  --diagram-edge: #9A8AB3;
+  --diagram-label: var(--text-primary);
+  --glass-fill: #FFFFFF13;
+  --glass-border: #FFFFFF39;
+  --glass-border-hover: #FFFFFF74;
+  --glow-soft: #5B78FF40;
+  --bends-1: var(--brand-strong);
+  --bends-2: #8A5CFF;
+  --bends-3: #FF9FFC;
+  --corner-accent: #D4EDF9;
+  --shimmer-mid: #E9E2F4;
+  --shimmer-peak: #FFFFFF;
 
-  /* --- surfaces --------------------------------------------------------- */
-  --surface-page: #060a0f;
-  --surface-card: #0e141b;
-  --surface-raised: #161e27;
+  /* --- shadows and glows (glows: public pages only) ---------------------- */
+  --shadow-card: 0 1px 0 #ffffff0a inset, 0 8px 24px -12px #00000099;
+  --shadow-pop: 0 12px 32px -8px #000000cc;
+  --shadow-focus: 0 0 0 2px #000000, 0 0 0 4px #A3B3FF;
+  --glow-button: 0 0 20px #5B78FF80, 0 5px 5px -1px #4846E840, inset 4px 4px 8px #A3B3FF80, inset -4px -4px 8px #4846E866;
+  --glow-card: 0 0 0 1px #5B78FF40, 0 24px 60px -24px #5B78FF80;
+  --glow-card-hover: 0 0 20px 1px #5B78FF40;
 
-  /* --- text ------------------------------------------------------------- */
-  --text-primary: #f2f7fa;
-  --text-secondary: #a7becd;
-  /* Was #6f8496. That cleared AA on the page surface (5.1:1) but NOT on the surfaces
-     muted text actually sits on most often: 4.34:1 on --surface-raised (every table
-     header in the app) and 4.27:1 on the auth page's tinted wash. Phase 45 measured
-     this token against --surface-page only, which is why it passed then. Nudged 4%
-     toward white so the WORST surface clears the bar with headroom: page 5.5,
-     card 5.1, raised 4.6, auth wash 4.6. Found by docs/ui-checks-49.mjs (49.1). */
-  --text-muted: #75899a;
+  /* --- spacing, 4px grid ------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-hero-top: 112px;   /* C9: the public hero's top padding (bundle.css .ps-hero) */
 
-  /* --- lines & depth ---------------------------------------------------- */
-  --border: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.3);
+  /* --- radius ------------------------------------------------------------ */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
 
-  /* --- decision bands (traffic-light meaning is load-bearing) ------------ */
-  --decision-allow: #34d399;
-  --decision-allow-bg: rgba(52, 211, 153, 0.14);
-  --decision-allow-border: rgba(52, 211, 153, 0.45);
-  --decision-mask: #fbbf24;
-  --decision-mask-bg: rgba(251, 191, 36, 0.14);
-  --decision-mask-border: rgba(251, 191, 36, 0.45);
-  /* CONFIRM and REVIEW deliberately share one band: PolicyDecisionEngine
-     splits 50-74 at 65, but the project defines only four colour steps for
-     the 0-100 range, so both sit in orange. */
-  --decision-confirm: #fb923c;
-  --decision-confirm-bg: rgba(251, 146, 60, 0.14);
-  --decision-confirm-border: rgba(251, 146, 60, 0.45);
-  --decision-block: #f87171;
-  --decision-block-bg: rgba(248, 113, 113, 0.14);
-  --decision-block-border: rgba(248, 113, 113, 0.45);
+  /* --- gradients (public pages only) ------------------------------------- */
+  --gradient-hero-scrim: radial-gradient(ellipse 60% 55% at 50% 42%, #000000E0 0%, #000000A0 55%, #00000000 100%);
+  --gradient-glow-line: linear-gradient(90deg, #5B78FF00 0%, #A3B3FF 50%, #5B78FF00 100%);
+  --gradient-brand: linear-gradient(325deg, #4846E8 0%, #525FF4 55%, #4846E8 90%);
+  --gradient-shimmer: linear-gradient(120deg, #CFC3E0 0%, #CFC3E0 38%, #E9E2F4 44%, #FFFFFF 50%, #E9E2F4 56%, #CFC3E0 62%, #CFC3E0 100%);
+  --gradient-card-glow: radial-gradient(120% 90% at 100% 0%, #5B78FF59 0%, #2A249626 45%, #00000000 75%);
 
-  /* --- severity tiers, mirroring RiskSubScoreCalculator.SEVERITY_WEIGHT --- */
-  --severity-critical: #f87171;
-  --severity-critical-bg: rgba(248, 113, 113, 0.14);
-  --severity-critical-border: rgba(248, 113, 113, 0.4);
-  --severity-high: #fbbf24;
-  --severity-high-bg: rgba(251, 191, 36, 0.14);
-  --severity-high-border: rgba(251, 191, 36, 0.4);
-  --severity-medium: #67d9ef;
-  --severity-medium-bg: rgba(103, 217, 239, 0.14);
-  --severity-medium-border: rgba(103, 217, 239, 0.4);
+  /* --- durations --------------------------------------------------------- */
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+  --duration-card: 300ms;
+  --duration-button: 800ms;
+  --duration-shine: 1000ms;
+  --duration-shimmer: 2000ms;
 
-  /* --- gradients (45.1/45.2/45.3) ---------------------------------------
-     The reference design's signature is a multi-stop accent gradient slid
-     across on hover. Defined here rather than in components.css because a
-     gradient is a colour value, and colour values live in this file only.
+  /* --- easing ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease-effect: ease-in-out;
 
-     --gradient-accent is deliberately kept in the navy-to-mid-blue part of
-     the ramp rather than running up to --accent (#00b4d8): these carry white
-     text, and white on the bright cyan measures ~2.3:1, well under AA. Its
-     lightest stop is #0077b6, which holds 4.9:1 against white - so the label
-     stays readable at rest, on hover, AND mid-sweep. (The first version of
-     this used #0096c7 in the middle, which measures 3.4:1; the browser check
-     caught it. Any new stop added here has to be verified the same way.) It
-     needs no light override - a brand-coloured button is the same object on
-     either surface.
+  /* --- sizes ------------------------------------------------------------- */
+  --width-content: 1200px;
+  --width-reading: 68ch;
+  --height-control: 40px;
+  --height-control-sm: 32px;
+  --height-nav: 64px;
 
-     --gradient-accent-bright is for thin lines and clipped text (nav
-     underline, wordmark), which carry no text on top and so can use the
-     bright end. That one DOES flip per theme: the pale stops vanish on a
-     white page. */
-  --gradient-accent: linear-gradient(90deg, #03045e, #0066a0, #0077b6, #0066a0, #03045e);
-  --gradient-accent-bright: linear-gradient(90deg, #0077b6, #00b4d8, #90e0ef, #00b4d8, #0077b6);
-  --gradient-danger: linear-gradient(90deg, #7f1d1d, #b91c1c, #dc2626, #b91c1c, #7f1d1d);
+  /* --- type families ------------------------------------------------- */
+  --font-heading: "Inter", system-ui, "Segoe UI", sans-serif;
+  --font-body: "Source Sans 3", system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* --- typography (self-hosted via @fontsource, see main.tsx) ------------ */
-  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --sans: 'Source Sans 3', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  /* --- SCALE: type ------------------------------------------------------
-     V1.2 UI pass. Before this there was no type scale at all: 13 distinct
-     font sizes were in use (11/12/13/14/15/17/18/20/22/24/28/30px and one
-     stray `0.9em`), each chosen by eye at the moment it was needed, and
-     line-height and letter-spacing were set on only a handful of them. Five
-     near-identical small steps are not a hierarchy - nothing distinguishes
-     13px from 14px except which day it was written - and that is what reads
-     as "unfinished" long before anyone looks at the colours.
-
-     Each step below is a ROLE, and each carries its own line-height and
-     tracking, because those are what actually separate a label from a
-     heading. Tracking opens up on small uppercase type (it is unreadable set
-     tight) and tightens on large type (which looks loose set at 0). The
-     one-off 17/20/22px sizes are gone, folded into the 18/24px steps.
-
-     WEIGHTS ARE CONSTRAINED. main.tsx imports Inter 500/600/700 and Source
-     Sans 3 400/600 only, and `font-synthesis: none` is set, so any other
-     value silently falls back to the nearest imported face rather than
-     rendering as asked. Nothing here may ask for 650. */
-  --fs-micro: 11px;     /* uppercase instrument labels: table headers, eyebrows */
-  --lh-micro: 14px;
-  --ls-micro: 0.06em;
-
-  --fs-label: 12px;     /* badges, chips, legends, stat-card captions */
-  --lh-label: 16px;
-  --ls-label: 0.03em;
-
-  --fs-caption: 13px;   /* form labels, hints, errors, footer */
-  --lh-caption: 18px;
-
-  --fs-body-sm: 14px;   /* secondary prose, nav links, empty states */
-  --lh-body-sm: 20px;
-
-  --fs-body: 15px;      /* controls, inputs, buttons, card titles */
-  --lh-body: 22px;
-
-  --fs-lead: 16px;      /* the sentence under a page title */
-  --lh-lead: 26px;
-
-  --fs-h3: 18px;
-  --lh-h3: 24px;
-  --ls-h3: -0.01em;
-
-  --fs-h2: 24px;
-  --lh-h2: 32px;
-  --ls-h2: -0.015em;
-
-  --fs-h1: 28px;
-  --lh-h1: 36px;
-  --ls-h1: -0.02em;
-
-  --fs-stat: 30px;      /* a headline figure on a stat card */
-  --lh-stat: 32px;
-  --ls-stat: -0.03em;
-
-  /* --- SCALE: spacing ----------------------------------------------------
-     A 4px base step, named so a card and the section around it cannot drift
-     apart. The padding values in this app were previously all one-offs -
-     `3px 10px`, `7px 11px`, `9px 18px`, `36px 12px`, `28px 26px` - so no two
-     components sat on the same grid and nothing lined up optically. */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-7: 28px;
-  --sp-8: 32px;
-  --sp-9: 36px;
-  --sp-10: 40px;
-  --sp-12: 48px;
-  --sp-14: 56px;
-  --sp-16: 64px;
-
-  /* --- SCALE: radius -----------------------------------------------------
-     Was nine different values (2/3/4/6/8/10/12px, 50%, 999px). Four steps
-     plus the pill, kept deliberately tight: chips and inputs read sharper
-     when they are not rounded to the point of looking like toys. */
-  --r-sm: 4px;
-  --r-md: 6px;
-  --r-lg: 10px;
-  --r-xl: 14px;
-  --r-pill: 999px;
-
-  /* --- SCALE: layout ----------------------------------------------------- */
-  --content-w: 1200px;
-  --gutter: var(--sp-4);        /* phone  */
-  --gutter-md: var(--sp-6);     /* tablet */
-  --gutter-lg: var(--sp-10);    /* desktop */
-  --block-gap: var(--sp-8);     /* between the major blocks of one page */
-
-  /* --- ELEVATION ---------------------------------------------------------
-     --shadow-sm/md above are the originals and stay. These three are the
-     named roles the restyle uses: a barely-there resting shadow so a panel
-     is separated from the page without looking like it is floating, and an
-     accent-tinted glow for hover, which is what makes a grid of identical
-     panels feel responsive to the pointer. */
-  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-raised: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
-  --shadow-glow: 0 16px 40px -12px rgba(0, 180, 216, 0.28);
-
-  /* --- MOTION ------------------------------------------------------------
-     One easing curve and three durations, so every transition in the app is
-     timed the same way. The curve is a strong ease-out: things arrive fast
-     and settle, which reads as responsive rather than floaty. */
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-fast: 150ms;
-  --dur-med: 240ms;
-  --dur-slow: 420ms;
-
-  /* The legacy aliases (--bg, --text-h, --text, --code-bg, --shadow) lived here
-     from Phase 44 and were DELETED in Phase 47, on schedule. They existed so the
-     app could re-theme in one step without a half-restyled UI while Phases 45-47
-     rewrote the components underneath them: 44 usages at the start, 13 after
-     Phase 45's component library, 0 now. Deleting the definitions rather than
-     leaving them harmlessly in place is the point - a stray usage now fails to
-     resolve and shows up immediately, instead of silently inheriting. */
+  /* --- type styles (design.md 4b, C9): font shorthand values ----------- */
+  --text-display-hero: 700 60px/64px var(--font-heading);
+  --text-display-section: 600 40px/46px var(--font-heading);
+  --text-stat: 600 30px/36px var(--font-heading);
+  --text-h1: 600 28px/36px var(--font-heading);
+  --text-h2: 600 24px/32px var(--font-heading);
+  --text-h3: 600 18px/26px var(--font-heading);
+  --text-lead: 400 16px/26px var(--font-body);
+  --text-body: 400 15px/24px var(--font-body);
+  --text-body-sm: 400 14px/22px var(--font-body);
+  --text-caption: 400 13px/18px var(--font-body);
+  --text-label: 600 12px/16px var(--font-body);
+  --text-micro: 600 11px/14px var(--font-heading);
+  --text-button: 500 14px/1 var(--font-heading);
+  --text-button-sm: 500 13px/1 var(--font-heading);
+  --text-badge: 600 12px/1 var(--font-heading);
+  --text-badge-lg: 600 13px/1 var(--font-heading);
+  --text-tag: 600 11px/14px var(--font-heading);
+  --text-role: 500 12px/1 var(--font-heading);
+  --text-nav: 500 14px/20px var(--font-heading);
+  --text-wordmark: 700 15px/1 var(--font-heading);
+  --text-code: 400 13px/20px var(--font-mono);
+  --text-display-step: 500 44px/1 var(--font-heading);
+  --text-display-metric: 600 56px/60px var(--font-heading);
+  --text-alert-title: 600 15px/22px var(--font-heading);
+  --text-node-title: 600 14px/20px var(--font-heading);
+  --text-edge-label: 400 12px/16px var(--font-body);
+  --text-chip-value: 400 12px/1 var(--font-mono);
 
   color-scheme: dark;
-  font: 16px/1.55 var(--sans);
-  color: var(--text-secondary);
+  font: var(--text-body);
+  color: var(--text-primary);
   background: var(--surface-page);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 15px; /* scale-lint-ignore: the document base, not a type step */
-  }
 }
 
 /* 44.2: the fixed 1126px centred, side-bordered box was the Vite starter
@@ -301,7 +234,7 @@
    ========================================================================== */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-color: var(--line-strong) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -316,12 +249,12 @@
 ::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   background-clip: content-box;
-  border-radius: var(--r-pill);
-  background-color: var(--border-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--line-strong);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--accent-border);
+  background-color: var(--line-control);
 }
 
 body {
@@ -332,9 +265,9 @@ body {
 /* Visible keyboard focus everywhere, on the brand colour (accessibility pass
    in 49.1 verifies this; defining it here keeps it consistent from the start). */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--brand-soft);
   outline-offset: 2px;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-xs);
 }
 
 /* Inter for headings, Source Sans 3 for body - the pairing from the reference
@@ -347,33 +280,22 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--heading);
+  font-family: var(--font-heading);
   font-weight: 600;
   color: var(--text-primary);
-  letter-spacing: -0.01em;
 }
 
 /* Was 56px - the Vite template's landing-page hero scale, far too loud for an
    application screen. Phase 46.2 introduces the real page-header pattern. */
 h1 {
-  font-size: var(--fs-h1);
-  line-height: var(--lh-h1);
-  margin: 0 0 var(--sp-5);
-  @media (max-width: 1024px) {
-    font-size: var(--fs-h2);
-  }
+  font: var(--text-h1);
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-5);
 }
 h2 {
-  font-size: var(--fs-h2);
-  /* Was `118%` and `-0.24px` - a percentage line-height and a tracking value in px,
-     neither of which matched anything else in the file. Both now come from the h2
-     step, so a heading and the label under it are related by the scale. */
-  line-height: var(--lh-h2);
-  letter-spacing: var(--ls-h2);
-  margin: 0 0 var(--sp-2);
-  @media (max-width: 1024px) {
-    font-size: var(--fs-h3);
-  }
+  font: var(--text-h2);
+  letter-spacing: 0;
+  margin: 0 0 var(--space-2);
 }
 p {
   margin: 0;
@@ -382,16 +304,16 @@ p {
 /* 44.1: `.counter` removed here - it was the Vite starter template's demo
    click-counter, matched by nothing in this app. */
 code {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   display: inline-flex;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-xs);
   color: var(--text-primary);
 }
 
 code {
-  font-size: var(--fs-body);
+  font: var(--text-body);
   line-height: 135%;
-  padding: var(--sp-1) var(--sp-2);
+  padding: var(--space-1) var(--space-2);
   background: var(--surface-raised);
 }
 
@@ -403,10 +325,10 @@ code {
    accounted for. Removed rather than overridden. */
 
 .form-links {
+  font: var(--text-body-sm);
   display: flex;
   justify-content: space-between;
-  margin-top: var(--sp-3);
-  font-size: var(--fs-body-sm);
+  margin-top: var(--space-3);
 }
 
 /* Phase 26+ prompt submission / results.
@@ -422,93 +344,93 @@ code {
 }
 
 .results-section {
-  margin-top: var(--sp-6);
-  padding-top: var(--sp-4);
-  border-top: 1px solid var(--border);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line-subtle);
 }
 
 .masked-text {
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-md);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
   background: var(--surface-raised);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   line-height: 160%;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .ai-response-box {
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-md);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
   background: var(--surface-raised);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   white-space: pre-wrap;
 }
 
 /* Phase 27+ review/pending states, risk score bar */
 .request-id {
-  font-family: var(--mono);
-  font-size: var(--fs-caption);
+  font: var(--text-caption);
+  font-family: var(--font-mono);
 }
 
 .explanation-text {
-  margin: var(--sp-3) 0;
+  margin: var(--space-3) 0;
   color: var(--text-primary);
 }
 
 .summary-text {
-  margin: 0 0 var(--sp-3);
+  margin: 0 0 var(--space-3);
   color: var(--text-primary);
 }
 
 .risk-score-bar-wrap {
-  margin: var(--sp-3) 0;
+  margin: var(--space-3) 0;
 }
 
 .risk-score-label {
+  font: var(--text-caption);
   display: flex;
   justify-content: space-between;
-  font-size: var(--fs-caption);
   color: var(--text-secondary);
-  margin-bottom: var(--sp-1);
+  margin-bottom: var(--space-1);
 }
 
 .risk-score-track {
   width: 100%;
   height: 8px;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   background: var(--surface-raised);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   overflow: hidden;
 }
 
 .risk-score-fill {
   height: 100%;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   transition: width 0.3s ease;
 }
 
 .risk-score-green {
-  background: var(--decision-allow);
+  background: var(--allow);
 }
 
 .risk-score-yellow {
-  background: var(--decision-mask);
+  background: var(--mask);
 }
 
 .risk-score-orange {
-  background: var(--decision-confirm);
+  background: var(--confirm);
 }
 
 .risk-score-red {
-  background: var(--decision-block);
+  background: var(--block);
 }
 
 /* Phase 28+ history page: the filter's own layout (the select inside it is
    styled as a form control in styles/components.css). */
 .history-filter {
   max-width: 260px;
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--space-4);
 }
 
 /* Phase 30+ admin dashboard */
@@ -523,37 +445,37 @@ code {
 .bar-chart {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }
 
 .bar-row {
   display: grid;
   grid-template-columns: 160px 1fr 40px;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }
 
 .bar-label {
-  font-size: var(--fs-caption);
+  font: var(--text-caption);
   color: var(--text-primary);
 }
 
 .bar-track {
   height: 12px;
-  border-radius: var(--r-md);
+  border-radius: var(--radius-sm);
   background: var(--surface-raised);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line-subtle);
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: var(--r-md);
+  background: var(--brand-soft);
+  border-radius: var(--radius-sm);
 }
 
 .bar-count {
-  font-size: var(--fs-caption);
+  font: var(--text-caption);
   color: var(--text-secondary);
   text-align: right;
 }
@@ -562,14 +484,14 @@ code {
 .detector-toggle-list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-2) var(--sp-5);
+  gap: var(--space-2) var(--space-5);
 }
 
 .detector-toggle {
+  font: var(--text-body-sm);
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-body-sm);
+  gap: var(--space-2);
   color: var(--text-primary);
   font-weight: 400;
 }
@@ -577,30 +499,30 @@ code {
 .threshold-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0 var(--sp-4);
+  gap: 0 var(--space-4);
 }
 
 .term-list {
   list-style: none;
-  margin: 0 0 var(--sp-4);
+  margin: 0 0 var(--space-4);
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
+  gap: var(--space-1);
 }
 
 .term-list-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--sp-2) var(--sp-3);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-sm);
 }
 
 .term-add-form {
   display: flex;
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }
 
 /* Layout only — the input's appearance comes from styles/components.css. */
@@ -612,5 +534,5 @@ code {
 .model-status-row {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }

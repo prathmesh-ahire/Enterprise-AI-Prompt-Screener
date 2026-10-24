@@ -23,22 +23,20 @@
    no layout and degrades to a still gradient when motion is reduced.
    ========================================================================== */
 .btn {
+  font: var(--text-body);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-2);
-  font: inherit;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  gap: var(--space-2);
   font-weight: 600;
-  letter-spacing: var(--ls-label);
-  padding: var(--sp-2) var(--sp-5);
+  letter-spacing: .01em;
+  padding: var(--space-2) var(--space-5);
   border: 1px solid transparent;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  color: var(--on-accent);
+  color: var(--on-brand);
   background-color: transparent;
-  background-image: var(--gradient-accent);
+  background-image: none;
   background-size: 300%;
   background-position: left center;
   transition:
@@ -53,12 +51,12 @@
 /* Explicit alias. The bare `.btn` already renders primary (17 existing call
    sites rely on that), so this exists for pages that prefer to name it. */
 .btn-primary {
-  background-image: var(--gradient-accent);
+  background-image: none;
 }
 
 .btn:hover:not(:disabled) {
   background-position: right center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
 .btn:active:not(:disabled) {
@@ -75,18 +73,18 @@
 
 .btn-secondary {
   background-image: none;
-  border-color: var(--border-strong);
+  border-color: var(--line-strong);
   color: var(--text-primary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: var(--accent-bg);
-  border-color: var(--accent-border);
+  background-color: var(--surface-hover);
+  border-color: var(--line-control);
 }
 
 .btn-danger {
-  background-image: var(--gradient-danger);
-  color: var(--on-accent);
+  background-image: none;
+  color: var(--on-brand);
 }
 
 .btn-link {
@@ -94,7 +92,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--accent);
+  color: var(--brand-soft);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -102,17 +100,17 @@
 }
 
 .btn-link:hover:not(:disabled) {
-  color: var(--accent-soft);
+  color: var(--brand-faint);
 }
 
 .btn-row {
   display: flex;
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }
 
 .review-actions {
   flex-wrap: wrap;
-  margin-top: var(--sp-2);
+  margin-top: var(--space-2);
 }
 
 /* ==========================================================================
@@ -138,11 +136,10 @@
 }
 
 .loading-inline {
+  font: var(--text-body-sm);
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
+  gap: var(--space-2);
   color: var(--text-muted);
 }
 
@@ -159,36 +156,35 @@
 .app-main {
   flex: 1;
   width: 100%;
-  max-width: var(--content-w);
+  max-width: var(--width-content);
   margin: 0 auto;
-  padding: var(--sp-8) var(--gutter) var(--sp-16);
+  padding: var(--space-8) var(--space-4) var(--space-16);
   box-sizing: border-box;
   text-align: left;
 }
 
 @media (min-width: 640px) {
   .app-main {
-    padding-inline: var(--gutter-md);
+    padding-inline: var(--space-6);
   }
 }
 
 @media (min-width: 1024px) {
   .app-main {
-    padding-inline: var(--gutter-lg);
+    padding-inline: var(--space-8);
   }
 }
 
 .app-footer {
+  font: var(--text-caption);
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-4) var(--sp-6);
-  border-top: 1px solid var(--border);
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--line-subtle);
   background: var(--surface-card);
   color: var(--text-muted);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
 }
 
 /* ==========================================================================
@@ -203,9 +199,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-4);
-  padding: var(--sp-4) var(--sp-6);
-  border-bottom: 1px solid var(--border);
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--line-subtle);
   /* Opaque, not translucent: content scrolls underneath it, and a see-through
      bar over a table of decision badges is unreadable. */
   background: var(--surface-card);
@@ -221,16 +217,16 @@
   width: 40px;
   height: 40px;
   padding: 0;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--r-lg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
   background: transparent;
   cursor: pointer;
   transition: border-color 0.25s ease, background-color 0.25s ease;
 }
 
 .navbar-toggle:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
+  border-color: var(--line-control);
+  background: var(--surface-hover);
 }
 
 /* Three bars drawn from one element: the middle is the element's own
@@ -241,7 +237,7 @@
   display: block;
   width: 18px;
   height: 2px;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-xs);
   background: var(--text-primary);
 }
 
@@ -256,15 +252,14 @@
 }
 
 .navbar-toggle-bars::after {
-  top: var(--sp-1);
+  top: var(--space-1);
 }
 
 .navbar-brand {
-  font-family: var(--heading);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
+  font: var(--text-h3);
+  font-family: var(--font-heading);
   font-weight: 700;
-  letter-spacing: var(--ls-h3);
+  letter-spacing: 0;
   color: var(--text-primary);
   transition: opacity 0.3s ease;
 }
@@ -273,7 +268,7 @@
    colour has to come back on its own when the gradient is removed — hence
    both the -webkit- and standard properties are reset explicitly. */
 .navbar-brand:hover {
-  background-image: var(--gradient-accent-bright);
+  background-image: linear-gradient(var(--brand-base), var(--brand-base));
   background-size: 300%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -284,16 +279,15 @@
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: var(--sp-6);
+  gap: var(--space-6);
 }
 
 .navbar-links a {
+  font: var(--text-caption);
   position: relative;
-  padding: var(--sp-1) 0;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  padding: var(--space-1) 0;
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
   text-decoration: none;
   color: var(--text-secondary);
@@ -314,8 +308,8 @@
   left: 50%;
   width: 0;
   height: 2px;
-  border-radius: var(--r-sm);
-  background-image: var(--gradient-accent-bright);
+  border-radius: var(--radius-xs);
+  background-image: linear-gradient(var(--brand-base), var(--brand-base));
   pointer-events: none;
   transition: width 0.25s ease, left 0.25s ease;
 }
@@ -329,8 +323,7 @@
 /* The account controls beside the links are not navigation — they must not
    pick up the uppercase link treatment or the underline. */
 .navbar-user {
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
+  font: var(--text-body-sm);
   color: var(--text-secondary);
 }
 
@@ -340,7 +333,7 @@
 .navbar-account {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }
 
 /* ==========================================================================
@@ -362,31 +355,30 @@
    state only, so it never sits on screen competing with a real BLOCK badge.
    ========================================================================== */
 .navbar-logout {
+  font: var(--text-micro);
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-1) var(--sp-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--r-pill);
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-secondary);
-  font-family: var(--heading);
-  font-size: var(--fs-micro);
-  line-height: var(--lh-micro);
+  font-family: var(--font-heading);
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
   cursor: pointer;
   transition:
-    color var(--dur-fast) var(--ease),
-    border-color var(--dur-fast) var(--ease),
-    background-color var(--dur-fast) var(--ease);
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
 }
 
 .navbar-logout:hover {
-  color: var(--decision-block);
-  border-color: var(--decision-block-border);
-  background: var(--decision-block-bg);
+  color: var(--block);
+  border-color: color-mix(in srgb, var(--block) 45%, transparent);
+  background: var(--block-tint);
 }
 
 .navbar-logout:active {
@@ -397,7 +389,7 @@
    on the control, and it says "leaving" better than any colour change can. */
 .navbar-logout-icon {
   flex: none;
-  transition: transform var(--dur-fast) var(--ease);
+  transition: transform var(--duration-fast) var(--ease-out);
 }
 
 .navbar-logout:hover .navbar-logout-icon {
@@ -413,7 +405,7 @@
 @media (max-width: 900px) {
   .navbar {
     flex-wrap: wrap;
-    padding: var(--sp-3) var(--sp-4);
+    padding: var(--space-3) var(--space-4);
   }
 
   .navbar-toggle {
@@ -427,10 +419,10 @@
     flex-basis: 100%;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--sp-1);
-    margin-top: var(--sp-3);
-    padding-top: var(--sp-3);
-    border-top: 1px solid var(--border);
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-subtle);
   }
 
   .navbar-open .navbar-links {
@@ -438,9 +430,9 @@
   }
 
   .navbar-links a {
+    font: var(--text-body-sm);
     width: 100%;
-    padding: var(--sp-2) 0;
-    font-size: var(--fs-body-sm);
+    padding: var(--space-2) 0;
   }
 
   /* The centre-growing underline reads as an accident on a stacked list —
@@ -451,17 +443,17 @@
   }
 
   .navbar-links a.active {
-    padding-left: var(--sp-3);
-    border-left: 3px solid var(--accent);
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--brand-soft);
   }
 
   /* Account controls sit together on one row under the links — delivered by
      .navbar-account's own flex row now, not by a margin on two of the four. */
   .navbar-account {
     flex-wrap: wrap;
-    margin-top: var(--sp-3);
-    padding-top: var(--sp-3);
-    border-top: 1px solid var(--border);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line-subtle);
     width: 100%;
   }
 }
@@ -471,18 +463,17 @@
    ========================================================================== */
 .role-badge,
 .status-pill {
+  font: var(--text-micro);
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-micro);
-  line-height: var(--lh-micro);
+  gap: var(--space-2);
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--r-pill);
-  background: var(--accent-bg);
-  border: 1px solid var(--accent-border);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface-hover);
+  border: 1px solid var(--line-control);
   color: var(--text-primary);
 }
 
@@ -501,15 +492,14 @@
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
-  margin-bottom: var(--sp-4);
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
   text-align: left;
 }
 
 .form-field label,
 .field-label {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font: var(--text-caption);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -521,17 +511,15 @@
 .prompt-textarea,
 .history-filter select,
 .term-add-form input {
-  font: inherit;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  font: var(--text-body);
   width: 100%;
-  padding: var(--sp-3) var(--sp-3);
+  padding: var(--space-3) var(--space-3);
   box-sizing: border-box;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   background-color: var(--surface-card);
-  background-image: var(--gradient-accent-bright);
+  background-image: linear-gradient(var(--brand-base), var(--brand-base));
   background-repeat: no-repeat;
   background-position: center bottom;
   background-size: 0% 2px;
@@ -556,7 +544,7 @@
 .prompt-textarea:hover:not(:disabled),
 .history-filter select:hover:not(:disabled),
 .term-add-form input:hover:not(:disabled) {
-  border-color: var(--border-strong);
+  border-color: var(--line-strong);
 }
 
 .form-field input:focus,
@@ -567,8 +555,8 @@
 .history-filter select:focus,
 .term-add-form input:focus {
   background-size: 100% 2px;
-  border-color: var(--accent-border);
-  box-shadow: 0 4px 14px var(--accent-bg);
+  border-color: var(--line-control);
+  box-shadow: 0 4px 14px var(--surface-hover);
   transform: scale(1.005);
 }
 
@@ -594,50 +582,47 @@
 .form-field textarea.input-error,
 .input-error,
 [aria-invalid='true'] {
-  border-color: var(--decision-block-border);
+  border-color: color-mix(in srgb, var(--block) 45%, transparent);
   background-image: none;
 }
 
 .form-field input.input-error:focus,
 .input-error:focus,
 [aria-invalid='true']:focus {
-  border-color: var(--decision-block);
-  box-shadow: 0 4px 14px var(--decision-block-bg);
+  border-color: var(--block);
+  box-shadow: 0 4px 14px var(--block-tint);
 }
 
 .form-field-error {
+  font: var(--text-caption);
   display: flex;
   align-items: center;
-  gap: var(--sp-1);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--decision-block);
+  gap: var(--space-1);
+  color: var(--block);
 }
 
 .form-field-hint {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font: var(--text-caption);
   color: var(--text-muted);
 }
 
 .char-counter {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font: var(--text-caption);
   color: var(--text-muted);
   text-align: right;
-  margin-top: var(--sp-1);
+  margin-top: var(--space-1);
   font-variant-numeric: tabular-nums;
 }
 
 .char-counter-over {
-  color: var(--decision-block);
+  color: var(--block);
   font-weight: 600;
 }
 
 .detector-toggle input,
 .form-field input[type='checkbox'] {
   width: auto;
-  accent-color: var(--accent);
+  accent-color: var(--brand-soft);
 }
 
 /* ==========================================================================
@@ -654,16 +639,16 @@
    ========================================================================== */
 .card {
   position: relative;
-  padding: var(--sp-4) var(--sp-5);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-lg);
   background: var(--surface-card);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
   transition:
-    transform var(--dur-med) var(--ease),
-    box-shadow var(--dur-med) var(--ease),
-    border-color var(--dur-med) var(--ease);
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
 }
 
 /* V1.2 UI pass. `.card-lift`, `.card-curtain` and `.card-tilt` were defined in
@@ -684,9 +669,9 @@
   position: relative;
   overflow: hidden;
   transition:
-    transform var(--dur-med) var(--ease),
-    box-shadow var(--dur-med) var(--ease),
-    border-color var(--dur-med) var(--ease);
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
 }
 
 .panel-hover::after,
@@ -707,7 +692,7 @@
     rgba(255, 255, 255, 0.06),
     transparent
   );
-  transition: opacity var(--dur-fast) var(--ease);
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .panel-hover:hover,
@@ -715,8 +700,8 @@
 .chart-card:hover,
 .admin-section:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-glow);
-  border-color: var(--accent-border);
+  box-shadow: none;
+  border-color: var(--line-control);
 }
 
 .panel-hover:hover::after,
@@ -724,7 +709,7 @@
 .chart-card:hover::after,
 .admin-section:hover::after {
   opacity: 1;
-  animation: panel-sheen var(--dur-slow) var(--ease);
+  animation: panel-sheen var(--duration-slow) var(--ease-out);
 }
 
 @keyframes panel-sheen {
@@ -737,12 +722,11 @@
 }
 
 .card-header {
-  font-family: var(--heading);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  font: var(--text-body);
+  font-family: var(--font-heading);
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: var(--sp-3);
+  margin-bottom: var(--space-3);
 }
 
 /* V1.2 UI pass. The stat card was a centred number in a thin box with the
@@ -758,16 +742,16 @@
 .stat-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }
 
 .stat-card {
   position: relative;
-  padding: var(--sp-5) var(--sp-5) var(--sp-4);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-lg);
   background: var(--surface-card);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-card);
   text-align: left;
   overflow: hidden;
 }
@@ -780,9 +764,9 @@
   inset-inline: 0;
   top: 0;
   height: 2px;
-  background-image: var(--gradient-accent-bright);
+  background-image: linear-gradient(var(--brand-base), var(--brand-base));
   opacity: 0.55;
-  transition: opacity var(--dur-med) var(--ease);
+  transition: opacity var(--duration-base) var(--ease-out);
 }
 
 .stat-card:hover::before {
@@ -790,23 +774,21 @@
 }
 
 .stat-card-value {
-  font-family: var(--heading);
-  font-size: var(--fs-stat);
+  font: var(--text-stat);
+  font-family: var(--font-heading);
   font-weight: 700;
-  line-height: var(--lh-stat);
-  letter-spacing: var(--ls-stat);
+  letter-spacing: -0.01em;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums slashed-zero;
 }
 
 .stat-card-label {
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
+  font: var(--text-label);
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-top: var(--sp-2);
+  margin-top: var(--space-2);
 }
 
 /* ==========================================================================
@@ -818,49 +800,48 @@
    this file only supplies the four band appearances it names.
    ========================================================================== */
 .badge {
+  font: var(--text-label);
   display: inline-block;
-  font-size: var(--fs-label);
   font-weight: 600;
-  letter-spacing: var(--ls-label);
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--r-pill);
+  letter-spacing: .01em;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
-  line-height: var(--lh-label);
-  margin-bottom: var(--sp-2);
+  margin-bottom: var(--space-2);
   white-space: nowrap;
 }
 
 .badge-band-green,
 .badge-safe {
-  background: var(--decision-allow-bg);
-  border-color: var(--decision-allow-border);
-  color: var(--decision-allow);
+  background: var(--allow-tint);
+  border-color: color-mix(in srgb, var(--allow) 45%, transparent);
+  color: var(--allow);
 }
 
 .badge-band-yellow {
-  background: var(--decision-mask-bg);
-  border-color: var(--decision-mask-border);
-  color: var(--decision-mask);
+  background: var(--mask-tint);
+  border-color: color-mix(in srgb, var(--mask) 45%, transparent);
+  color: var(--mask);
 }
 
 /* CONFIRM and REVIEW share this one, per the Phase 44 band decision. They
    stay tellable apart because the badge prints the decision word itself —
    colour is never the only signal (49.1). */
 .badge-band-orange {
-  background: var(--decision-confirm-bg);
-  border-color: var(--decision-confirm-border);
-  color: var(--decision-confirm);
+  background: var(--confirm-tint);
+  border-color: color-mix(in srgb, var(--confirm) 45%, transparent);
+  color: var(--confirm);
 }
 
 .badge-band-red {
-  background: var(--decision-block-bg);
-  border-color: var(--decision-block-border);
-  color: var(--decision-block);
+  background: var(--block-tint);
+  border-color: color-mix(in srgb, var(--block) 45%, transparent);
+  color: var(--block);
 }
 
 .badge-neutral {
-  background: var(--accent-bg);
-  border-color: var(--accent-border);
+  background: var(--surface-hover);
+  border-color: var(--line-control);
   color: var(--text-primary);
 }
 
@@ -872,57 +853,56 @@
 .signal-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin: var(--sp-2) 0 var(--sp-4);
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-4);
 }
 
 .entity-chip,
 .signal-chip {
+  font: var(--text-label);
   display: inline-block;
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  letter-spacing: var(--ls-label);
+  letter-spacing: .01em;
   font-weight: 600;
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--r-pill);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   white-space: nowrap;
 }
 
 .entity-chip-critical {
-  background: var(--severity-critical-bg);
-  border-color: var(--severity-critical-border);
-  color: var(--severity-critical);
+  background: var(--sev-critical-tint);
+  border-color: var(--sev-critical);
+  color: var(--sev-critical);
 }
 
 .entity-chip-high {
-  background: var(--severity-high-bg);
-  border-color: var(--severity-high-border);
-  color: var(--severity-high);
+  background: var(--sev-high-tint);
+  border-color: var(--sev-high);
+  color: var(--sev-high);
 }
 
 .entity-chip-medium {
-  background: var(--severity-medium-bg);
-  border-color: var(--severity-medium-border);
-  color: var(--severity-medium);
+  background: var(--sev-medium-tint);
+  border-color: var(--sev-medium);
+  color: var(--sev-medium);
 }
 
 /* Risk signals are neutral: they are evidence, not a severity ranking. */
 .signal-chip {
   background: var(--surface-raised);
-  border-color: var(--border);
+  border-color: var(--line-subtle);
   color: var(--text-secondary);
 }
 
 .placeholder-chip {
+  font: var(--text-caption);
   display: inline-block;
-  padding: 0 var(--sp-1);
-  border-radius: var(--r-sm);
-  background: var(--accent-bg);
-  border: 1px solid var(--accent-border);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-xs);
+  background: var(--surface-hover);
+  border: 1px solid var(--line-control);
   color: var(--text-primary);
-  font-family: var(--mono);
-  font-size: var(--fs-caption);
+  font-family: var(--font-mono);
 }
 
 /* ==========================================================================
@@ -936,10 +916,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--sp-8) var(--sp-4);
+  padding: var(--space-8) var(--space-4);
   background-image:
-    radial-gradient(60ch 60ch at 15% 0%, var(--accent-bg), transparent 70%),
-    radial-gradient(70ch 70ch at 90% 100%, var(--accent-bg), transparent 70%);
+    radial-gradient(60ch 60ch at 15% 0%, var(--surface-hover), transparent 70%),
+    radial-gradient(70ch 70ch at 90% 100%, var(--surface-hover), transparent 70%);
 }
 
 /* V1.2 UI pass: the split. One column below 960px (the panel is removed, not just
@@ -951,7 +931,7 @@
   width: 100%;
   max-width: 1120px;
   margin: 0 auto;
-  gap: var(--sp-16);
+  gap: var(--space-16);
   align-items: center;
 }
 
@@ -973,12 +953,11 @@
 }
 
 .auth-hero-mark {
-  margin: 0 0 var(--sp-5);
-  font-family: var(--heading);
-  font-size: var(--fs-micro);
-  line-height: var(--lh-micro);
+  font: var(--text-micro);
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-heading);
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -986,8 +965,8 @@
 /* Deliberately larger than any heading inside the app shell. This is the one
    marketing-weight statement in the product, and it is the first thing seen. */
 .auth-hero-title {
-  margin: 0 0 var(--sp-5);
-  font-family: var(--heading);
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-heading);
   font-size: clamp(30px, 1.4rem + 1.9vw, 46px);
   line-height: 1.12;
   letter-spacing: -0.025em;
@@ -998,16 +977,15 @@
 /* One word in the brand gradient, never the whole sentence - the rest has to keep
    full text contrast, and a gradient-filled paragraph is unreadable. */
 .auth-hero-accent {
-  background-image: var(--gradient-accent-bright);
+  background-image: linear-gradient(var(--brand-base), var(--brand-base));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .auth-hero-lede {
-  margin: 0 0 var(--sp-8);
-  font-size: var(--fs-lead);
-  line-height: var(--lh-lead);
+  font: var(--text-lead);
+  margin: 0 0 var(--space-8);
   color: var(--text-secondary);
 }
 
@@ -1016,14 +994,13 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: var(--sp-4);
+  gap: var(--space-4);
 }
 
 .auth-hero-points li {
+  font: var(--text-body-sm);
   position: relative;
-  padding-left: var(--sp-7);
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
+  padding-left: var(--space-7);
   color: var(--text-secondary);
 }
 
@@ -1036,7 +1013,7 @@
   top: 4px;
   width: 7px;
   height: 12px;
-  border: solid var(--accent);
+  border: solid var(--brand-soft);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -1052,21 +1029,20 @@
 
 
 .auth-brand {
+  font: var(--text-body);
   display: block;
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--space-4);
   text-align: center;
-  font-family: var(--heading);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  font-family: var(--font-heading);
   font-weight: 600;
-  letter-spacing: var(--ls-label);
+  letter-spacing: .01em;
   color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.25s ease;
 }
 
 .auth-brand:hover {
-  color: var(--accent);
+  color: var(--brand-soft);
 }
 
 /* Once the split panel is on screen it carries the wordmark, so the card's own copy
@@ -1081,21 +1057,19 @@
 }
 
 .auth-card {
-  padding: var(--sp-7) var(--sp-7);
-  box-shadow: var(--shadow-md);
+  padding: var(--space-7) var(--space-7);
+  box-shadow: var(--shadow-pop);
 }
 
 .auth-title {
-  font-size: var(--fs-h2);
-  line-height: var(--lh-h2);
-  letter-spacing: var(--ls-h2);
-  margin: 0 0 var(--sp-1);
+  font: var(--text-h2);
+  letter-spacing: 0;
+  margin: 0 0 var(--space-1);
 }
 
 .auth-subtitle {
-  margin-bottom: var(--sp-5);
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
+  font: var(--text-body-sm);
+  margin-bottom: var(--space-5);
   color: var(--text-secondary);
 }
 
@@ -1106,10 +1080,9 @@
 }
 
 .auth-footnote {
-  margin-top: var(--sp-5);
+  font: var(--text-label);
+  margin-top: var(--space-5);
   text-align: center;
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
   color: var(--text-muted);
 }
 
@@ -1121,48 +1094,47 @@
    carries its decision word in the badge as well.
    ========================================================================== */
 .result-card {
-  padding: var(--sp-5) var(--sp-5);
-  border-radius: var(--r-xl);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--border-strong);
+  padding: var(--space-5) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-subtle);
+  border-left: 4px solid var(--line-strong);
   background: var(--surface-card);
 }
 
 .result-card-allow {
-  border-left-color: var(--decision-allow);
-  background: color-mix(in srgb, var(--decision-allow) 5%, var(--surface-card));
+  border-left-color: var(--allow);
+  background: color-mix(in srgb, var(--allow) 5%, var(--surface-card));
 }
 
 .result-card-mask {
-  border-left-color: var(--decision-mask);
-  background: color-mix(in srgb, var(--decision-mask) 5%, var(--surface-card));
+  border-left-color: var(--mask);
+  background: color-mix(in srgb, var(--mask) 5%, var(--surface-card));
 }
 
 /* CONFIRM and REVIEW share the orange band, per the Phase 44 decision. */
 .result-card-confirm,
 .result-card-review {
-  border-left-color: var(--decision-confirm);
-  background: color-mix(in srgb, var(--decision-confirm) 5%, var(--surface-card));
+  border-left-color: var(--confirm);
+  background: color-mix(in srgb, var(--confirm) 5%, var(--surface-card));
 }
 
 .result-card-block {
-  border-left-color: var(--decision-block);
-  background: color-mix(in srgb, var(--decision-block) 5%, var(--surface-card));
+  border-left-color: var(--block);
+  background: color-mix(in srgb, var(--block) 5%, var(--surface-card));
 }
 
 .result-head {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--space-3);
   flex-wrap: wrap;
-  margin-bottom: var(--sp-1);
+  margin-bottom: var(--space-1);
 }
 
 .result-title {
-  font-family: var(--heading);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-  letter-spacing: var(--ls-h3);
+  font: var(--text-h3);
+  font-family: var(--font-heading);
+  letter-spacing: 0;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -1171,18 +1143,17 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--sp-3);
+  gap: var(--space-3);
 }
 
 .section-label {
-  font-family: var(--heading);
-  font-size: var(--fs-micro);
-  line-height: var(--lh-micro);
+  font: var(--text-micro);
+  font-family: var(--font-heading);
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin: var(--sp-4) 0 var(--sp-2);
+  margin: var(--space-4) 0 var(--space-2);
 }
 
 /* ==========================================================================
@@ -1194,24 +1165,23 @@
    "grouped form sections": no markup changed, every page gets it at once.
    ========================================================================== */
 .admin-section {
-  margin: var(--sp-5) 0;
-  padding: var(--sp-5) var(--sp-6);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
+  margin: var(--space-5) 0;
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-lg);
   background: var(--surface-card);
 }
 
 .admin-section h2 {
+  font: var(--text-h3);
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--space-3);
   flex-wrap: wrap;
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-  letter-spacing: var(--ls-h3);
-  margin: 0 0 var(--sp-4);
-  padding-bottom: var(--sp-3);
-  border-bottom: 1px solid var(--border);
+  letter-spacing: 0;
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line-subtle);
 }
 
 /* A panel whose only child is a table should not double the padding around
@@ -1222,7 +1192,7 @@
 
 @media (max-width: 700px) {
   .admin-section {
-    padding: var(--sp-4);
+    padding: var(--space-4);
   }
 }
 
@@ -1246,14 +1216,14 @@
      floor in min() lets the track collapse to the container width instead.
      Caught by re-running ui-checks-46.mjs after this phase. */
   grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
-  gap: var(--sp-4);
-  margin: var(--sp-5) 0;
+  gap: var(--space-4);
+  margin: var(--space-5) 0;
 }
 
 .chart-card {
-  padding: var(--sp-5) var(--sp-5);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
+  padding: var(--space-5) var(--space-5);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-lg);
   background: var(--surface-card);
   min-width: 0; /* lets a grid child actually shrink instead of overflowing */
 }
@@ -1262,23 +1232,21 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--sp-3);
-  margin-bottom: var(--sp-4);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .chart-title {
-  font-family: var(--heading);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  font: var(--text-body);
+  font-family: var(--font-heading);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
 
 .chart-subtitle {
-  margin-top: var(--sp-1);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font: var(--text-caption);
+  margin-top: var(--space-1);
   color: var(--text-secondary);
   max-width: 60ch;
 }
@@ -1287,17 +1255,16 @@
    dashboard mixes today-only, all-time and 7-day figures, and the panels
    disagreeing is the most common "is it broken?" question it provokes. */
 .chart-period {
+  font: var(--text-micro);
   flex: none;
   align-self: flex-start;
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--r-pill);
-  border: 1px solid var(--accent-border);
-  background: var(--accent-bg);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-control);
+  background: var(--surface-hover);
   color: var(--text-primary);
-  font-size: var(--fs-micro);
-  line-height: var(--lh-micro);
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1307,11 +1274,10 @@
 }
 
 .chart-empty {
-  padding: var(--sp-9) var(--sp-3);
+  font: var(--text-body-sm);
+  padding: var(--space-9) var(--space-3);
   text-align: center;
   color: var(--text-muted);
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
 }
 
 /* Custom donut legend — recharts' own sorts alphabetically, which reorders the
@@ -1320,43 +1286,41 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: var(--sp-2) var(--sp-4);
+  gap: var(--space-2) var(--space-4);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .chart-legend-item {
+  font: var(--text-label);
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-2);
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
+  gap: var(--space-2);
   font-weight: 600;
-  letter-spacing: var(--ls-label);
+  letter-spacing: .01em;
   color: var(--text-primary);
 }
 
 .chart-legend-swatch {
   width: 10px;
   height: 10px;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-xs);
   flex: none;
 }
 
 /* recharts' default tooltip is a white box with a light border — invisible
    against the dark surface, and unstyled against the light one. */
 .chart-tooltip {
+  font: var(--text-caption);
   display: flex;
   align-items: baseline;
-  gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--border-strong);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-strong);
   background: var(--surface-raised);
-  box-shadow: var(--shadow-md);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  box-shadow: var(--shadow-pop);
 }
 
 .chart-tooltip-label {
@@ -1364,7 +1328,7 @@
 }
 
 .chart-tooltip-value {
-  font-family: var(--heading);
+  font-family: var(--font-heading);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -1372,9 +1336,9 @@
 /* recharts puts a focusable wrapper around the surface; keep the project's
    focus ring rather than letting it draw its own default outline. */
 .chart-body .recharts-wrapper:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--brand-soft);
   outline-offset: 2px;
-  border-radius: var(--r-lg);
+  border-radius: var(--radius-md);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1393,11 +1357,11 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--sp-4);
+  gap: var(--space-4);
   flex-wrap: wrap;
-  margin-bottom: var(--sp-6);
-  padding-bottom: var(--sp-4);
-  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line-subtle);
 }
 
 .page-header h1 {
@@ -1405,17 +1369,16 @@
 }
 
 .page-header-description {
-  margin-top: var(--sp-2);
+  font: var(--text-lead);
+  margin-top: var(--space-2);
   max-width: 68ch;
   color: var(--text-secondary);
-  font-size: var(--fs-lead);
-  line-height: var(--lh-lead);
 }
 
 .page-header-actions {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -1423,38 +1386,36 @@
    46.4 LOADING / EMPTY / ERROR
    ========================================================================== */
 .data-state {
+  font: var(--text-body);
   color: var(--text-muted);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
 }
 
 .data-state-loading {
-  padding: var(--sp-5) 0;
+  padding: var(--space-5) 0;
 }
 
 .data-state-empty {
-  padding: var(--sp-7) var(--sp-5);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--r-xl);
+  padding: var(--space-7) var(--space-5);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
   background: var(--surface-card);
   text-align: center;
 }
 
 .data-state-title {
   color: var(--text-primary);
-  font-family: var(--heading);
+  font-family: var(--font-heading);
   font-weight: 600;
 }
 
 .data-state-hint {
-  margin-top: var(--sp-2);
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
+  font: var(--text-body-sm);
+  margin-top: var(--space-2);
   color: var(--text-muted);
 }
 
 .data-state-action {
-  margin-top: var(--sp-3);
+  margin-top: var(--space-3);
 }
 
 /* ==========================================================================
@@ -1476,42 +1437,40 @@
 }
 .data-table,
 .history-table {
+  font: var(--text-body-sm);
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
 }
 
 .data-table th,
 .history-table th {
+  font: var(--text-micro);
   text-align: left;
-  padding: var(--sp-3) var(--sp-3);
-  font-family: var(--heading);
-  font-size: var(--fs-micro);
-  line-height: var(--lh-micro);
+  padding: var(--space-3) var(--space-3);
+  font-family: var(--font-heading);
   font-weight: 600;
-  letter-spacing: var(--ls-micro);
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-muted);
   background: var(--surface-raised);
-  border-bottom: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--line-strong);
   white-space: nowrap;
 }
 
 .data-table th:first-child,
 .history-table th:first-child {
-  border-top-left-radius: var(--r-lg);
+  border-top-left-radius: var(--radius-md);
 }
 
 .data-table th:last-child,
 .history-table th:last-child {
-  border-top-right-radius: var(--r-lg);
+  border-top-right-radius: var(--radius-md);
 }
 
 .data-table td,
 .history-table td {
-  padding: var(--sp-3) var(--sp-3);
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--line-subtle);
   color: var(--text-secondary);
   vertical-align: top;
 }
@@ -1539,7 +1498,7 @@
 
 .data-table tbody tr,
 .history-table tbody tr {
-  transition: background-color var(--dur-fast) var(--ease);
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
 /* A button sitting in a table row is a per-row secondary action, not the
@@ -1551,29 +1510,28 @@
    action, and it is not in a table. */
 .data-table .btn,
 .history-table .btn {
-  padding: var(--sp-1) var(--sp-3);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font: var(--text-caption);
+  padding: var(--space-1) var(--space-3);
 }
 
 .data-table .btn-danger,
 .history-table .btn-danger {
   background-image: none;
   background-color: transparent;
-  border-color: var(--decision-block-border);
-  color: var(--decision-block);
+  border-color: color-mix(in srgb, var(--block) 45%, transparent);
+  color: var(--block);
 }
 
 .data-table .btn-danger:hover:not(:disabled),
 .history-table .btn-danger:hover:not(:disabled) {
-  background-image: var(--gradient-danger);
+  background-image: none;
   border-color: transparent;
-  color: var(--on-accent);
+  color: var(--on-brand);
 }
 
 .data-table tbody tr:hover,
 .history-table tbody tr:hover {
-  background: var(--accent-bg);
+  background: var(--surface-hover);
 }
 
 .history-row {
@@ -1586,23 +1544,22 @@
 .history-detail-row td,
 .history-detail-row:hover td {
   background: var(--surface-raised);
-  box-shadow: inset 3px 0 0 var(--accent);
+  box-shadow: inset 3px 0 0 var(--brand-soft);
 }
 
 .history-detail {
-  padding: var(--sp-2) var(--sp-1);
+  padding: var(--space-2) var(--space-1);
 }
 
 .pagination {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
-  margin-top: var(--sp-4);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
 }
 
 .pagination-label {
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
+  font: var(--text-body-sm);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -1613,19 +1570,19 @@
    read apart in greyscale and for anyone who cannot distinguish the hues.
    ========================================================================== */
 .alert {
+  font: var(--text-body-sm);
   display: flex;
   align-items: flex-start;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--border);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-subtle);
   background: var(--surface-raised);
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
   color: var(--text-secondary);
 }
 
 .alert-icon {
+  font: var(--text-label);
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -1633,10 +1590,9 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  font-size: var(--fs-label);
   font-weight: 700;
   line-height: 1;
-  color: var(--on-accent);
+  color: var(--on-brand);
 }
 
 .alert-body {
@@ -1644,92 +1600,91 @@
 }
 
 .alert-title {
-  font-family: var(--heading);
+  font-family: var(--font-heading);
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: var(--sp-1);
+  margin-bottom: var(--space-1);
 }
 
 .alert-success {
-  background: var(--decision-allow-bg);
-  border-color: var(--decision-allow-border);
+  background: var(--allow-tint);
+  border-color: color-mix(in srgb, var(--allow) 45%, transparent);
 }
 
 .alert-success .alert-icon {
-  background: var(--decision-allow);
+  background: var(--allow);
 }
 
 .alert-error {
-  background: var(--decision-block-bg);
-  border-color: var(--decision-block-border);
+  background: var(--block-tint);
+  border-color: color-mix(in srgb, var(--block) 45%, transparent);
 }
 
 .alert-error .alert-icon {
-  background: var(--decision-block);
+  background: var(--block);
 }
 
 .alert-warning {
-  background: var(--decision-mask-bg);
-  border-color: var(--decision-mask-border);
+  background: var(--mask-tint);
+  border-color: color-mix(in srgb, var(--mask) 45%, transparent);
 }
 
 .alert-warning .alert-icon {
-  background: var(--decision-mask);
+  background: var(--mask);
 }
 
 .alert-info {
-  background: var(--accent-bg);
-  border-color: var(--accent-border);
+  background: var(--surface-hover);
+  border-color: var(--line-control);
 }
 
 .alert-info .alert-icon {
-  background: var(--accent);
+  background: var(--brand-soft);
 }
 
 /* Banners are the page-level form of the same thing (auth pages, save
    confirmations). 22 call sites, so the class names stay as they are. */
 .banner {
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--border);
-  font-size: var(--fs-body-sm);
-  line-height: var(--lh-body-sm);
-  margin-bottom: var(--sp-4);
+  font: var(--text-body-sm);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-subtle);
+  margin-bottom: var(--space-4);
   color: var(--text-secondary);
 }
 
 .banner-error {
-  background: var(--decision-block-bg);
-  border-color: var(--decision-block-border);
-  color: var(--decision-block);
+  background: var(--block-tint);
+  border-color: color-mix(in srgb, var(--block) 45%, transparent);
+  color: var(--block);
 }
 
 .banner-success {
-  background: var(--decision-allow-bg);
-  border-color: var(--decision-allow-border);
-  color: var(--decision-allow);
+  background: var(--allow-tint);
+  border-color: color-mix(in srgb, var(--allow) 45%, transparent);
+  color: var(--allow);
 }
 
 /* The BLOCK explanation panel — the single most consequential surface in the
    app, so it gets the heaviest treatment: full-height accent rule, raised
    weight, block-red throughout. */
 .alert-block {
-  padding: var(--sp-4) var(--sp-4);
-  border-radius: var(--r-lg);
-  background: var(--decision-block-bg);
-  border: 1px solid var(--decision-block-border);
-  border-left: 4px solid var(--decision-block);
+  padding: var(--space-4) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--block-tint);
+  border: 1px solid color-mix(in srgb, var(--block) 45%, transparent);
+  border-left: 4px solid var(--block);
   color: var(--text-primary);
 }
 
 .alert-review {
-  padding: var(--sp-4) var(--sp-4);
-  border-radius: var(--r-lg);
-  background: var(--decision-confirm-bg);
-  border: 1px solid var(--decision-confirm-border);
-  border-left: 4px solid var(--decision-confirm);
+  padding: var(--space-4) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--confirm-tint);
+  border: 1px solid color-mix(in srgb, var(--confirm) 45%, transparent);
+  border-left: 4px solid var(--confirm);
   color: var(--text-primary);
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--space-4);
 }
 
 .alert-review p {
@@ -1737,7 +1692,7 @@
 }
 
 .alert-review p + p {
-  margin-top: var(--sp-2);
+  margin-top: var(--space-2);
 }
 
 /* ==========================================================================
@@ -1758,7 +1713,7 @@
 @media (prefers-reduced-motion: no-preference) {
   .page-content > *,
   .auth-split > * {
-    animation: reveal-up var(--dur-slow) var(--ease) both;
+    animation: reveal-up var(--duration-slow) var(--ease-out) both;
   }
 
   .page-content > *:nth-child(2),
@@ -1844,8 +1799,8 @@
   .chart-card:hover,
   .admin-section:hover {
     transform: none;
-    box-shadow: var(--shadow-glow);
-    border-color: var(--accent-border);
+    box-shadow: none;
+    border-color: var(--line-control);
   }
 
   .panel-hover:hover::after,
