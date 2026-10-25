@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
+import { FieldError } from '../components/FieldError'
+import { PageMessage } from '../components/PageMessage'
 
 interface ForgotPasswordForm {
   email: string
@@ -16,15 +18,18 @@ interface ForgotPasswordForm {
 export function ForgotPasswordPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordForm>()
   const [message, setMessage] = useState<string | null>(null)
+  const [requestError, setRequestError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const onSubmit = async (data: ForgotPasswordForm) => {
     setSubmitting(true)
+    setMessage(null)
+    setRequestError(null)
     try {
       const response = await apiClient.post<{ message: string }>('/api/auth/forgot-password', data)
       setMessage(response.data.message)
     } catch (error) {
-      setMessage(extractErrorMessage(error))
+      setRequestError(extractErrorMessage(error))
     } finally {
       setSubmitting(false)
     }
@@ -33,35 +38,37 @@ export function ForgotPasswordPage() {
   return (
     <AuthLayout
       title="Forgot password"
-      subtitle="Enter your email and we'll issue a reset token."
+      subtitle="Enter your email and a reset token will be issued."
       links={(
         <>
-          <Link to="/login">Back to sign in</Link>
-          <Link to="/reset-password">Have a token?</Link>
+          <Link to="/login" className="ps-link">Back to sign in</Link>
+          <Link to="/reset-password" className="ps-link">Have a token?</Link>
         </>
       )}
     >
-
       {message && (
-        <div className="banner banner-success">
-          {message} This demo has no real email service — check the backend console output
-          for your reset token, then use it on the Reset Password page.
-        </div>
+        <PageMessage kind="success">
+          {message} There is no email service on this machine: the reset token is printed in the
+          backend console. Use it on the Reset password page.
+        </PageMessage>
       )}
+      {requestError && <PageMessage kind="error">{requestError}</PageMessage>}
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="form-field">
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" autoComplete="email"
+      <form className="ps-stack" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className="ps-field">
+          <label className="ps-label" htmlFor="email">Email</label>
+          <input id="email" type="email" autoComplete="email" className="ps-input"
+            aria-invalid={errors.email ? true : undefined}
+            aria-describedby={errors.email ? 'email-error' : undefined}
             {...register('email', {
-              required: 'Email is required',
-              pattern: { value: /^\S+@\S+\.\S+$/, message: 'Email must be a valid address' },
+              required: 'Enter the email address on your account.',
+              pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a full email address, such as name@example.com.' },
             })} />
-          {errors.email && <span className="form-field-error">{errors.email.message}</span>}
+          <FieldError id="email-error" message={errors.email?.message} />
         </div>
 
-        <Button type="submit" loading={submitting} className="btn-block">
-          {submitting ? 'Sending…' : 'Send reset link'}
+        <Button type="submit" loading={submitting} className="auth-submit">
+          {submitting ? 'Sending…' : 'Send reset token'}
         </Button>
       </form>
     </AuthLayout>

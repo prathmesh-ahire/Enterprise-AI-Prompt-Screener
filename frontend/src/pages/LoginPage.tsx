@@ -4,6 +4,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
+import { FieldError } from '../components/FieldError'
+import { PageMessage } from '../components/PageMessage'
 import { useAuth, type Role } from '../AuthContext'
 
 interface LoginForm {
@@ -48,32 +50,34 @@ export function LoginPage() {
       subtitle="Use your account to submit and review screened prompts."
       links={(
         <>
-          <Link to="/register">Create an account</Link>
-          <Link to="/forgot-password">Forgot password?</Link>
+          <Link to="/forgot-password" className="ps-link">Forgot password?</Link>
+          <Link to="/register" className="ps-link">Create an account</Link>
         </>
       )}
     >
-      {justRegistered && (
-        <div className="banner banner-success">Account created. Please log in.</div>
-      )}
-      {serverError && <div className="banner banner-error">{serverError}</div>}
+      {justRegistered && <PageMessage kind="success">Account created. Please sign in.</PageMessage>}
+      {serverError && <PageMessage kind="error">{serverError}</PageMessage>}
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="form-field">
-          <label htmlFor="username">Username</label>
-          <input id="username" type="text" autoComplete="username"
-            {...register('username', { required: 'Username is required' })} />
-          {errors.username && <span className="form-field-error">{errors.username.message}</span>}
+      <form className="ps-stack" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className="ps-field">
+          <label className="ps-label" htmlFor="username">Username</label>
+          <input id="username" type="text" autoComplete="username" className="ps-input"
+            aria-invalid={errors.username ? true : undefined}
+            aria-describedby={errors.username ? 'username-error' : undefined}
+            {...register('username', { required: 'Enter your username.' })} />
+          <FieldError id="username-error" message={errors.username?.message} />
         </div>
 
-        <div className="form-field">
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" autoComplete="current-password"
-            {...register('password', { required: 'Password is required' })} />
-          {errors.password && <span className="form-field-error">{errors.password.message}</span>}
+        <div className="ps-field">
+          <label className="ps-label" htmlFor="password">Password</label>
+          <input id="password" type="password" autoComplete="current-password" className="ps-input"
+            aria-invalid={errors.password ? true : undefined}
+            aria-describedby={errors.password ? 'password-error' : undefined}
+            {...register('password', { required: 'Enter your password.' })} />
+          <FieldError id="password-error" message={errors.password?.message} />
         </div>
 
-        <Button type="submit" loading={submitting} className="btn-block">
+        <Button type="submit" loading={submitting} className="auth-submit">
           {submitting ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>

@@ -4,6 +4,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
+import { FieldError } from '../components/FieldError'
+import { PageMessage } from '../components/PageMessage'
 
 interface ResetPasswordForm {
   token: string
@@ -37,10 +39,12 @@ export function ResetPasswordPage() {
 
   if (success) {
     return (
-      <AuthLayout title="Password reset" subtitle="You can sign in with your new password now.">
-        <div className="banner banner-success">
-          Password has been reset successfully. <Link to="/login">Go to sign in</Link>
-        </div>
+      <AuthLayout
+        title="Password reset"
+        subtitle="You can sign in with your new password now."
+        links={<Link to="/login" className="ps-link">Go to sign in</Link>}
+      >
+        <PageMessage kind="success">Your password has been reset.</PageMessage>
       </AuthLayout>
     )
   }
@@ -51,32 +55,38 @@ export function ResetPasswordPage() {
       subtitle="Paste the token you were issued, then choose a new password."
       links={(
         <>
-          <Link to="/login">Back to sign in</Link>
-          <Link to="/forgot-password">Need a token?</Link>
+          <Link to="/login" className="ps-link">Back to sign in</Link>
+          <Link to="/forgot-password" className="ps-link">Need a token?</Link>
         </>
       )}
     >
-      {serverError && <div className="banner banner-error">{serverError}</div>}
+      {serverError && <PageMessage kind="error">{serverError}</PageMessage>}
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div className="form-field">
-          <label htmlFor="token">Reset token</label>
-          <input id="token" type="text"
-            {...register('token', { required: 'Reset token is required' })} />
-          {errors.token && <span className="form-field-error">{errors.token.message}</span>}
+      <form className="ps-stack" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className="ps-field">
+          <label className="ps-label" htmlFor="token">Reset token</label>
+          <input id="token" type="text" className="ps-input ps-mono"
+            aria-invalid={errors.token ? true : undefined}
+            aria-describedby={errors.token ? 'token-error' : undefined}
+            {...register('token', { required: 'Paste the reset token from the backend console.' })} />
+          <FieldError id="token-error" message={errors.token?.message} />
         </div>
 
-        <div className="form-field">
-          <label htmlFor="newPassword">New password</label>
-          <input id="newPassword" type="password" autoComplete="new-password"
+        <div className="ps-field">
+          <label className="ps-label" htmlFor="newPassword">New password</label>
+          <input id="newPassword" type="password" autoComplete="new-password" className="ps-input"
+            aria-invalid={errors.newPassword ? true : undefined}
+            aria-describedby={errors.newPassword ? 'newPassword-error' : 'newPassword-help'}
             {...register('newPassword', {
-              required: 'New password is required',
-              minLength: { value: 8, message: 'Password must be at least 8 characters' },
+              required: 'Choose a new password of at least 8 characters.',
+              minLength: { value: 8, message: 'Use at least 8 characters.' },
             })} />
-          {errors.newPassword && <span className="form-field-error">{errors.newPassword.message}</span>}
+          {errors.newPassword
+            ? <FieldError id="newPassword-error" message={errors.newPassword.message} />
+            : <p id="newPassword-help" className="ps-help">At least 8 characters.</p>}
         </div>
 
-        <Button type="submit" loading={submitting} className="btn-block">
+        <Button type="submit" loading={submitting} className="auth-submit">
           {submitting ? 'Resetting…' : 'Reset password'}
         </Button>
       </form>

@@ -277,12 +277,6 @@ code {
    the stale padding was still landing - 16px of inset nothing else in the auth column
    accounted for. Removed rather than overridden. */
 
-.form-links {
-  font: var(--text-body-sm);
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--space-3);
-}
 
 /* Page body. 56A.7: forms and tables use the full width-content (design.md
    section 5); long help text is capped at width-reading where it appears. */

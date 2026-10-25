@@ -464,184 +464,45 @@
 }
 
 /* ==========================================================================
-   47.1 AUTH PAGES
-   A centred card on a branded background. The tint is two very wide, very
-   faint radial washes of the accent — enough to read as "branded" rather
-   than "blank", without ever competing with the card or the form text.
+   47.1 SIGN-IN PAGES — rebuilt to C10 in 56A.7 (design.md section 15b)
+   Calm app style with no background: one centred solid card, 400px wide
+   (the user's value), with the full product name above it.
    ========================================================================== */
 .auth-shell {
   flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--space-16) var(--space-8);
+}
+
+.auth-column {
+  width: 400px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-8) var(--space-4);
-  background-image:
-    radial-gradient(60ch 60ch at 15% 0%, var(--surface-hover), transparent 70%),
-    radial-gradient(70ch 70ch at 90% 100%, var(--surface-hover), transparent 70%);
-}
-
-/* V1.2 UI pass: the split. One column below 960px (the panel is removed, not just
-   visually hidden, so its text is not announced twice), two above it. The card column
-   is a fixed comfortable width and the panel takes the rest, rather than both being
-   1fr - a sign-in form stretched to 600px looks wrong at any viewport. */
-.auth-split {
-  display: grid;
-  width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
-  gap: var(--space-16);
-  align-items: center;
-}
-
-@media (min-width: 960px) {
-  .auth-split {
-    grid-template-columns: minmax(0, 1fr) 400px;
-  }
-}
-
-.auth-hero {
-  display: none;
-}
-
-@media (min-width: 960px) {
-  .auth-hero {
-    display: block;
-    max-width: 52ch;
-  }
-}
-
-.auth-hero-mark {
-  font: var(--text-micro);
-  margin: 0 0 var(--space-5);
-  font-family: var(--font-heading);
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-/* Deliberately larger than any heading inside the app shell. This is the one
-   marketing-weight statement in the product, and it is the first thing seen. */
-.auth-hero-title {
-  margin: 0 0 var(--space-5);
-  font-family: var(--font-heading);
-  font-size: clamp(30px, 1.4rem + 1.9vw, 46px);
-  line-height: 1.12;
-  letter-spacing: -0.025em;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-/* One word in the brand gradient, never the whole sentence - the rest has to keep
-   full text contrast, and a gradient-filled paragraph is unreadable. */
-.auth-hero-accent {
-  background-image: linear-gradient(var(--brand-base), var(--brand-base));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.auth-hero-lede {
-  font: var(--text-lead);
-  margin: 0 0 var(--space-8);
-  color: var(--text-secondary);
-}
-
-.auth-hero-points {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
+  flex-direction: column;
   gap: var(--space-4);
 }
 
-.auth-hero-points li {
-  font: var(--text-body-sm);
-  position: relative;
-  padding-left: var(--space-7);
-  color: var(--text-secondary);
-}
-
-/* A check mark drawn from two borders rather than a glyph, so it needs no icon font
-   and inherits the accent colour. */
-.auth-hero-points li::before {
-  content: '';
-  position: absolute;
-  left: 2px;
-  top: 4px;
-  width: 7px;
-  height: 12px;
-  border: solid var(--brand-soft);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.auth-page {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  text-align: left;
-  box-sizing: border-box;
-}
-
-
-
-.auth-brand {
-  font: var(--text-body);
-  display: block;
-  margin-bottom: var(--space-4);
-  text-align: center;
-  font-family: var(--font-heading);
-  font-weight: 600;
-  letter-spacing: .01em;
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: color 0.25s ease;
-}
-
-.auth-brand:hover {
-  color: var(--brand-soft);
-}
-
-/* Once the split panel is on screen it carries the wordmark, so the card's own copy
-   would be the second one in view. Scoped under .auth-page (and so more specific than
-   `.auth-brand` above) because a media query adds no specificity of its own - the
-   first attempt at this rule sat earlier in the file and silently lost on source
-   order, which is exactly the trap that makes "it works in devtools" so common. */
-@media (min-width: 960px) {
-  .auth-page > .auth-brand {
-    display: none;
-  }
+.auth-name {
+  align-self: center;
 }
 
 .auth-card {
-  padding: var(--space-7) var(--space-7);
-  box-shadow: var(--shadow-pop);
+  gap: var(--space-4);
 }
 
-.auth-title {
-  font: var(--text-h2);
-  letter-spacing: 0;
-  margin: 0 0 var(--space-1);
+.auth-card h1 {
+  margin: 0;
 }
 
-.auth-subtitle {
-  font: var(--text-body-sm);
-  margin-bottom: var(--space-5);
-  color: var(--text-secondary);
-}
-
-/* Full-width submit: on a 400px card a pill-shaped button hugging the left
-   edge reads as unfinished, and the primary action should be unmissable. */
-.btn-block {
+.auth-submit {
   width: 100%;
 }
 
-.auth-footnote {
-  font: var(--text-label);
-  margin-top: var(--space-5);
-  text-align: center;
-  color: var(--text-muted);
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font: var(--text-body-sm);
 }
 
 /* ==========================================================================
