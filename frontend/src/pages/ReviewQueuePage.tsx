@@ -5,6 +5,9 @@ import { EntityChips } from '../components/EntityChips'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
+import { Icon } from '../components/Icon'
+import { PageMessage } from '../components/PageMessage'
+import { Button } from '../components/Button'
 import type { ScoreBreakdown } from '../api/types'
 
 interface QueueItem {
@@ -28,12 +31,20 @@ interface ReviewDetails {
 
 type ReviewAction = 'APPROVE' | 'REJECT' | 'REQUEST_CORRECTION' | 'FALSE_POSITIVE'
 
-const ACTIONS: { value: ReviewAction; label: string; className: string }[] = [
-  { value: 'APPROVE', label: 'Approve', className: 'btn' },
-  { value: 'REJECT', label: 'Reject', className: 'btn btn-danger' },
-  { value: 'REQUEST_CORRECTION', label: 'Request Correction', className: 'btn btn-secondary' },
-  { value: 'FALSE_POSITIVE', label: 'Mark False Positive', className: 'btn btn-secondary' },
+// Approve is the view's one primary action; Reject is a destructive reviewer action, so it
+// takes the danger outline (it is not a BLOCK decision badge).
+const ACTIONS: { value: ReviewAction; label: string; variant: 'primary' | 'secondary' | 'danger' }[] = [
+  { value: 'APPROVE', label: 'Approve', variant: 'primary' },
+  { value: 'REJECT', label: 'Reject', variant: 'danger' },
+  { value: 'REQUEST_CORRECTION', label: 'Request correction', variant: 'secondary' },
+  { value: 'FALSE_POSITIVE', label: 'Mark as false positive', variant: 'secondary' },
 ]
+
+// Sentence case for the risk-signal names (INSTRUCTION_OVERRIDE -> "Instruction override").
+function signalLabel(signal: string): string {
+  const words = signal.toLowerCase().replace(/_/g, ' ')
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
@@ -107,112 +118,145 @@ export function ReviewQueuePage() {
   return (
     <div className="page-content">
       <PageHeader
-        title="Review Queue"
-        description="Prompts flagged for human review. Each shows its masked text and what was detected — the raw prompt is never displayed."
+        title="Review queue"
+        description="Prompts held for human review. Each shows its masked text and what was detected; the raw prompt is never displayed."
       />
 
-      {error && <div className="banner banner-error">{error}</div>}
-      {successMessage && <div className="banner banner-success">{successMessage}</div>}
+      {error && <PageMessage kind="error">{error}</PageMessage>}
+      {successMessage && <PageMessage kind="success">{successMessage}</PageMessage>}
 
       {loading && <LoadingState label="Loading the review queue…" />}
 
       {!loading && queue && queue.length === 0 && (
         <EmptyState
-          title="There are no prompts waiting for review."
+          title="Nothing waiting for review"
           hint="Prompts arrive here when they score in the REVIEW band or trip a hard override."
         />
       )}
 
       {!loading && queue && queue.length > 0 && (
-        <div className="table-scroll">
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Risk Score</th>
-              <th>Entity Types Found</th>
-            </tr>
-          </thead>
-          <tbody>
-            {queue.map((item) => (
-              <Fragment key={item.requestId}>
-                <tr className="history-row" onClick={() => handleRowClick(item.requestId)}>
-                  <td>{formatDateTime(item.submittedAt)}</td>
-                  <td>{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
-                  <td>{item.entityTypes.length > 0 ? <EntityChips entityTypes={item.entityTypes} /> : 'None'}</td>
-                </tr>
-                {expandedId === item.requestId && (
-                  <tr className="history-detail-row">
-                    <td colSpan={3}>
-                      {detailLoadingId === item.requestId && <LoadingState label="Loading details…" />}
-                      {detailError && detailLoadingId !== item.requestId && (
-                        <div className="banner banner-error">{detailError}</div>
-                      )}
-                      {details[item.requestId] && (
-                        <div className="history-detail">
-                          {/* Everything in this queue was decided REVIEW, which is the F1 fallback colour. */}
-                          <RiskScoreBar
-                            score={details[item.requestId].riskScore}
-                            band={details[item.requestId].scoreBreakdown?.scoreBand}
-                            decision="REVIEW"
-                          />
-                          {details[item.requestId].explanation && (
-                            <p className="explanation-text">{details[item.requestId].explanation}</p>
+        <div className="ps-table-wrap">
+          <table className="ps-table">
+            <caption>Prompts waiting for a reviewer, oldest first.</caption>
+            <thead>
+              <tr>
+                <th className="col-expander"><span className="ps-sr">Details</span></th>
+                <th>Time</th>
+                <th className="ps-right">Risk score</th>
+                <th>Detected items</th>
+              </tr>
+            </thead>
+            <tbody>
+              {queue.map((item) => {
+                const open = expandedId === item.requestId
+                const detailId = `review-detail-${item.requestId}`
+                const detail = details[item.requestId]
+                return (
+                  <Fragment key={item.requestId}>
+                    <tr className="ps-tr row-clickable" onClick={() => handleRowClick(item.requestId)}>
+                      <td>
+                        <button
+                          type="button"
+                          className="ps-expander"
+                          aria-expanded={open}
+                          aria-controls={open ? detailId : undefined}
+                          aria-label={`${open ? 'Hide' : 'Show'} details for the prompt from ${formatDateTime(item.submittedAt)}`}
+                          onClick={(e) => { e.stopPropagation(); handleRowClick(item.requestId) }}
+                        >
+                          <Icon name="chevron" />
+                        </button>
+                      </td>
+                      <td className="ps-muted">{formatDateTime(item.submittedAt)}</td>
+                      <td className="ps-num">{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
+                      <td>
+                        {item.entityTypes.length > 0
+                          ? <EntityChips entityTypes={item.entityTypes} />
+                          : <span className="ps-muted">None</span>}
+                      </td>
+                    </tr>
+                    {open && (
+                      <tr className="ps-detail" id={detailId}>
+                        <td colSpan={4}>
+                          {detailLoadingId === item.requestId && <LoadingState label="Loading details…" />}
+                          {detailError && detailLoadingId !== item.requestId && (
+                            <PageMessage kind="error">{detailError}</PageMessage>
                           )}
-                          <MaskedText text={details[item.requestId].maskedPrompt} />
-                          <EntityChips entityTypes={details[item.requestId].entityTypes} />
+                          {detail && (
+                            <div className="ps-stack">
+                              {/* Everything in this queue was decided REVIEW, which is the F1 fallback colour. */}
+                              <RiskScoreBar
+                                score={detail.riskScore}
+                                band={detail.scoreBreakdown?.scoreBand}
+                                decision="REVIEW"
+                              />
+                              {detail.explanation && <p>{detail.explanation}</p>}
+                              <div className="ps-detail__grid">
+                                <div>
+                                  <p className="ps-detail__k">Masked prompt</p>
+                                  <MaskedText text={detail.maskedPrompt} />
+                                </div>
+                                {detail.entityTypes.length > 0 && (
+                                  <div>
+                                    <p className="ps-detail__k">Detected items</p>
+                                    <EntityChips entityTypes={detail.entityTypes} />
+                                  </div>
+                                )}
+                                {detail.matchedSignals.length > 0 && (
+                                  <div>
+                                    <p className="ps-detail__k">Matched signals</p>
+                                    {/* Neutral, pill-shaped and not interactive (design.md 15b). */}
+                                    <div className="ps-chips">
+                                      {detail.matchedSignals.map((signal) => (
+                                        <span key={signal} className="ps-chip ps-chip--signal">{signalLabel(signal)}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
 
-                          {details[item.requestId].matchedSignals.length > 0 && (
-                            <div className="signal-chips">
-                              {details[item.requestId].matchedSignals.map((signal) => (
-                                <span key={signal} className="signal-chip">{signal}</span>
-                              ))}
+                              <div className="ps-field review-reason">
+                                <label className="ps-label" htmlFor="review-reason">Reason for your decision</label>
+                                <input
+                                  id="review-reason"
+                                  type="text"
+                                  className="ps-input"
+                                  value={reason}
+                                  onChange={(e) => setReason(e.target.value)}
+                                  placeholder="Explain your decision…"
+                                  aria-describedby="review-reason-help"
+                                />
+                                {/* 47.4: the four actions stay disabled until a reason is typed,
+                                    and this line says so - four greyed-out buttons with no
+                                    explanation read as "you lack permission". */}
+                                <p id="review-reason-help" className="ps-help">
+                                  {reason.trim()
+                                    ? 'Choose an action below.'
+                                    : 'Enter a reason to enable the four actions below.'}
+                                </p>
+                              </div>
+                              <div className="ps-row">
+                                {ACTIONS.map((a) => (
+                                  <Button
+                                    key={a.value}
+                                    variant={a.variant}
+                                    disabled={!reason.trim() || decidingAction !== null}
+                                    loading={decidingAction === a.value}
+                                    onClick={() => handleDecide(item.requestId, a.value)}
+                                  >
+                                    {decidingAction === a.value ? 'Submitting…' : a.label}
+                                  </Button>
+                                ))}
+                              </div>
                             </div>
                           )}
-
-                          <p className="section-label">Your decision</p>
-                          <div className="form-field">
-                            <label htmlFor="review-reason">Reason</label>
-                            <input
-                              id="review-reason"
-                              type="text"
-                              value={reason}
-                              onChange={(e) => setReason(e.target.value)}
-                              placeholder="Explain your decision…"
-                            />
-                            {/* 47.4: the four actions have always been disabled until a
-                                reason is typed, but nothing said so — four greyed-out
-                                buttons with no explanation read as "you lack permission".
-                                The hint states the gate and clears once it is satisfied. */}
-                            <span className="form-field-hint">
-                              {reason.trim()
-                                ? 'Choose an action below.'
-                                : 'Enter a reason to enable the four actions below.'}
-                            </span>
-                          </div>
-
-                          <div className="btn-row review-actions">
-                            {ACTIONS.map((a) => (
-                              <button
-                                key={a.value}
-                                type="button"
-                                className={a.className}
-                                disabled={!reason.trim() || decidingAction !== null}
-                                onClick={() => handleDecide(item.requestId, a.value)}
-                              >
-                                {decidingAction === a.value ? 'Submitting…' : a.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

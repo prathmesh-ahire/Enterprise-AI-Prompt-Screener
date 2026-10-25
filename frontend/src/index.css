@@ -285,30 +285,10 @@ code {
   text-align: left;
 }
 
-.ai-response-box {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--surface-raised);
-  border: 1px solid var(--line-subtle);
-  white-space: pre-wrap;
-}
-
 /* Phase 27+ review/pending states, risk score bar */
 .request-id {
   font: var(--text-caption);
   font-family: var(--font-mono);
-}
-
-.explanation-text {
-  margin: var(--space-3) 0;
-  color: var(--text-primary);
-}
-
-/* Phase 28+ history page: the filter's own layout (the select inside it is
-   styled as a form control in styles/components.css). */
-.history-filter {
-  max-width: 260px;
-  margin-bottom: var(--space-4);
 }
 
 /* Phase 30+ admin dashboard */
@@ -319,44 +299,6 @@ code {
 }
 
 /* 47.5/47.6: .admin-section became a real panel — see styles/components.css. */
-
-.bar-chart {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.bar-row {
-  display: grid;
-  grid-template-columns: 160px 1fr 40px;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.bar-label {
-  font: var(--text-caption);
-  color: var(--text-primary);
-}
-
-.bar-track {
-  height: 12px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-raised);
-  border: 1px solid var(--line-subtle);
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  background: var(--brand-soft);
-  border-radius: var(--radius-sm);
-}
-
-.bar-count {
-  font: var(--text-caption);
-  color: var(--text-secondary);
-  text-align: right;
-}
 
 /* Phase 31+ policy management: detector toggles, threshold grid, org-terms list */
 .detector-toggle-list {

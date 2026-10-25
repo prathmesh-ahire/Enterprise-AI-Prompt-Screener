@@ -3,7 +3,7 @@ import { apiClient, extractErrorMessage } from '../api/client'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
 import { EntityBreakdownChart, ProcessingTimePanel, RiskBandDonut, type RiskBandStat } from '../components/DashboardCharts'
-import { decisionBadgeClass } from '../components/decisionBadge'
+import { DecisionBadge } from '../components/DecisionBadge'
 import type { PageResponse } from '../api/types'
 
 const USERS_PAGE_SIZE = 10
@@ -326,7 +326,7 @@ export function AdminPage() {
                                           <td>{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
                                           <td>
                                             {item.decision
-                                              ? <span className={`badge ${decisionBadgeClass(item.decision)}`}>{item.decision}</span>
+                                              ? <DecisionBadge decision={item.decision} />
                                               : '—'}
                                           </td>
                                         </tr>

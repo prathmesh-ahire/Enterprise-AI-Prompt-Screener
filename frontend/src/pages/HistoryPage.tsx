@@ -4,7 +4,12 @@ import { MaskedText } from '../components/MaskedText'
 import { EntityChips } from '../components/EntityChips'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
-import { decisionBadgeClass } from '../components/decisionBadge'
+import { DecisionBadge } from '../components/DecisionBadge'
+import { PromptStatusPill } from '../components/StatusPill'
+import { Icon } from '../components/Icon'
+import { PageMessage } from '../components/PageMessage'
+import { Pagination } from '../components/Pagination'
+import { Button } from '../components/Button'
 import type { PageResponse } from '../api/types'
 
 const PAGE_SIZE = 10
@@ -38,11 +43,11 @@ interface PromptDetail {
 // this problem) - see docs/NOTE.md.
 const DECISION_FILTERS: { value: string; label: string }[] = [
   { value: 'ALL', label: 'All' },
-  { value: 'ALLOW', label: 'Allowed' },
-  { value: 'MASK', label: 'Masked' },
-  { value: 'CONFIRM', label: 'Awaiting Confirmation' },
-  { value: 'REVIEW', label: 'Pending Review' },
-  { value: 'BLOCK', label: 'Blocked' },
+  { value: 'ALLOW', label: 'ALLOW' },
+  { value: 'MASK', label: 'MASK' },
+  { value: 'CONFIRM', label: 'CONFIRM' },
+  { value: 'REVIEW', label: 'REVIEW' },
+  { value: 'BLOCK', label: 'BLOCK' },
 ]
 
 function formatDateTime(iso: string): string {
@@ -104,25 +109,25 @@ export function HistoryPage() {
   return (
     <div className="page-content">
       <PageHeader
-        title="Prompt History"
+        title="Prompt history"
         description="Every prompt you have submitted, with the decision it received and why."
       />
 
-      {error && <div className="banner banner-error">{error}</div>}
+      {error && <PageMessage kind="error">{error}</PageMessage>}
 
       {/* "No history at all" — distinct from "no rows match the filter" below. */}
       {!loading && pageData && pageData.totalElements === 0 && (
         <EmptyState
-          title="You haven't submitted any prompts yet."
+          title="No prompts yet"
           hint="Submit one from the Prompt page and it will appear here with its decision."
         />
       )}
 
       {(loading || (pageData && pageData.totalElements > 0)) && (
-        <>
-          <div className="form-field history-filter">
-            <label htmlFor="decision-filter">Filter by decision</label>
-            <select id="decision-filter" value={filter} onChange={(e) => setFilter(e.target.value)}>
+        <div className="ps-stack">
+          <div className="ps-field table-filter">
+            <label className="ps-label" htmlFor="decision-filter">Filter by decision</label>
+            <select id="decision-filter" className="ps-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
               {DECISION_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>{f.label}</option>
               ))}
@@ -133,82 +138,108 @@ export function HistoryPage() {
             <LoadingState label="Loading your history…" />
           ) : (
             <>
-              <div className="table-scroll">
-              <table className="history-table">
-                <thead>
-                  <tr>
-                    <th>Date/Time</th>
-                    <th>Risk Score</th>
-                    <th>Decision</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <Fragment key={item.requestId}>
-                      <tr className="history-row" onClick={() => handleRowClick(item.requestId)}>
-                        <td>{formatDateTime(item.submittedAt)}</td>
-                        <td>{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
-                        <td>
-                          {item.decision
-                            ? <span className={`badge ${decisionBadgeClass(item.decision)}`}>{item.decision}</span>
-                            : '—'}
-                        </td>
-                        <td>{item.status}</td>
-                      </tr>
-                      {expandedId === item.requestId && (
-                        <tr className="history-detail-row">
-                          <td colSpan={4}>
-                            {detailLoadingId === item.requestId && <LoadingState label="Loading details…" />}
-                            {detailError && detailLoadingId !== item.requestId && (
-                              <div className="banner banner-error">{detailError}</div>
-                            )}
-                            {details[item.requestId] && (
-                              <div className="history-detail">
-                                {details[item.requestId].maskedText
-                                  ? <MaskedText text={details[item.requestId].maskedText!} />
-                                  : <p>No sensitive data was found in this prompt.</p>}
-                                <EntityChips entityTypes={details[item.requestId].entityTypes} />
-                                {details[item.requestId].explanation && (
-                                  <p className="explanation-text">{details[item.requestId].explanation}</p>
+              <div className="ps-table-wrap">
+                <table className="ps-table">
+                  <caption>Your prompts, newest first. The filter applies to this page.</caption>
+                  <thead>
+                    <tr>
+                      <th className="col-expander"><span className="ps-sr">Details</span></th>
+                      <th>Date and time</th>
+                      <th className="ps-right">Risk score</th>
+                      <th>Decision</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item) => {
+                      const open = expandedId === item.requestId
+                      const detailId = `history-detail-${item.requestId}`
+                      return (
+                        <Fragment key={item.requestId}>
+                          <tr className="ps-tr row-clickable" onClick={() => handleRowClick(item.requestId)}>
+                            <td>
+                              <button
+                                type="button"
+                                className="ps-expander"
+                                aria-expanded={open}
+                                aria-controls={open ? detailId : undefined}
+                                aria-label={`${open ? 'Hide' : 'Show'} details for the prompt from ${formatDateTime(item.submittedAt)}`}
+                                onClick={(e) => { e.stopPropagation(); handleRowClick(item.requestId) }}
+                              >
+                                <Icon name="chevron" />
+                              </button>
+                            </td>
+                            <td className="ps-muted">{formatDateTime(item.submittedAt)}</td>
+                            <td className="ps-num">{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
+                            <td>{item.decision ? <DecisionBadge decision={item.decision} /> : '—'}</td>
+                            <td><PromptStatusPill status={item.status} /></td>
+                          </tr>
+                          {open && (
+                            <tr className="ps-detail" id={detailId}>
+                              <td colSpan={5}>
+                                {detailLoadingId === item.requestId && <LoadingState label="Loading details…" />}
+                                {detailError && detailLoadingId !== item.requestId && (
+                                  <PageMessage kind="error">{detailError}</PageMessage>
                                 )}
-                                {details[item.requestId].aiResponse && (
-                                  <div className="ai-response-box">{details[item.requestId].aiResponse}</div>
+                                {details[item.requestId] && (
+                                  <div className="ps-detail__grid">
+                                    <div>
+                                      <p className="ps-detail__k">Sent as</p>
+                                      {details[item.requestId].maskedText
+                                        ? <MaskedText text={details[item.requestId].maskedText!} />
+                                        : <p className="ps-card__text">No sensitive data was found in this prompt.</p>}
+                                    </div>
+                                    {details[item.requestId].entityTypes.length > 0 && (
+                                      <div>
+                                        <p className="ps-detail__k">Detected items</p>
+                                        <EntityChips entityTypes={details[item.requestId].entityTypes} />
+                                      </div>
+                                    )}
+                                    {details[item.requestId].explanation && (
+                                      <div>
+                                        <p className="ps-detail__k">Why</p>
+                                        <p>{details[item.requestId].explanation}</p>
+                                      </div>
+                                    )}
+                                    {details[item.requestId].aiResponse && (
+                                      <div>
+                                        <p className="ps-detail__k">AI response</p>
+                                        <div className="ps-nested">{details[item.requestId].aiResponse}</div>
+                                      </div>
+                                    )}
+                                  </div>
                                 )}
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
 
               {/* Filter matched nothing — the user DOES have history, so this must not
                   say the same thing as the empty state above. */}
               {filteredItems.length === 0 && (
                 <EmptyState
-                  title="No records match this filter on this page."
-                  hint="Try a different decision, or move to another page."
+                  title="Nothing matches this filter on this page"
+                  hint="Choose a different decision, or move to another page."
+                  action={<Button variant="secondary" onClick={() => setFilter('ALL')}>Clear the filter</Button>}
                 />
               )}
 
-              <div className="pagination">
-                <button type="button" className="btn btn-secondary" onClick={() => setPage((p) => p - 1)} disabled={!pageData || pageData.first}>
-                  Previous
-                </button>
-                <span className="pagination-label">
-                  Page {(pageData?.number ?? 0) + 1} of {Math.max(pageData?.totalPages ?? 1, 1)}
-                </span>
-                <button type="button" className="btn btn-secondary" onClick={() => setPage((p) => p + 1)} disabled={!pageData || pageData.last}>
-                  Next
-                </button>
-              </div>
+              <Pagination
+                page={pageData?.number ?? 0}
+                totalPages={pageData?.totalPages ?? 1}
+                first={!pageData || pageData.first}
+                last={!pageData || pageData.last}
+                onPrevious={() => setPage((p) => p - 1)}
+                onNext={() => setPage((p) => p + 1)}
+              />
             </>
           )}
-        </>
+        </div>
       )}
     </div>
   )
