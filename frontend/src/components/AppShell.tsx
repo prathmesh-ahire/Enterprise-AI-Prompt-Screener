@@ -12,8 +12,10 @@ export const APP_NAME = 'Enterprise AI Prompt Screener'
 export const APP_VERSION = 'V1.1'
 
 export function AppShell({ children }: { children: ReactNode }) {
+  // 56A.7: the app is the calm style (design.md section 11), so the whole shell sits in
+  // .ps-app, which turns the public glows and background off.
   return (
-    <>
+    <div className="ps-app app-shell">
       <Navbar />
       {/* <main> rather than a <div>: it is the page's one landmark region, and it gives
           the skip-to-content target a real destination. */}
@@ -23,6 +25,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span aria-hidden="true">·</span>
         <span>{APP_VERSION}</span>
       </footer>
-    </>
+    </div>
   )
 }
