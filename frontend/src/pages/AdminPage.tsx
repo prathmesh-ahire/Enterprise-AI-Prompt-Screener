@@ -4,6 +4,13 @@ import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
 import { EntityBreakdownChart, ProcessingTimePanel, RiskBandDonut, type RiskBandStat } from '../components/DashboardCharts'
 import { DecisionBadge } from '../components/DecisionBadge'
+import { Button } from '../components/Button'
+import { PageMessage } from '../components/PageMessage'
+import { Pagination } from '../components/Pagination'
+import { RoleBadge } from '../components/RoleBadge'
+import { AccountStatusPill } from '../components/StatusPill'
+import { LiveSourceCaption } from '../components/SourceCaption'
+import { entityLabel } from '../components/EntityChips'
 import type { PageResponse } from '../api/types'
 
 const USERS_PAGE_SIZE = 10
@@ -84,6 +91,8 @@ export function AdminPage() {
   const [repeatedViolations, setRepeatedViolations] = useState<RepeatedViolation[]>([])
   const [dashboardLoading, setDashboardLoading] = useState(true)
   const [dashboardError, setDashboardError] = useState<string | null>(null)
+  // When the dashboard's figures were loaded, for the panels' live captions.
+  const [loadedAt, setLoadedAt] = useState<Date | null>(null)
 
   const [expandedUserId, setExpandedUserId] = useState<number | null>(null)
   const [userHistories, setUserHistories] = useState<Record<number, HistoryItem[]>>({})
@@ -118,6 +127,7 @@ export function AdminPage() {
         setProcessingTime(processingRes.data)
         setRepeatedViolations(violationsRes.data)
         setRiskBands(riskRes.data)
+        setLoadedAt(new Date())
       })
       .catch((err) => {
         if (!cancelled) setDashboardError(extractErrorMessage(err))
@@ -188,237 +198,220 @@ export function AdminPage() {
   }
 
   return (
-    <div className="page-content page-content-wide">
+    <div className="page-content">
       {/* The description states the window caveat up front. These panels genuinely use
-          three different periods, and "the summary says 3 blocked but the database says
-          30" is the most common question this page provokes. Phase 48 repeats the window
-          on each chart; saying it once here covers the panels that are not charts. */}
+          three different periods; each panel also states its own in its caption. */}
       <PageHeader
-        title="Admin Dashboard"
-        description="Summary cards cover today only. Entity stats are all-time; the panels below use the last 7 days."
+        title="Admin dashboard"
+        description="The summary covers today only. Entity counts are all-time; the panels below use the last 7 days."
       />
 
-      {dashboardError && <div className="banner banner-error">{dashboardError}</div>}
+      {dashboardError && <PageMessage kind="error">{dashboardError}</PageMessage>}
       {dashboardLoading && <LoadingState label="Loading dashboard…" />}
 
       {!dashboardLoading && summary && (
-        <>
-          <section className="admin-section">
-            <h2>Summary (Today)</h2>
-            <div className="stat-cards">
-              <div className="stat-card">
-                <div className="stat-card-value">{summary.total}</div>
-                <div className="stat-card-label">Total</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-card-value">{summary.allowed}</div>
-                <div className="stat-card-label">Allowed</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-card-value">{summary.masked}</div>
-                <div className="stat-card-label">Masked</div>
-              </div>
-              {/* 41.6: Total has always counted CONFIRM decisions, but no card reported
-                  them - so the cards could not be reconciled against the Total beside them. */}
-              <div className="stat-card">
-                <div className="stat-card-value">{summary.confirm}</div>
-                <div className="stat-card-label">Confirm</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-card-value">{summary.blocked}</div>
-                <div className="stat-card-label">Blocked</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-card-value">{summary.pendingReview}</div>
-                <div className="stat-card-label">Pending Review</div>
-              </div>
+        <div className="ps-stack admin-stack">
+          <section className="ps-card">
+            <h2 className="ps-card__title">Summary for today</h2>
+            <div className="ps-metrics">
+              {[
+                ['Prompts screened', summary.total],
+                ['ALLOW', summary.allowed],
+                ['MASK', summary.masked],
+                // 41.6: Total has always counted CONFIRM decisions, so they get a tile too.
+                ['CONFIRM', summary.confirm],
+                ['BLOCK', summary.blocked],
+                ['Waiting for review', summary.pendingReview],
+              ].map(([label, value]) => (
+                <div className="ps-metric" key={label}>
+                  <p className="ps-metric__value">{value}</p>
+                  <p className="ps-metric__label">{label}</p>
+                </div>
+              ))}
             </div>
+            <LiveSourceCaption window="today" updatedAt={loadedAt} />
           </section>
 
-          {/* 48.2/48.3/48.4: the hand-rolled CSS bar chart that used to sit here is
-              replaced by real charts. Each states its own window on itself, because this
-              page mixes today-only, all-time and 7-day figures. */}
           <div className="chart-grid">
-            <RiskBandDonut data={riskBands} />
-            <EntityBreakdownChart data={entityStats} />
+            <RiskBandDonut data={riskBands} updatedAt={loadedAt} />
+            <EntityBreakdownChart data={entityStats} updatedAt={loadedAt} />
           </div>
 
-          <section className="admin-section">
-            <h2>Recent Blocked</h2>
-            {recentBlocked.length === 0 ? <EmptyState title="No blocked prompts recorded yet." /> : (
-              <div className="table-scroll">
-              <table className="history-table">
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Risk Score</th>
-                    <th>Triggering Entity Type</th>
-                    <th>Request ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentBlocked.map((item) => (
-                    <tr key={item.requestId}>
-                      <td>{formatDateTime(item.timestamp)}</td>
-                      <td>{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
-                      <td>{item.triggeringEntityType ?? '—'}</td>
-                      <td className="request-id">{item.requestId.slice(0, 8)}…</td>
+          <section className="ps-card">
+            <h2 className="ps-card__title">Recently blocked</h2>
+            {recentBlocked.length === 0 ? <EmptyState title="No blocked prompts yet" hint="Prompts stopped with BLOCK appear here, newest first." /> : (
+              <div className="ps-table-wrap">
+                <table className="ps-table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th className="ps-right">Risk score</th>
+                      <th>Triggering item</th>
+                      <th>Request ID</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {recentBlocked.map((item) => (
+                      <tr key={item.requestId} className="ps-tr">
+                        <td className="ps-muted">{formatDateTime(item.timestamp)}</td>
+                        <td className="ps-num">{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
+                        <td>{item.triggeringEntityType ? entityLabel(item.triggeringEntityType) : '—'}</td>
+                        <td className="ps-mono">{item.requestId.slice(0, 8)}…</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </section>
 
-          <section className="admin-section">
-            <h2>Repeated Violations</h2>
+          <section className="ps-card">
+            <h2 className="ps-card__title">Repeated violations</h2>
             {repeatedViolations.length === 0 ? (
               <EmptyState
-                title="No users with repeated violations in the last 7 days."
+                title="No repeated violations in the last 7 days"
                 hint="A user appears here after three or more BLOCK or REVIEW decisions in that window."
               />
             ) : (
-              <div className="table-scroll">
-              <table className="history-table">
-                <thead>
-                  <tr>
-                    {/* 41.7: this panel exists to answer "who keeps tripping the screener",
-                        and used to answer it with a bare numeric id - leaving an admin to
-                        query the database by hand to find out who that actually was. */}
-                    <th>User</th>
-                    <th>Violation Count (7d)</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {repeatedViolations.map((v) => (
-                    <Fragment key={v.userId}>
-                      <tr>
-                        <td>{v.username}</td>
-                        <td>{v.violationCount}</td>
-                        <td>
-                          <button type="button" className="btn-link" onClick={() => handleToggleUserHistory(v.userId)}>
-                            {expandedUserId === v.userId ? 'Hide history' : 'View history'}
-                          </button>
-                        </td>
-                      </tr>
-                      {expandedUserId === v.userId && (
-                        <tr className="history-detail-row">
-                          <td colSpan={3}>
-                            {userHistoryLoadingId === v.userId && <LoadingState label="Loading history…" />}
-                            {userHistories[v.userId] && (
-                              userHistories[v.userId].length === 0
-                                ? <EmptyState title="This user has no prompt history." />
-                                : (
-                                  <table className="history-table">
-                                    <thead>
-                                      <tr>
-                                        <th>Date/Time</th>
-                                        <th>Risk Score</th>
-                                        <th>Decision</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {userHistories[v.userId].map((item) => (
-                                        <tr key={item.requestId}>
-                                          <td>{formatDateTime(item.submittedAt)}</td>
-                                          <td>{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
-                                          <td>
-                                            {item.decision
-                                              ? <DecisionBadge decision={item.decision} />
-                                              : '—'}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                )
-                            )}
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
+              <div className="ps-table-wrap">
+                <table className="ps-table">
+                  <thead>
+                    <tr>
+                      {/* 41.7: answers "who keeps tripping the screener" by name, not id. */}
+                      <th>User</th>
+                      <th className="ps-right">Violations (7 days)</th>
+                      <th><span className="ps-sr">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {repeatedViolations.map((v) => {
+                      const open = expandedUserId === v.userId
+                      const detailId = `violations-${v.userId}`
+                      return (
+                        <Fragment key={v.userId}>
+                          <tr className="ps-tr">
+                            <td>{v.username}</td>
+                            <td className="ps-num">{v.violationCount}</td>
+                            <td className="ps-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                aria-expanded={open}
+                                aria-controls={open ? detailId : undefined}
+                                onClick={() => handleToggleUserHistory(v.userId)}
+                              >
+                                {open ? 'Hide history' : 'View history'}
+                              </Button>
+                            </td>
+                          </tr>
+                          {open && (
+                            <tr className="ps-detail" id={detailId}>
+                              <td colSpan={3}>
+                                {userHistoryLoadingId === v.userId && <LoadingState label="Loading history…" />}
+                                {userHistories[v.userId] && (
+                                  userHistories[v.userId].length === 0
+                                    ? <EmptyState title="This user has no prompt history" />
+                                    : (
+                                      <table className="ps-table">
+                                        <thead>
+                                          <tr>
+                                            <th>Date and time</th>
+                                            <th className="ps-right">Risk score</th>
+                                            <th>Decision</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {userHistories[v.userId].map((item) => (
+                                            <tr key={item.requestId}>
+                                              <td className="ps-muted">{formatDateTime(item.submittedAt)}</td>
+                                              <td className="ps-num">{item.riskScore !== null ? Math.round(item.riskScore) : '—'}</td>
+                                              <td>{item.decision ? <DecisionBadge decision={item.decision} /> : '—'}</td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    )
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </section>
 
-          {/* 48.5: now shows the live figures against the recorded V1.0 baseline, so the
-              dashboard demonstrates the Phase 43 optimisation instead of only the report
-              claiming it. */}
-          <ProcessingTimePanel data={processingTime} />
-        </>
+          <ProcessingTimePanel data={processingTime} updatedAt={loadedAt} />
+        </div>
       )}
 
-      <section className="admin-section">
-        <h2>Export Report</h2>
-        {exportError && <div className="banner banner-error">{exportError}</div>}
-        <div className="btn-row">
-          <button type="button" className="btn btn-secondary" disabled={exporting !== null} onClick={() => handleExport('csv')}>
-            {exporting === 'csv' ? 'Exporting…' : 'Export CSV'}
-          </button>
-          <button type="button" className="btn btn-secondary" disabled={exporting !== null} onClick={() => handleExport('pdf')}>
-            {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
-          </button>
-        </div>
-      </section>
+      <div className="ps-stack admin-stack">
+        <section className="ps-card">
+          <h2 className="ps-card__title">Export a report</h2>
+          {exportError && <PageMessage kind="error">{exportError}</PageMessage>}
+          <div className="ps-row">
+            <Button variant="secondary" disabled={exporting !== null} loading={exporting === 'csv'} onClick={() => handleExport('csv')}>
+              {exporting === 'csv' ? 'Exporting…' : 'Export CSV'}
+            </Button>
+            <Button variant="secondary" disabled={exporting !== null} loading={exporting === 'pdf'} onClick={() => handleExport('pdf')}>
+              {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
+            </Button>
+          </div>
+        </section>
 
-      <section className="admin-section">
-        <h2>User Management</h2>
-        {usersError && <div className="banner banner-error">{usersError}</div>}
-        {usersLoading ? <LoadingState label="Loading users…" /> : usersData && (
-          <>
-            <div className="table-scroll">
-            <table className="history-table">
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th>Email</th>
-                  <th>Roles</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {usersData.content.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>{user.roles.join(', ')}</td>
-                    <td>{user.accountStatus}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className={user.accountStatus === 'ACTIVE' ? 'btn btn-danger' : 'btn btn-secondary'}
-                        disabled={togglingUserId === user.id}
-                        onClick={() => handleToggleStatus(user)}
-                      >
-                        {togglingUserId === user.id ? 'Working…' : user.accountStatus === 'ACTIVE' ? 'Disable' : 'Enable'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-
-            <div className="pagination">
-              <button type="button" className="btn btn-secondary" onClick={() => setUsersPage((p) => p - 1)} disabled={usersData.first}>
-                Previous
-              </button>
-              <span className="pagination-label">
-                Page {usersData.number + 1} of {Math.max(usersData.totalPages, 1)}
-              </span>
-              <button type="button" className="btn btn-secondary" onClick={() => setUsersPage((p) => p + 1)} disabled={usersData.last}>
-                Next
-              </button>
-            </div>
-          </>
-        )}
-      </section>
+        <section className="ps-card">
+          <h2 className="ps-card__title">Users</h2>
+          {usersError && <PageMessage kind="error">{usersError}</PageMessage>}
+          {usersLoading ? <LoadingState label="Loading users…" /> : usersData && (
+            <>
+              <div className="ps-table-wrap">
+                <table className="ps-table">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Roles</th>
+                      <th>Status</th>
+                      <th><span className="ps-sr">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usersData.content.map((user) => (
+                      <tr key={user.id} className="ps-tr">
+                        <td>{user.username}</td>
+                        <td className="ps-muted">{user.email}</td>
+                        <td><span className="ps-row">{user.roles.map((r) => <RoleBadge key={r} role={r} />)}</span></td>
+                        <td><AccountStatusPill status={user.accountStatus} /></td>
+                        <td className="ps-right">
+                          <Button
+                            variant={user.accountStatus === 'ACTIVE' ? 'danger' : 'secondary'}
+                            size="sm"
+                            loading={togglingUserId === user.id}
+                            onClick={() => handleToggleStatus(user)}
+                          >
+                            {togglingUserId === user.id ? 'Working…' : user.accountStatus === 'ACTIVE' ? 'Disable' : 'Enable'}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                page={usersData.number}
+                totalPages={usersData.totalPages}
+                first={usersData.first}
+                last={usersData.last}
+                onPrevious={() => setUsersPage((p) => p - 1)}
+                onNext={() => setUsersPage((p) => p + 1)}
+              />
+            </>
+          )}
+        </section>
+      </div>
     </div>
   )
 }

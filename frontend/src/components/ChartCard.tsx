@@ -1,32 +1,32 @@
 import { useState, type ReactNode } from 'react'
+import { LiveSourceCaption } from './SourceCaption'
 
-// todo.md Phase 48.1. The shared frame every chart on the dashboard sits in.
+// todo.md Phase 48.1, on the design in 56A.7 (design.md section 15b, Charts and Live-number
+// captions). The shared frame every chart sits in: an app Card with a title, one line of
+// context, the chart, and one SourceCaption for the panel stating its window and when it
+// was loaded.
 //
-// The `period` prop is not decoration and is deliberately REQUIRED. This dashboard's
-// panels genuinely use three different windows — summary cards are today only, entity
-// stats are all-time, and risk distribution / processing time / repeated violations are
-// the last 7 days. NOTE.md records that discrepancy being mistaken for a bug during
-// manual testing ("the card says 3 blocked, the database says 30"). A chart that states
-// its own window turns the most common "is your dashboard broken?" question at viva into
-// a point in favour.
+// The window is deliberately REQUIRED. This dashboard's panels genuinely use three
+// different windows - summary cards are today only, entity stats are all-time, and risk
+// distribution / processing time / repeated violations are the last 7 days. NOTE.md records
+// that discrepancy being mistaken for a bug during manual testing ("the card says 3
+// blocked, the database says 30"). V1's period pill was only a label, so the caption
+// replaces it.
 interface ChartCardProps {
   title: string
   subtitle?: string
-  period: string
+  window: string
+  updatedAt: Date | null
   children: ReactNode
 }
 
-export function ChartCard({ title, subtitle, period, children }: ChartCardProps) {
+export function ChartCard({ title, subtitle, window, updatedAt, children }: ChartCardProps) {
   return (
-    <section className="chart-card">
-      <header className="chart-card-head">
-        <div>
-          <h3 className="chart-title">{title}</h3>
-          {subtitle && <p className="chart-subtitle">{subtitle}</p>}
-        </div>
-        <span className="chart-period">{period}</span>
-      </header>
+    <section className="ps-card chart-card">
+      <h3 className="ps-card__title">{title}</h3>
+      {subtitle && <p className="ps-card__text">{subtitle}</p>}
       <div className="chart-body">{children}</div>
+      <LiveSourceCaption window={window} updatedAt={updatedAt} />
     </section>
   )
 }
@@ -40,20 +40,16 @@ export function useChartTokens() {
     const s = getComputedStyle(document.documentElement)
     const t = (name: string) => s.getPropertyValue(name).trim()
     return {
-      accent: t('--brand-base'),
+      brand: t('--brand-base'),
+      track: t('--surface-hover'),
       grid: t('--line-subtle'),
       axis: t('--text-muted'),
-      text: t('--text-primary'),
-      surface: t('--surface-raised'),
-      border: t('--line-strong'),
+      surface: t('--surface-card'),
       allow: t('--allow'),
       mask: t('--mask'),
       confirm: t('--confirm'),
       review: t('--review'),
       block: t('--block'),
-      critical: t('--sev-critical'),
-      high: t('--sev-high'),
-      medium: t('--sev-medium'),
     }
   }
 
@@ -61,8 +57,8 @@ export function useChartTokens() {
   return tokens
 }
 
-// One tooltip for every chart, built from the same tokens rather than recharts' default
-// white box — which is invisible-on-invisible in dark mode.
+// One tooltip for every chart, built from the tokens rather than recharts' default white
+// box: surface-raised, a line-strong border and shadow-pop (design.md 15b).
 export function ChartTooltip({ active, payload, label, suffix = '' }: {
   active?: boolean
   payload?: Array<{ name?: string; value?: number | string; payload?: { name?: string } }>

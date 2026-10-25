@@ -16,93 +16,6 @@
    ========================================================================== */
 
 /* ==========================================================================
-   45.1 BUTTONS
-   The reference design's signature control: a multi-stop accent gradient at
-   300% background-size, parked at the left edge and slid to the right on
-   hover. Nothing moves except the background position, so the effect costs
-   no layout and degrades to a still gradient when motion is reduced.
-   ========================================================================== */
-.btn {
-  font: var(--text-body);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  font-weight: 600;
-  letter-spacing: .01em;
-  padding: var(--space-2) var(--space-5);
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  color: var(--on-brand);
-  background-color: var(--brand-strong);
-  transition:
-    background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
-}
-
-.btn:hover:not(:disabled) {
-  box-shadow: inset 0 0 0 1px var(--brand-faint);
-}
-
-.btn:active:not(:disabled) {
-  background-color: var(--brand-deep);
-}
-
-/* Covers the loading state too — the Button component sets `disabled` when
-   loading, so a request in flight can't be fired twice by an impatient click. */
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.btn-secondary {
-  background-color: var(--surface-card);
-  border-color: var(--line-control);
-  color: var(--text-primary);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: var(--surface-hover);
-  border-color: var(--line-control);
-}
-
-.btn-danger {
-  background-color: transparent;
-  border-color: var(--block);
-  color: var(--block);
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: var(--block-tint);
-  box-shadow: none;
-}
-
-.btn-link {
-  font: inherit;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--brand-soft);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-  transition: color 0.25s ease;
-}
-
-.btn-link:hover:not(:disabled) {
-  color: var(--brand-faint);
-}
-
-.btn-row {
-  display: flex;
-  gap: var(--space-3);
-}
-
-/* ==========================================================================
    46.1 APP SHELL — desktop only since V2 (56A.7)
    The calm app region (.ps-app): navbar, a content column capped at
    width-content with the desktop gutter, and a slim footer. #root is a
@@ -134,80 +47,6 @@
   color: var(--text-muted);
 }
 
-/* ==========================================================================
-   45.3 FORM CONTROLS
-   One focus treatment shared by inputs, textareas and selects: a gradient
-   underline grown from the centre (a background-image sized 0% -> 100%, so
-   no extra markup is needed on 17 existing form fields) plus a subtle lift.
-
-   The global :focus-visible outline in index.css is deliberately NOT
-   overridden here. It uses :where(), so it has zero specificity and these
-   rules would silently win — a keyboard user would lose the focus ring to a
-   decorative underline. Both are wanted: the ring for keyboard, the
-   underline for everyone.
-   ========================================================================== */
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin-bottom: var(--space-4);
-  text-align: left;
-}
-
-.form-field label {
-  font: var(--text-caption);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.form-field input,
-.form-field select,
-.form-field textarea,
-.input,
-.term-add-form input {
-  font: var(--text-body);
-  width: 100%;
-  padding: var(--space-3) var(--space-3);
-  box-sizing: border-box;
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  background-color: var(--surface-card);
-  transition:
-    border-color var(--duration-fast) var(--ease-out),
-    background-color var(--duration-fast) var(--ease-out);
-}
-
-.form-field input::placeholder,
-.form-field textarea::placeholder,
-.input::placeholder {
-  color: var(--text-muted);
-}
-
-.form-field input:hover:not(:disabled),
-.form-field select:hover:not(:disabled),
-.form-field textarea:hover:not(:disabled),
-.input:hover:not(:disabled),
-.term-add-form input:hover:not(:disabled) {
-  border-color: var(--line-strong);
-}
-
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus,
-.input:focus,
-.term-add-form input:focus {
-  border-color: var(--brand-soft);
-}
-
-.form-field input:disabled,
-.form-field select:disabled,
-.form-field textarea:disabled,
-.input:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 /* Error state pairs colour with a border AND the message text below — never
    colour alone (49.1). Supports both the class and aria-invalid, so Phase 47
    can wire up the accessible attribute without a second style pass. */
@@ -219,101 +58,6 @@
 [aria-invalid='true']:focus {
   border-color: var(--block);
   box-shadow: 0 4px 14px var(--block-tint);
-}
-
-.detector-toggle input,
-.form-field input[type='checkbox'] {
-  width: auto;
-  accent-color: var(--brand-soft);
-}
-
-/* ==========================================================================
-   45.4 CARDS
-   A surface: border, radius, resting shadow. 56A.6 removed the V1.2 hover
-   lift, glow and sweep - the design's app cards have no hover effect.
-   ========================================================================== */
-.card {
-  position: relative;
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-}
-
-/* Stat cards: left-aligned figures in a bordered tile. */
-.stat-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--space-3);
-}
-
-.stat-card {
-  position: relative;
-  padding: var(--space-5) var(--space-5) var(--space-4);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  text-align: left;
-  overflow: hidden;
-}
-
-.stat-card-value {
-  font: var(--text-stat);
-  font-family: var(--font-heading);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums slashed-zero;
-}
-
-.stat-card-label {
-  font: var(--text-label);
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-top: var(--space-2);
-}
-
-/* ==========================================================================
-   45.5 BADGES AND CHIPS
-   Decision badges map from the DECISION STRING via decisionBadge.ts, never
-   from the raw score — an 11.2.3 hard override (a REVIEW forced by an
-   injection phrase at score 23) has to read as elevated, and a
-   score-coloured badge would render it green. That mapping stays in TS;
-   this file only supplies the four band appearances it names.
-   ========================================================================== */
-.badge {
-  font: var(--text-label);
-  display: inline-block;
-  font-weight: 600;
-  letter-spacing: .01em;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  border: 1px solid transparent;
-  margin-bottom: var(--space-2);
-  white-space: nowrap;
-}
-
-.badge-safe {
-  background: var(--allow-tint);
-  border-color: color-mix(in srgb, var(--allow) 45%, transparent);
-  color: var(--allow);
-}
-
-.badge-band-red {
-  background: var(--block-tint);
-  border-color: color-mix(in srgb, var(--block) 45%, transparent);
-  color: var(--block);
-}
-
-.badge-neutral {
-  background: var(--surface-hover);
-  border-color: var(--line-control);
-  color: var(--text-primary);
 }
 
 /* ==========================================================================
@@ -359,46 +103,6 @@
 }
 
 /* ==========================================================================
-   47.5 / 47.6 ADMIN PANELS
-   The three admin pages were flat runs of <h2> + content with nothing
-   separating one concern from the next — on the policy page in particular,
-   thresholds, detector toggles, org terms and retention all ran together as
-   one long column. Each section is now its own panel, which is the whole of
-   "grouped form sections": no markup changed, every page gets it at once.
-   ========================================================================== */
-.admin-section {
-  margin: var(--space-5) 0;
-  padding: var(--space-5) var(--space-6);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-}
-
-.admin-section h2 {
-  font: var(--text-h3);
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  letter-spacing: 0;
-  margin: 0 0 var(--space-4);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--line-subtle);
-}
-
-/* A panel whose only child is a table should not double the padding around
-   it — the table brings its own cell padding. */
-.admin-section > .table-scroll:last-child {
-  margin-bottom: -4px;
-}
-
-@media (max-width: 700px) {
-  .admin-section {
-    padding: var(--space-4);
-  }
-}
-
-/* ==========================================================================
    48.1 CHARTS
    recharts renders SVG, which cannot resolve a CSS custom property inside an
    attribute — so the *marks* are coloured from JS (see useChartTokens in
@@ -407,72 +111,21 @@
    ========================================================================== */
 .chart-grid {
   display: grid;
-  /* Two up on a desktop, one up once a chart would be too narrow to read.
-     360px is the point below which the donut legend starts wrapping badly.
-
-     The `min(360px, 100%)` is load-bearing, not decoration: a bare
-     minmax(360px, 1fr) sets a hard 360px floor on the track, so at a 375px
-     viewport (≈327px of content after gutters) the grid is wider than the
-     screen and the whole PAGE scrolls sideways — which is precisely the
-     guarantee Phase 46.3 exists to hold, and this broke it. Wrapping the
-     floor in min() lets the track collapse to the container width instead.
-     Caught by re-running ui-checks-46.mjs after this phase. */
+  /* Two up at desktop widths. min() keeps a track from forcing the grid wider
+     than its container. */
   grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
   gap: var(--space-4);
-  margin: var(--space-5) 0;
 }
 
+/* The frame is the app Card (.ps-card); this only lets a grid child shrink
+   instead of overflowing. */
 .chart-card {
-  padding: var(--space-5) var(--space-5);
-  border: 1px solid var(--line-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  min-width: 0; /* lets a grid child actually shrink instead of overflowing */
-}
-
-.chart-card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-.chart-title {
-  font: var(--text-body);
-  font-family: var(--font-heading);
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.chart-subtitle {
-  font: var(--text-caption);
-  margin-top: var(--space-1);
-  color: var(--text-secondary);
-  max-width: 60ch;
-}
-
-/* The window label. Deliberately prominent rather than fine print: this
-   dashboard mixes today-only, all-time and 7-day figures, and the panels
-   disagreeing is the most common "is it broken?" question it provokes. */
-.chart-period {
-  font: var(--text-micro);
-  flex: none;
-  align-self: flex-start;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--line-control);
-  background: var(--surface-hover);
-  color: var(--text-primary);
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  min-width: 0;
 }
 
 .chart-body {
   min-height: 60px;
+  margin-top: var(--space-4);
 }
 
 .chart-empty {
@@ -495,20 +148,10 @@
 }
 
 .chart-legend-item {
-  font: var(--text-label);
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-weight: 600;
-  letter-spacing: .01em;
   color: var(--text-primary);
-}
-
-.chart-legend-swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-xs);
-  flex: none;
 }
 
 /* recharts' default tooltip is a white box with a light border — invisible
@@ -559,152 +202,6 @@
    equal so Phase 47 can rename toward the honest name without a flag day.
    ========================================================================== */
 
-/* 46.3: a table that is too wide scrolls inside its OWN box. Without this the
-   page body scrolls sideways instead, which drags the navbar and every other
-   section off-screen to read one extra column. */
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
-  /* Momentum scrolling on touch, and a scrollbar that doesn't overlap the
-     last row on platforms that reserve space for it. */
-  -webkit-overflow-scrolling: touch;
-}
-.history-table {
-  font: var(--text-body-sm);
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.history-table th {
-  font: var(--text-micro);
-  text-align: left;
-  padding: var(--space-3) var(--space-3);
-  font-family: var(--font-heading);
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  background: var(--surface-raised);
-  border-bottom: 1px solid var(--line-strong);
-  white-space: nowrap;
-}
-
-.history-table th:first-child {
-  border-top-left-radius: var(--radius-md);
-}
-
-.history-table th:last-child {
-  border-top-right-radius: var(--radius-md);
-}
-
-.history-table td {
-  padding: var(--space-3) var(--space-3);
-  border-bottom: 1px solid var(--line-subtle);
-  color: var(--text-secondary);
-  vertical-align: top;
-}
-
-/* V1.2 UI pass. Three additions, all about making a long table scannable:
-
-   Zebra striping, at a very low alpha - enough that the eye can follow a row
-   across four columns without a ruler, not enough to read as two colours.
-
-   Tabular figures on every cell, so a column of risk scores, counts and
-   timestamps lines up digit under digit. Without it the proportional face
-   gives each digit its own width and a numeric column visibly ripples.
-
-   A slightly tighter row on a wide screen, because the previous padding was
-   tuned for a phone and left a desktop table looking half empty. */
-.history-table tbody td {
-  font-variant-numeric: tabular-nums;
-}
-
-.history-table tbody tr:nth-child(even) > td {
-  background: rgba(255, 255, 255, 0.018);
-}
-
-.history-table tbody tr {
-  transition: background-color var(--duration-fast) var(--ease-out);
-}
-
-/* A button sitting in a table row is a per-row secondary action, not the
-   page's primary one. At full button size and a solid red fill, ten "Disable"
-   buttons were the loudest thing on the admin dashboard - louder than the
-   figures the page exists to show. Compact, and outlined until hovered, so
-   the row reads as data with an action available rather than as a wall of
-   buttons. The reviewer queue's Reject stays solid: there it IS the primary
-   action, and it is not in a table. */
-.history-table .btn {
-  font: var(--text-caption);
-  padding: var(--space-1) var(--space-3);
-}
-
-.history-table .btn-danger {
-  background-image: none;
-  background-color: transparent;
-  border-color: color-mix(in srgb, var(--block) 45%, transparent);
-  color: var(--block);
-}
-
-.history-table .btn-danger:hover:not(:disabled) {
-  background-image: none;
-  border-color: transparent;
-  color: var(--on-brand);
-}
-
-.history-table tbody tr:hover {
-  background: var(--surface-hover);
-}
-
-/* The expanded row reads as attached to its parent: same raised surface, an
-   accent rule down the left edge, and no hover reaction of its own (it is
-   not itself clickable). */
-.history-detail-row td,
-.history-detail-row:hover td {
-  background: var(--surface-raised);
-  box-shadow: inset 3px 0 0 var(--brand-soft);
-}
-
-.history-detail {
-  padding: var(--space-2) var(--space-1);
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-
-.pagination-label {
-  font: var(--text-body-sm);
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Banners are the page-level form of the same thing (auth pages, save
-   confirmations). 22 call sites, so the class names stay as they are. */
-.banner {
-  font: var(--text-body-sm);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--line-subtle);
-  margin-bottom: var(--space-4);
-  color: var(--text-secondary);
-}
-
-.banner-error {
-  background: var(--block-tint);
-  border-color: color-mix(in srgb, var(--block) 45%, transparent);
-  color: var(--block);
-}
-
-.banner-success {
-  background: var(--allow-tint);
-  border-color: color-mix(in srgb, var(--allow) 45%, transparent);
-  color: var(--allow);
-}
-
 /* ==========================================================================
    REDUCED MOTION — the one place effects opt out
    Nothing above needs its own media query; every transform-based effect in
@@ -721,12 +218,6 @@
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
     animation-iteration-count: 1 !important;
-  }
-
-  .spinner {
-    animation: none;
-    border-right-color: currentColor;
-    border-style: dotted;
   }
 }
 
@@ -800,6 +291,12 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
+}
+
+.ps-grid {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 /* --- Button ------------------------------------------------------------- */
@@ -1865,4 +1362,48 @@
   font: var(--text-body-sm);
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
+}
+
+/* Admin dashboard: the live panels and the always-shown panels are two stacks. */
+.admin-stack + .admin-stack {
+  margin-top: var(--space-4);
+}
+
+/* Policy and Models pages */
+.policy-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.policy-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.policy-fieldset legend {
+  padding: 0;
+  margin-bottom: var(--space-3);
+}
+
+.detector-grid {
+  row-gap: var(--space-3);
+}
+
+.add-form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.add-form .ps-field {
+  flex: 0 1 280px;
+}
+
+/* A lone short number field, at the filter width rather than the card's. */
+.field-short {
+  max-width: 280px;
 }

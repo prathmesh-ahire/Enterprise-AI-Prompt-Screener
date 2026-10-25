@@ -3,6 +3,8 @@ import { apiClient, extractErrorMessage } from '../api/client'
 import { entityLabel } from '../components/EntityChips'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
+import { Button } from '../components/Button'
+import { PageMessage } from '../components/PageMessage'
 
 // Same 9 EntityType values DetectionEngine (backend Phase 9.6) checks against
 // disabled_detectors - reusing EntityChips' key list keeps this in one place.
@@ -206,163 +208,151 @@ export function PolicyManagementPage() {
     }
   }
 
+  // One labelled number box; every policy and retention field has the same shape.
+  const numberField = (id: string, label: string, value: NumberField, set: (v: NumberField) => void, min: number) => (
+    <div className="ps-field">
+      <label className="ps-label" htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        type="number"
+        className="ps-input"
+        min={min}
+        value={value}
+        onChange={(e) => set(toNumberField(e.target.value))}
+      />
+    </div>
+  )
+
   return (
-    <div className="page-content page-content-wide">
+    <div className="page-content">
       <PageHeader
-        title="Policy Management"
-        description="Thresholds, detectors and retention. Changes take effect on the very next prompt — no restart needed."
+        title="Policy"
+        description="Thresholds, detectors and retention. Changes take effect on the very next prompt, with no restart."
       />
 
-      <section className="admin-section">
-        <h2>
-          Screening Policy{' '}
-          {policy && <span className="badge badge-neutral">v{policy.policyVersion}</span>}
-        </h2>
+      <div className="ps-stack">
+        <section className="ps-card">
+          <div className="policy-card-head">
+            <h2 className="ps-card__title">Screening policy</h2>
+            {policy && <span className="ps-muted">Policy version <span className="ps-num">{policy.policyVersion}</span></span>}
+          </div>
 
-        {policyError && <div className="banner banner-error">{policyError}</div>}
-        {policySuccess && <div className="banner banner-success">{policySuccess}</div>}
-        {policyLoading && <LoadingState label="Loading policy…" />}
+          {policyError && <PageMessage kind="error">{policyError}</PageMessage>}
+          {policySuccess && <PageMessage kind="success">{policySuccess}</PageMessage>}
+          {policyLoading && <LoadingState label="Loading policy…" />}
 
-        {!policyLoading && (
-          <>
-            <div className="form-field">
-              <label htmlFor="max-prompt-length">Max prompt length (characters)</label>
-              <input
-                id="max-prompt-length"
-                type="number"
-                min={1}
-                value={maxPromptLength}
-                onChange={(e) => setMaxPromptLength(toNumberField(e.target.value))}
-              />
-            </div>
+          {!policyLoading && (
+            <div className="ps-stack">
+              <div className="field-short">
+                {numberField('max-prompt-length', 'Max prompt length (characters)', maxPromptLength, setMaxPromptLength, 1)}
+              </div>
 
-            <div className="form-field">
-              <label>Detectors (unchecking disables that detector)</label>
-              <div className="detector-toggle-list">
-                {DETECTOR_TYPES.map((type) => (
-                  <label key={type} className="detector-toggle">
-                    <input
-                      type="checkbox"
-                      checked={!disabled.has(type)}
-                      onChange={() => toggleDetector(type)}
-                    />
-                    {entityLabel(type)}
-                  </label>
-                ))}
+              <fieldset className="policy-fieldset">
+                <legend className="ps-label">Detectors (clear a box to turn that detector off)</legend>
+                <div className="ps-grid detector-grid">
+                  {DETECTOR_TYPES.map((type) => (
+                    <label key={type} className="ps-check">
+                      <input
+                        type="checkbox"
+                        checked={!disabled.has(type)}
+                        onChange={() => toggleDetector(type)}
+                      />
+                      {entityLabel(type)}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="ps-grid">
+                {numberField('mask-threshold', 'Mask threshold', maskThreshold, setMaskThreshold, 0)}
+                {numberField('confirm-threshold', 'Confirm threshold', confirmThreshold, setConfirmThreshold, 0)}
+                {numberField('review-threshold', 'Review threshold', reviewThreshold, setReviewThreshold, 0)}
+                {numberField('block-threshold', 'Block threshold', blockThreshold, setBlockThreshold, 0)}
+              </div>
+
+              <div className="ps-row">
+                <Button loading={policySaving} onClick={handleSavePolicy}>
+                  {policySaving ? 'Saving…' : 'Save policy'}
+                </Button>
               </div>
             </div>
+          )}
+        </section>
 
-            <div className="threshold-grid">
-              <div className="form-field">
-                <label htmlFor="mask-threshold">Mask threshold</label>
-                <input
-                  id="mask-threshold"
-                  type="number"
-                  min={0}
-                  value={maskThreshold}
-                  onChange={(e) => setMaskThreshold(toNumberField(e.target.value))}
-                />
+        <section className="ps-card">
+          <h2 className="ps-card__title">Confidential terms</h2>
+          <p className="ps-card__text">A prompt containing any of these terms is flagged as a confidential term.</p>
+          {termsError && <PageMessage kind="error">{termsError}</PageMessage>}
+
+          {terms === null ? <LoadingState label="Loading terms…" /> : (
+            <div className="ps-stack">
+              {terms.length === 0 ? <EmptyState title="No confidential terms yet" hint="Add a term below to start flagging it." /> : (
+                <div className="ps-table-wrap">
+                  <table className="ps-table">
+                    <thead>
+                      <tr>
+                        <th>Term</th>
+                        <th><span className="ps-sr">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {terms.map((t) => (
+                        <tr key={t.id} className="ps-tr">
+                          <td>{t.term}</td>
+                          <td className="ps-right">
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              loading={deletingTermId === t.id}
+                              onClick={() => handleDeleteTerm(t.id)}
+                            >
+                              {deletingTermId === t.id ? 'Removing…' : 'Remove'}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <form className="add-form" onSubmit={handleAddTerm}>
+                <div className="ps-field">
+                  <label className="ps-label" htmlFor="new-term">New term</label>
+                  <input
+                    id="new-term"
+                    type="text"
+                    className="ps-input"
+                    value={newTerm}
+                    onChange={(e) => setNewTerm(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" variant="secondary" loading={addingTerm} disabled={!newTerm.trim()}>
+                  {addingTerm ? 'Adding…' : 'Add term'}
+                </Button>
+              </form>
+            </div>
+          )}
+        </section>
+
+        <section className="ps-card">
+          <h2 className="ps-card__title">Data retention</h2>
+          {retentionError && <PageMessage kind="error">{retentionError}</PageMessage>}
+          {retentionSuccess && <PageMessage kind="success">{retentionSuccess}</PageMessage>}
+          {retentionLoading ? <LoadingState label="Loading retention setting…" /> : (
+            <div className="ps-stack">
+              <div className="field-short">
+                {numberField('retention-days', 'Retention period (days)', retentionDays, setRetentionDays, 1)}
               </div>
-              <div className="form-field">
-                <label htmlFor="confirm-threshold">Confirm threshold</label>
-                <input
-                  id="confirm-threshold"
-                  type="number"
-                  min={0}
-                  value={confirmThreshold}
-                  onChange={(e) => setConfirmThreshold(toNumberField(e.target.value))}
-                />
-              </div>
-              <div className="form-field">
-                <label htmlFor="review-threshold">Review threshold</label>
-                <input
-                  id="review-threshold"
-                  type="number"
-                  min={0}
-                  value={reviewThreshold}
-                  onChange={(e) => setReviewThreshold(toNumberField(e.target.value))}
-                />
-              </div>
-              <div className="form-field">
-                <label htmlFor="block-threshold">Block threshold</label>
-                <input
-                  id="block-threshold"
-                  type="number"
-                  min={0}
-                  value={blockThreshold}
-                  onChange={(e) => setBlockThreshold(toNumberField(e.target.value))}
-                />
+              <div className="ps-row">
+                <Button variant="secondary" loading={retentionSaving} onClick={handleSaveRetention}>
+                  {retentionSaving ? 'Saving…' : 'Save retention'}
+                </Button>
               </div>
             </div>
-
-            <button type="button" className="btn" disabled={policySaving} onClick={handleSavePolicy}>
-              {policySaving ? 'Saving…' : 'Save Policy'}
-            </button>
-          </>
-        )}
-      </section>
-
-      <section className="admin-section">
-        <h2>Organisation Confidential Terms</h2>
-        {termsError && <div className="banner banner-error">{termsError}</div>}
-
-        {terms === null ? <LoadingState label="Loading terms…" /> : (
-          <>
-            {terms.length === 0 ? <EmptyState title="No confidential terms configured yet." hint="Add a term below and any prompt containing it is flagged as ORG_CONFIDENTIAL." /> : (
-              <ul className="term-list">
-                {terms.map((t) => (
-                  <li key={t.id} className="term-list-item">
-                    <span>{t.term}</span>
-                    <button
-                      type="button"
-                      className="btn-link"
-                      disabled={deletingTermId === t.id}
-                      onClick={() => handleDeleteTerm(t.id)}
-                    >
-                      {deletingTermId === t.id ? 'Removing…' : 'Remove'}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <form className="term-add-form" onSubmit={handleAddTerm}>
-              <input
-                type="text"
-                value={newTerm}
-                onChange={(e) => setNewTerm(e.target.value)}
-                placeholder="New confidential term…"
-              />
-              <button type="submit" className="btn btn-secondary" disabled={addingTerm || !newTerm.trim()}>
-                {addingTerm ? 'Adding…' : 'Add'}
-              </button>
-            </form>
-          </>
-        )}
-      </section>
-
-      <section className="admin-section">
-        <h2>Data Retention</h2>
-        {retentionError && <div className="banner banner-error">{retentionError}</div>}
-        {retentionSuccess && <div className="banner banner-success">{retentionSuccess}</div>}
-        {retentionLoading ? <LoadingState label="Loading retention setting…" /> : (
-          <>
-            <div className="form-field">
-              <label htmlFor="retention-days">Retention period (days)</label>
-              <input
-                id="retention-days"
-                type="number"
-                min={1}
-                value={retentionDays}
-                onChange={(e) => setRetentionDays(toNumberField(e.target.value))}
-              />
-            </div>
-            <button type="button" className="btn" disabled={retentionSaving} onClick={handleSaveRetention}>
-              {retentionSaving ? 'Saving…' : 'Save Retention'}
-            </button>
-          </>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
     </div>
   )
 }

@@ -2,6 +2,9 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
+import { Button } from '../components/Button'
+import { PageMessage } from '../components/PageMessage'
+import { ApprovedModelStatusPill, ModelStatusPill } from '../components/StatusPill'
 
 interface ApprovedModel {
   id: number
@@ -95,97 +98,99 @@ export function ModelConfigPage() {
   }
 
   return (
-    <div className="page-content page-content-wide">
+    <div className="page-content">
       <PageHeader
-        title="Model Configuration"
-        description="The local Ollama model this system forwards approved prompts to. Everything runs on this machine — no prompt ever leaves it."
+        title="Models"
+        description="The local Ollama model this system forwards approved prompts to. Everything runs on this machine; no prompt leaves it."
       />
 
-      <section className="admin-section">
-        <h2>Model Status</h2>
-        {statusError && <div className="banner banner-error">{statusError}</div>}
-        {statusLoading ? <LoadingState label="Checking…" /> : (
-          <div className="model-status-row">
-            <span className={`badge ${status?.reachable ? 'badge-safe' : 'badge-band-red'}`}>
-              {status?.reachable ? 'Online' : 'Unavailable'}
-            </span>
-            <button type="button" className="btn-link" onClick={loadStatus}>Refresh</button>
+      <div className="ps-stack">
+        <section className="ps-card">
+          <h2 className="ps-card__title">Model status</h2>
+          {statusError && <PageMessage kind="error">{statusError}</PageMessage>}
+          {statusLoading ? <LoadingState label="Checking…" /> : (
+            <div className="ps-row">
+              <ModelStatusPill online={status?.reachable === true} />
+              <Button variant="ghost" size="sm" onClick={loadStatus}>Refresh</Button>
+            </div>
+          )}
+        </section>
+
+        <section className="ps-card">
+          <h2 className="ps-card__title">Policy and offline mode</h2>
+          <div className="ps-metrics">
+            <div className="ps-metric">
+              <p className={`ps-metric__value${policyVersion === null ? ' ps-metric__value--empty' : ''}`}>
+                {policyVersion ?? '—'}
+              </p>
+              <p className="ps-metric__label">Active policy version</p>
+            </div>
+            <div className="ps-metric">
+              <p className="ps-metric__value">{status?.reachable ? 'Active' : 'Unavailable'}</p>
+              <p className="ps-metric__label">Offline mode</p>
+            </div>
           </div>
-        )}
-      </section>
+        </section>
 
-      <section className="admin-section">
-        <h2>Policy &amp; Offline Mode</h2>
-        <div className="stat-cards">
-          <div className="stat-card">
-            <div className="stat-card-value">{policyVersion !== null ? `v${policyVersion}` : '—'}</div>
-            <div className="stat-card-label">Active Policy Version</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-card-value">{status?.reachable ? 'Active' : 'Unavailable'}</div>
-            <div className="stat-card-label">Offline Mode</div>
-          </div>
-        </div>
-      </section>
+        <section className="ps-card">
+          <h2 className="ps-card__title">Approved models</h2>
+          {modelsError && <PageMessage kind="error">{modelsError}</PageMessage>}
 
-      <section className="admin-section">
-        <h2>Approved Models</h2>
-        {modelsError && <div className="banner banner-error">{modelsError}</div>}
+          {models === null ? <LoadingState label="Loading models…" /> : (
+            <div className="ps-stack">
+              {models.length === 0 ? <EmptyState title="No approved models yet" hint="Add a model name below." /> : (
+                <div className="ps-table-wrap">
+                  <table className="ps-table">
+                    <thead>
+                      <tr>
+                        <th>Model name</th>
+                        <th>Status</th>
+                        <th>Added</th>
+                        <th><span className="ps-sr">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {models.map((model) => (
+                        <tr key={model.id} className="ps-tr">
+                          <td className="ps-mono">{model.modelName}</td>
+                          <td><ApprovedModelStatusPill active={model.active} /></td>
+                          <td className="ps-muted">{formatDateTime(model.addedAt)}</td>
+                          <td className="ps-right">
+                            <Button
+                              variant={model.active ? 'danger' : 'secondary'}
+                              size="sm"
+                              loading={togglingModelId === model.id}
+                              onClick={() => handleToggleActive(model)}
+                            >
+                              {togglingModelId === model.id ? 'Working…' : model.active ? 'Remove' : 'Activate'}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
 
-        {models === null ? <LoadingState label="Loading models…" /> : (
-          <>
-            {models.length === 0 ? <EmptyState title="No approved models configured yet." /> : (
-              <div className="table-scroll">
-              <table className="history-table">
-                <thead>
-                  <tr>
-                    <th>Model Name</th>
-                    <th>Status</th>
-                    <th>Added</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {models.map((model) => (
-                    <tr key={model.id}>
-                      <td>{model.modelName}</td>
-                      <td>
-                        <span className={`badge ${model.active ? 'badge-safe' : 'badge-neutral'}`}>
-                          {model.active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td>{formatDateTime(model.addedAt)}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className={model.active ? 'btn btn-danger' : 'btn btn-secondary'}
-                          disabled={togglingModelId === model.id}
-                          onClick={() => handleToggleActive(model)}
-                        >
-                          {togglingModelId === model.id ? 'Working…' : model.active ? 'Remove' : 'Activate'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              </div>
-            )}
-
-            <form className="term-add-form" onSubmit={handleAddModel}>
-              <input
-                type="text"
-                value={newModelName}
-                onChange={(e) => setNewModelName(e.target.value)}
-                placeholder="New model name (e.g. llama3.2)…"
-              />
-              <button type="submit" className="btn btn-secondary" disabled={addingModel || !newModelName.trim()}>
-                {addingModel ? 'Adding…' : 'Add'}
-              </button>
-            </form>
-          </>
-        )}
-      </section>
+              <form className="add-form" onSubmit={handleAddModel}>
+                <div className="ps-field">
+                  <label className="ps-label" htmlFor="new-model">New model name</label>
+                  <input
+                    id="new-model"
+                    type="text"
+                    className="ps-input"
+                    value={newModelName}
+                    onChange={(e) => setNewModelName(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" loading={addingModel} disabled={!newModelName.trim()}>
+                  {addingModel ? 'Adding…' : 'Add model'}
+                </Button>
+              </form>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   )
 }
