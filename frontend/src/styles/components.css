@@ -176,7 +176,6 @@
 .form-field select,
 .form-field textarea,
 .input,
-.prompt-textarea,
 .history-filter select,
 .term-add-form input {
   font: var(--text-body);
@@ -194,8 +193,7 @@
 
 .form-field input::placeholder,
 .form-field textarea::placeholder,
-.input::placeholder,
-.prompt-textarea::placeholder {
+.input::placeholder {
   color: var(--text-muted);
 }
 
@@ -203,7 +201,6 @@
 .form-field select:hover:not(:disabled),
 .form-field textarea:hover:not(:disabled),
 .input:hover:not(:disabled),
-.prompt-textarea:hover:not(:disabled),
 .history-filter select:hover:not(:disabled),
 .term-add-form input:hover:not(:disabled) {
   border-color: var(--line-strong);
@@ -213,7 +210,6 @@
 .form-field select:focus,
 .form-field textarea:focus,
 .input:focus,
-.prompt-textarea:focus,
 .history-filter select:focus,
 .term-add-form input:focus {
   border-color: var(--brand-soft);
@@ -222,15 +218,9 @@
 .form-field input:disabled,
 .form-field select:disabled,
 .form-field textarea:disabled,
-.input:disabled,
-.prompt-textarea:disabled {
+.input:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-.prompt-textarea {
-  resize: vertical;
-  line-height: 1.5;
 }
 
 /* Error state pairs colour with a border AND the message text below — never
@@ -263,19 +253,6 @@
 .form-field-hint {
   font: var(--text-caption);
   color: var(--text-muted);
-}
-
-.char-counter {
-  font: var(--text-caption);
-  color: var(--text-muted);
-  text-align: right;
-  margin-top: var(--space-1);
-  font-variant-numeric: tabular-nums;
-}
-
-.char-counter-over {
-  color: var(--block);
-  font-weight: 600;
 }
 
 .detector-toggle input,
@@ -503,69 +480,6 @@
   justify-content: space-between;
   gap: var(--space-3);
   font: var(--text-body-sm);
-}
-
-/* ==========================================================================
-   47.2 PROMPT RESULT — one presentation per decision band
-   The band's own colour drives a left rule and the heading, so ALLOW / MASK
-   / CONFIRM / REVIEW / BLOCK are distinguishable at a glance without the
-   reader parsing the score. Colour is never the only cue: every result
-   carries its decision word in the badge as well.
-   ========================================================================== */
-.result-card {
-  padding: var(--space-5) var(--space-5);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--line-subtle);
-  border-left: 4px solid var(--line-strong);
-  background: var(--surface-card);
-}
-
-.result-card-allow {
-  border-left-color: var(--allow);
-  background: color-mix(in srgb, var(--allow) 5%, var(--surface-card));
-}
-
-.result-card-mask {
-  border-left-color: var(--mask);
-  background: color-mix(in srgb, var(--mask) 5%, var(--surface-card));
-}
-
-.result-card-confirm {
-  border-left-color: var(--confirm);
-  background: color-mix(in srgb, var(--confirm) 5%, var(--surface-card));
-}
-
-.result-card-review {
-  border-left-color: var(--review);
-  background: color-mix(in srgb, var(--review) 5%, var(--surface-card));
-}
-
-.result-card-block {
-  border-left-color: var(--block);
-  background: color-mix(in srgb, var(--block) 5%, var(--surface-card));
-}
-
-.result-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-1);
-}
-
-.result-title {
-  font: var(--text-h3);
-  font-family: var(--font-heading);
-  letter-spacing: 0;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.field-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-3);
 }
 
 .section-label {
@@ -1085,36 +999,6 @@
   background: var(--allow-tint);
   border-color: color-mix(in srgb, var(--allow) 45%, transparent);
   color: var(--allow);
-}
-
-/* The BLOCK explanation panel — the single most consequential surface in the
-   app, so it gets the heaviest treatment: full-height accent rule, raised
-   weight, block-red throughout. */
-.alert-block {
-  padding: var(--space-4) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--block-tint);
-  border: 1px solid color-mix(in srgb, var(--block) 45%, transparent);
-  border-left: 4px solid var(--block);
-  color: var(--text-primary);
-}
-
-.alert-review {
-  padding: var(--space-4) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--review-tint);
-  border: 1px solid color-mix(in srgb, var(--review) 45%, transparent);
-  border-left: 4px solid var(--review);
-  color: var(--text-primary);
-  margin-bottom: var(--space-4);
-}
-
-.alert-review p {
-  margin: 0;
-}
-
-.alert-review p + p {
-  margin-top: var(--space-2);
 }
 
 /* ==========================================================================
@@ -2235,4 +2119,16 @@
     animation: none;
     background: var(--surface-raised);
   }
+}
+
+/* --- Prompt page (56A.7) -------------------------------------------------------- */
+.prompt-field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.prompt-result {
+  margin-top: var(--space-8);
 }

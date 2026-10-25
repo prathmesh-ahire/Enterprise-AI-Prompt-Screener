@@ -5,21 +5,31 @@ import { Button } from '../components/Button'
 import { EntityChips, entityLabel } from '../components/EntityChips'
 import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
-import { decisionBadgeClass } from '../components/decisionBadge'
+import { Icon, type IconName } from '../components/Icon'
+import { PageMessage } from '../components/PageMessage'
+import { FieldError } from '../components/FieldError'
 import type { ScoreBreakdown } from '../api/types'
 
 const MAX_LENGTH = 2000
 
-// 47.2: one plain-English heading per decision band, so the result says what happened
-// before the reader parses a score or a colour. Keyed on the decision string for the same
-// reason decisionBadgeClass is (see that file): a hard-overridden REVIEW at score 23 must
-// read as elevated, and anything keyed on the score would call it safe.
-const RESULT_TITLE: Record<string, string> = {
-  ALLOW: 'Allowed — sent to the model',
-  MASK: 'Sensitive data found and masked',
-  CONFIRM: 'Your confirmation needed',
-  REVIEW: 'Sent for human review',
-  BLOCK: 'Blocked — not sent anywhere',
+// 47.2, on the design's DecisionAlert in 56A.7: the title is "DECISION · what happened",
+// so the result says what happened before the reader parses a score or a colour. Keyed on
+// the decision string, never the score: a hard-overridden REVIEW at score 23 must read as
+// REVIEW, and anything keyed on the score would call it safe.
+const RESULT_OUTCOME: Record<string, string> = {
+  ALLOW: 'Sent to the model',
+  MASK: 'Sensitive data masked',
+  CONFIRM: 'Your confirmation is needed',
+  REVIEW: 'Held for a reviewer',
+  BLOCK: 'Not sent anywhere',
+}
+
+const RESULT_ICON: Record<string, IconName> = {
+  ALLOW: 'check',
+  MASK: 'eye-slash',
+  CONFIRM: 'question',
+  REVIEW: 'eye',
+  BLOCK: 'slashed-circle',
 }
 
 interface PromptResult {
@@ -88,32 +98,42 @@ export function PromptPage() {
   const pendingReview = result !== null && result.decision === 'REVIEW'
     && result.status !== 'COMPLETED' && result.status !== 'BLOCKED'
 
+  const tooLong = text.length > MAX_LENGTH
+  const decisionKey = result?.decision?.toLowerCase() ?? ''
+  const hasAlertStyle = result !== null && RESULT_ICON[result.decision] !== undefined
+
   return (
     <div className="page-content">
       <PageHeader
-        title="Submit a Prompt"
+        title="Submit a prompt"
         description="Prompts are screened for sensitive data and injection risk before anything reaches the AI model."
       />
 
-      {error && <div className="banner banner-error">{error}</div>}
+      {error && <PageMessage kind="error">{error}</PageMessage>}
 
-      <form onSubmit={handleSubmit}>
-        <div className="field-row">
-          <label className="section-label" htmlFor="prompt-input" style={{ margin: '0 0 6px' }}>Your prompt</label>
-          <div className={`char-counter${text.length > MAX_LENGTH ? ' char-counter-over' : ''}`}>
-            {text.length} / {MAX_LENGTH}
+      <form className="ps-stack" onSubmit={handleSubmit}>
+        <div className="ps-field">
+          <div className="prompt-field-head">
+            <label className="ps-label" htmlFor="prompt-input">Your prompt</label>
+            <span className="ps-counter" aria-live="polite">{text.length} / {MAX_LENGTH}</span>
           </div>
+          <textarea
+            id="prompt-input"
+            className="ps-textarea"
+            rows={8}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Type your prompt here…"
+            aria-invalid={tooLong ? true : undefined}
+            aria-describedby={tooLong ? 'prompt-error' : undefined}
+          />
+          <FieldError
+            id="prompt-error"
+            message={tooLong ? `Shorten your prompt to ${MAX_LENGTH} characters or fewer.` : undefined}
+          />
         </div>
-        <textarea
-          id="prompt-input"
-          className="prompt-textarea"
-          rows={8}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Type your prompt here…"
-        />
 
-        <div className="btn-row" style={{ marginTop: 12 }}>
+        <div>
           <Button type="submit" loading={submitting} disabled={text.trim().length < 3}>
             {submitting ? 'Screening…' : 'Screen & send'}
           </Button>
@@ -121,73 +141,58 @@ export function PromptPage() {
       </form>
 
       {result && (
-        <div className="results-section">
-          <div className={`result-card result-card-${(result.decision ?? '').toLowerCase()}`}>
-            <div className="result-head">
-              <span className={`badge ${decisionBadgeClass(result.decision)}`} style={{ marginBottom: 0 }}>
-                {result.decision}
-              </span>
-              <span className="result-title">{RESULT_TITLE[result.decision] ?? 'Screened'}</span>
-            </div>
-          {result.status === 'COMPLETED' && (
-            <>
-              <p className="section-label">AI response</p>
-              <div className="ai-response-box">{result.aiResponse}</div>
-            </>
-          )}
+        <section className="prompt-result ps-stack" aria-label="Screening result">
+          {/* The DecisionAlert: icon, DECISION · outcome, one or two sentences, and the
+              actions when the user must act. role="alert" for CONFIRM and BLOCK, which
+              need action; role="status" for the rest. Never animated or auto-dismissed. */}
+          <div
+            className={`ps-alert${hasAlertStyle ? ` ps-alert--${decisionKey}` : ''}`}
+            role={result.decision === 'CONFIRM' || result.decision === 'BLOCK' ? 'alert' : 'status'}
+          >
+            {hasAlertStyle && <Icon name={RESULT_ICON[result.decision]} />}
+            <p className="ps-alert__title">
+              {result.decision} · {RESULT_OUTCOME[result.decision] ?? 'Screened'}
+            </p>
+            <div className="ps-alert__body ps-stack">
+              {result.explanation && <p>{result.explanation}</p>}
 
-          {result.decision === 'BLOCK' && (
-            <div className="alert-block">{result.explanation}</div>
-          )}
+              {/* 27.1: the tracking ID, so a held prompt can be followed up. */}
+              {pendingReview && (
+                <p>Tracking ID: <span className="ps-mono">{result.requestId}</span></p>
+              )}
 
-          {/* 27.1: yellow "sent for review" alert, with the requestId for tracking. */}
-          {pendingReview && (
-            <div className="alert-review">
-              <p>This prompt has been sent for human review.</p>
-              <p className="request-id-line">Tracking ID: <span className="request-id">{result.requestId}</span></p>
-            </div>
-          )}
-
-          {/* 27.3/27.4/27.5: score bar + explanation + entity chips, shown for every
-              still-pending state (MASK/CONFIRM's preview below, or REVIEW's alert above). */}
-          {(awaitingConfirm || pendingReview) && (
-            <>
-              <RiskScoreBar score={result.riskScore} band={result.scoreBreakdown?.scoreBand} decision={result.decision} />
-              {result.explanation && <p className="explanation-text">{result.explanation}</p>}
-              <EntityChips entityTypes={result.entityTypes} />
-            </>
-          )}
-
-          {/* 41.4: this block used to be gated on `awaitingConfirm && result.maskedText`, so a
-              MASK/CONFIRM decision reached with no detection finding to mask (by risk score
-              alone, or by a hard override) rendered the backend's "review the masked version"
-              explanation with no masked version shown and no Confirm button at all - a dead
-              end the prompt could never leave. Only the preview is conditional now; the action
-              row always renders, and 41.1 makes confirming actually work in that case. */}
-          {awaitingConfirm && (
-            <>
-              {/* 27.2: CONFIRM gets its own plain-English summary line, on top of the
-                  entity chips above - MASK keeps the plain Confirm & Send flow from 26.4. */}
-              {result.decision === 'CONFIRM' && (
-                <p className="summary-text">
+              {/* 27.2: CONFIRM's plain summary of what was found. */}
+              {awaitingConfirm && result.decision === 'CONFIRM' && (
+                <p>
                   {result.entityTypes.length > 0
-                    ? `We found: ${result.entityTypes.map(entityLabel).join(', ')}. Review it below before sending.`
+                    ? `Found: ${result.entityTypes.map(entityLabel).join(', ')}. Check the masked version before sending.`
                     : 'This prompt needs your confirmation before it is sent.'}
                 </p>
               )}
-              {result.maskedText && <p className="section-label">Masked preview</p>}
-              {result.maskedText
-                ? <MaskedText text={result.maskedText} />
-                : (
-                  <p className="summary-text">
-                    No masked preview: this prompt was held by its overall risk score rather than by a
-                    specific piece of sensitive data, so there was nothing to mask. It will be sent to
-                    the AI model exactly as you wrote it.
-                  </p>
-                )}
-              <div className="btn-row" style={{ marginTop: 14 }}>
+
+              {/* 41.4: only the preview is conditional; the actions always render, so a
+                  MASK/CONFIRM reached with nothing to mask can still be sent. */}
+              {awaitingConfirm && (
+                result.maskedText
+                  ? (
+                    <div className="ps-field">
+                      <p className="ps-detail__k">Masked preview</p>
+                      <MaskedText text={result.maskedText} />
+                    </div>
+                  )
+                  : (
+                    <p>
+                      No masked preview: this prompt was held by its overall risk score rather than by a
+                      specific piece of sensitive data, so there was nothing to mask. It will be sent to
+                      the AI model exactly as you wrote it.
+                    </p>
+                  )
+              )}
+            </div>
+            {awaitingConfirm && (
+              <div className="ps-alert__actions">
                 <Button loading={confirming} onClick={handleConfirm}>
-                  {confirming ? 'Sending…' : 'Confirm & Send'}
+                  {confirming ? 'Sending…' : 'Confirm & send'}
                 </Button>
                 {result.decision === 'CONFIRM' && (
                   <Button variant="secondary" onClick={handleCancel} disabled={confirming}>
@@ -195,14 +200,33 @@ export function PromptPage() {
                   </Button>
                 )}
               </div>
-            </>
+            )}
+          </div>
+
+          {/* 27.3-27.5: the score and what was detected, for every still-pending state. */}
+          {(awaitingConfirm || pendingReview) && (
+            <div className="ps-card">
+              <RiskScoreBar score={result.riskScore} band={result.scoreBreakdown?.scoreBand} decision={result.decision} />
+              {result.entityTypes.length > 0 && (
+                <div className="ps-field">
+                  <p className="ps-detail__k">Detected items</p>
+                  <EntityChips entityTypes={result.entityTypes} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {result.status === 'COMPLETED' && (
+            <div className="ps-card">
+              <p className="ps-card__title">AI response</p>
+              <div className="ps-nested">{result.aiResponse}</div>
+            </div>
           )}
 
           {result.status !== 'COMPLETED' && result.decision !== 'BLOCK' && !awaitingConfirm && !pendingReview && (
-            <p>{result.explanation ?? `Status: ${result.status}`}</p>
+            <p className="ps-card__text">{result.explanation ?? `Status: ${result.status}`}</p>
           )}
-          </div>
-        </div>
+        </section>
       )}
     </div>
   )

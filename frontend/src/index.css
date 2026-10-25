@@ -285,22 +285,6 @@ code {
   text-align: left;
 }
 
-.results-section {
-  margin-top: var(--space-6);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--line-subtle);
-}
-
-.masked-text {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--surface-raised);
-  border: 1px solid var(--line-subtle);
-  line-height: 160%;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
 .ai-response-box {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
@@ -318,59 +302,6 @@ code {
 .explanation-text {
   margin: var(--space-3) 0;
   color: var(--text-primary);
-}
-
-.summary-text {
-  margin: 0 0 var(--space-3);
-  color: var(--text-primary);
-}
-
-.risk-score-bar-wrap {
-  margin: var(--space-3) 0;
-}
-
-.risk-score-label {
-  font: var(--text-caption);
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-1);
-}
-
-.risk-score-track {
-  width: 100%;
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-raised);
-  border: 1px solid var(--line-subtle);
-  overflow: hidden;
-}
-
-.risk-score-fill {
-  height: 100%;
-  border-radius: var(--radius-pill);
-  transition: width var(--duration-slow) var(--ease-out);
-}
-
-/* 56A.4: one fill per decision band, keyed on the band word the API returns. */
-.risk-score-allow {
-  background: var(--allow);
-}
-
-.risk-score-mask {
-  background: var(--mask);
-}
-
-.risk-score-confirm {
-  background: var(--confirm);
-}
-
-.risk-score-review {
-  background: var(--review);
-}
-
-.risk-score-block {
-  background: var(--block);
 }
 
 /* Phase 28+ history page: the filter's own layout (the select inside it is
