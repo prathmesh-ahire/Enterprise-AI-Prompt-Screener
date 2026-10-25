@@ -135,7 +135,7 @@ export function ProcessingTimePanel({ data, updatedAt }: { data: ProcessingTime 
   return (
     <ChartCard
       title="Screening performance"
-      subtitle="Pipeline time, excluding the AI call. The Phase 43 change cut 26 database statements per prompt to 17; latency is shown for context, not as that claim."
+      subtitle="Pipeline time, excluding the AI call. A query optimisation cut the database statements per prompt from 26 to 17; latency is shown for context, not as that claim."
       window="last 7 days"
       updatedAt={updatedAt}
     >

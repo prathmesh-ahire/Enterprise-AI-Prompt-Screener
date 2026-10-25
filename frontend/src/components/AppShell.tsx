@@ -4,12 +4,9 @@ import { Navbar } from './Navbar'
 // todo.md Phase 46.1. The shell every authenticated route sits in: sticky navbar, a
 // content region that owns the page gutters, and a slim footer.
 //
-// Version is a constant rather than being read from package.json, which still says
-// "0.0.0" - the frontend package version has never been maintained, and wiring a build
-// define to an unmaintained field would just surface the wrong number. This string is the
-// project milestone from todo.md, which is the number that actually means something here.
+// 56A.8 (C8): the full product name, used on the sign-in pages and in the footer. The
+// footer shows no version: version numbers are a developer term and never shown to users.
 export const APP_NAME = 'Enterprise AI Prompt Screener'
-export const APP_VERSION = 'V1.1'
 
 export function AppShell({ children }: { children: ReactNode }) {
   // 56A.7: the app is the calm style (design.md section 11), so the whole shell sits in
@@ -22,8 +19,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="app-main" id="main-content">{children}</main>
       <footer className="app-footer">
         <span>{APP_NAME}</span>
-        <span aria-hidden="true">·</span>
-        <span>{APP_VERSION}</span>
       </footer>
     </div>
   )
