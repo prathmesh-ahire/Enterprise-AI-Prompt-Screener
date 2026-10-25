@@ -10,8 +10,9 @@
  *   node uicheck/shots.mjs <outDir> [baseURL]
  *
  * Logs in with the seeded admin (both ADMIN and USER roles, so every route is
- * reachable from one session), then captures every page (dark only since 56A.3) at
- * desktop and phone widths. Run it once before a restyle and once after, then diff the directories.
+ * reachable from one session), then captures every page (dark only since 56A.3) at the
+ * three desktop widths the site is built for (desktop only; nothing is captured at phone
+ * or tablet widths). Run it once before a restyle and once after, then diff the directories.
  */
 import { chromium } from '@playwright/test'
 import { mkdirSync, readFileSync } from 'node:fs'
@@ -45,8 +46,9 @@ const ROUTES = [
 ]
 
 const VIEWPORTS = [
-  ['desktop', { width: 1440, height: 1000 }],
-  ['phone', { width: 390, height: 844 }],
+  ['w1280', { width: 1280, height: 900 }],
+  ['w1440', { width: 1440, height: 1000 }],
+  ['w1920', { width: 1920, height: 1080 }],
 ]
 
 const consoleErrors = []
@@ -87,7 +89,7 @@ try {
   await loginPage.click('button[type="submit"]')
   /* Wait for the authenticated shell to render rather than for a navigation event:
    * react-router changes the URL client-side, so there is no document load to await. */
-  await loginPage.waitForSelector('.navbar-inner, .navbar, nav', { timeout: 30000 })
+  await loginPage.waitForSelector('.ps-appbar', { timeout: 30000 })
   const storageState = await loginContext.storageState()
   await loginContext.close()
 
@@ -129,7 +131,7 @@ try {
       if (await box.count()) {
         await box.fill('Contact me at uicheck.user@example.com or 9876543210 about ProjectAtlas')
         await page.click('button[type="submit"]')
-        await page.waitForSelector('.result-card', { timeout: 90000 }).catch(() => {})
+        await page.waitForSelector('.ps-alert', { timeout: 90000 }).catch(() => {})
         await page.addStyleTag({ content: FREEZE })
         await shoot(page, `${vpName}-prompt-result`)
       }
