@@ -1,26 +1,30 @@
 /*
  * Design-scale lint. Zero dependencies; run with `node uicheck/scale-lint.mjs`.
  *
- * The V1.2 UI pass put every font size, radius and spacing value in the stylesheets
- * onto a named scale (src/index.css, "SCALE:" blocks). Nothing enforces that, and the
- * failure mode is silent: one `padding: 7px` added in a hurry does not break a build,
- * it just puts one component half a pixel off every other component, and after twenty
- * of those the UI looks hand-tuned again. That is precisely the state this pass found
- * the app in - 13 distinct font sizes, 9 radii, 22 spacing values.
+ * Every font, radius and spacing value in the stylesheets sits on the design's named
+ * scale (design.md sections 4b, 5 and 6; tokens in src/index.css). Nothing else enforces
+ * that, and the failure mode is silent: one `padding: 7px` added in a hurry does not break
+ * a build, it just puts one component half a pixel off every other component, and after
+ * twenty of those the UI looks hand-tuned again.
  *
- * Checks, over index.css and styles/components.css:
- *   1. every font-size is a var(--fs-*)
- *   2. every border-radius is a var(--r-*) (50% is allowed, for a circle)
- *   3. every padding/margin/gap length is a var(--sp-*) or 0
+ * Checks (todo 56A.9, decision C9), over index.css, styles/components.css and
+ * styles/site.css when it exists:
+ *   1. every font-size and every `font:` shorthand is a var(--text-*) (or inherit), with
+ *      no raw px size in either
+ *   2. every border-radius is a var(--radius-*), 0, 1px, 2px or 50%
+ *   3. every padding/margin/gap length is a var(--space-*), a calc() of them, 0, auto, a
+ *      percentage, or ±1px / ±2px
  *   4. no font-weight outside the faces main.tsx actually imports
  * Custom-property definitions are skipped - that is where the raw values belong.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
-const FILES = ['src/index.css', 'src/styles/components.css']
-/* Inter 500/600/700 and Source Sans 3 400/600 are the only faces imported, and
- * `font-synthesis: none` is set, so anything else silently falls back. */
+const FILES = ['src/index.css', 'src/styles/components.css', 'src/styles/site.css'].filter(existsSync)
+/* Only 400/500/600/700 faces are imported, and `font-synthesis: none` is set, so anything
+ * else silently falls back. */
 const ALLOWED_WEIGHTS = new Set(['400', '500', '600', '700', 'normal', 'bold', 'inherit'])
+/* Hairlines and tiny nudges stay raw (design.md section 6, "What may stay raw"). */
+const RAW_OK = new Set(['0', '0px', '1px', '2px', '-1px', '-2px'])
 
 let problems = 0
 const report = (file, line, msg) => {
@@ -28,44 +32,82 @@ const report = (file, line, msg) => {
   problems++
 }
 
+// A calc() is on the scale when every length inside it is a --space-* var or a raw-OK value.
+const calcOnScale = (v) => {
+  const vars = [...v.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => m[1])
+  const lengths = v.replace(/var\([^)]*\)/g, '').match(/-?\d*\.?\d+(px|rem|em)\b/g) ?? []
+  return vars.every((n) => n.startsWith('--space-')) && lengths.every((l) => RAW_OK.has(l))
+}
+
+// Splits a value into top-level tokens, keeping var(...) and calc(...) whole.
+const tokens = (v) => {
+  const out = []
+  let depth = 0
+  let cur = ''
+  for (const ch of v.trim()) {
+    if (ch === '(') depth++
+    if (ch === ')') depth--
+    if (/\s/.test(ch) && depth === 0) {
+      if (cur) out.push(cur)
+      cur = ''
+    } else cur += ch
+  }
+  if (cur) out.push(cur)
+  return out
+}
+
 for (const file of FILES) {
-  const lines = readFileSync(file, 'utf8').split('\n')
-  lines.forEach((raw, i) => {
-    /* An explicit, in-file opt-out for the handful of values that genuinely are not
-     * scale steps - the document's own base font-size being the only one today. It
-     * has to be written out on the line itself, so the reason is visible at the
-     * point of the exception rather than buried in this script. */
-    if (raw.includes('scale-lint-ignore')) return
-    const line = raw.split('/*')[0]
-    if (/^\s*--/.test(line)) return            // a token definition
-    const n = i + 1
+  const src = readFileSync(file, 'utf8')
+  // Blank out comments but keep their newlines, so offsets still map to the right line.
+  const css = src.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '))
+  const lineOf = (offset) => css.slice(0, offset).split('\n').length
+  const lines = src.split('\n')
 
-    const fs = line.match(/font-size:\s*([^;]+);/)
-    if (fs && !fs[1].includes('var(--fs-') && !fs[1].includes('clamp(') && fs[1].trim() !== 'inherit') {
-      report(file, n, `font-size off the scale: ${fs[1].trim()}`)
-    }
+  // A declaration is `name: value` that follows a `{` or `;` and ends at `;` or `}`. That
+  // excludes selectors such as `a:hover {`, and catches values split over several lines.
+  for (const m of css.matchAll(/(?<=[{;])\s*([\w-]+)\s*:\s*([^;{}]+?)\s*(?=[;}])/g)) {
+    const [, prop, value] = m
+    if (prop.startsWith('--')) continue // a token definition
+    const n = lineOf(m.index + m[0].indexOf(prop))
+    /* An explicit, in-file opt-out for a value that genuinely is not a scale step. It has
+     * to be written on the declaration's own line, so the reason is visible at the point
+     * of the exception rather than buried in this script. */
+    if (lines[n - 1].includes('scale-lint-ignore')) continue
+    const v = value.replace(/\s*!important$/, '')
 
-    const br = line.match(/border-radius:\s*([^;]+);/)
-    if (br && !br[1].includes('var(--r-') && br[1].trim() !== '50%' && !br[1].includes('inherit')) {
-      report(file, n, `border-radius off the scale: ${br[1].trim()}`)
-    }
-
-    const sp = line.match(/\b(padding|margin|gap|row-gap|column-gap)(?:-(?:top|bottom|left|right|inline|block))?:\s*([^;]+);/)
-    if (sp && !/var\(|%|calc|auto|inherit/.test(sp[2])) {
-      for (const tok of sp[2].trim().split(/\s+/)) {
-        if (/^\d+px$/.test(tok) && tok !== '0px') report(file, n, `${sp[1]} off the scale: ${tok}`)
+    if (prop === 'font-size' || prop === 'font') {
+      if (v !== 'inherit' && !/^var\(--text-[\w-]+\)$/.test(v)) {
+        report(file, n, `${prop} is not a var(--text-*): ${v}`)
       }
     }
 
-    const fw = line.match(/font-weight:\s*([^;]+);/)
-    if (fw && !ALLOWED_WEIGHTS.has(fw[1].trim())) {
-      report(file, n, `font-weight ${fw[1].trim()} is not an imported face (400/500/600/700)`)
+    if (prop === 'border-radius' || /^border-(top|bottom|start|end)-(left|right|start|end)-radius$/.test(prop)) {
+      for (const tok of tokens(v)) {
+        if (!/^var\(--radius-[\w-]+\)$/.test(tok) && !['0', '1px', '2px', '50%', 'inherit'].includes(tok)) {
+          report(file, n, `${prop} off the scale: ${tok}`)
+        }
+      }
     }
-  })
+
+    if (/^(padding|margin|gap|row-gap|column-gap)(-(top|bottom|left|right|inline|block)(-(start|end))?)?$/.test(prop)) {
+      for (const tok of tokens(v)) {
+        const ok = RAW_OK.has(tok)
+          || /^var\(--space-[\w-]+\)$/.test(tok)
+          || (tok.startsWith('calc(') && calcOnScale(tok))
+          || /^-?\d*\.?\d+%$/.test(tok)
+          || ['auto', 'inherit', 'normal'].includes(tok)
+        if (!ok) report(file, n, `${prop} off the scale: ${tok}`)
+      }
+    }
+
+    if (prop === 'font-weight' && !ALLOWED_WEIGHTS.has(v)) {
+      report(file, n, `font-weight ${v} is not an imported face (400/500/600/700)`)
+    }
+  }
 }
 
 if (problems) {
   console.log(`\n${problems} scale violation(s).`)
   process.exit(1)
 }
-console.log('Scale lint clean: every size, radius, spacing value and weight is on the scale.')
+console.log(`Scale lint clean over ${FILES.join(', ')}: every font, radius, spacing value and weight is on the scale.`)
