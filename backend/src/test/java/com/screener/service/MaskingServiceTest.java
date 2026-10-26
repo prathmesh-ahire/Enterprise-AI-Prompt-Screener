@@ -24,9 +24,9 @@ class MaskingServiceTest {
         assertEquals("My email is [EMAIL] today", masked);
     }
 
-    // Phase 35.6's "overlapping findings" case, per docs/NOTE.md: two separate positions
+    // The "overlapping findings" case: two separate positions
     // sharing the same underlying value (this project's established meaning for
-    // "overlapping" since Phase 12.6), not two findings whose character ranges genuinely
+    // "overlapping" from the start), not two findings whose character ranges genuinely
     // intersect - MaskingService documents (see its own class comment) that it relies on
     // DetectionEngine to have already resolved true overlaps before findings reach here.
     @Test

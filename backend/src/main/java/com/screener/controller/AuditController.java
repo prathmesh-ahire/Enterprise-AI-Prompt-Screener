@@ -25,9 +25,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * todo.md Phase 17.4. {@code my-history} never accepts a target user id from the
+ * {@code my-history} never accepts a target user id from the
  * caller — it always filters by whoever the JWT resolves to — so there is no parameter
- * a USER could tamper with to read another user's events (17.5).
+ * a USER could tamper with to read another user's events.
  */
 @RestController
 @RequestMapping("/api/audit")
@@ -54,7 +54,7 @@ public class AuditController {
         return ResponseEntity.ok(withUsernames(auditEventRepository.findAll(pageable)));
     }
 
-    // 55.6: one batched user lookup per page, never one query per row - same goal as 41.7's
+    // one batched user lookup per page, never one query per row - same goal as the
     // join for the repeated-violations panel. AuditEvent.userId is a plain Long, not a
     // relationship, so the names are resolved here rather than fetched with the events.
     private Page<AuditEventDto> withUsernames(Page<AuditEvent> page) {

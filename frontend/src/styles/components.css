@@ -1,22 +1,22 @@
 /* ==========================================================================
-   COMPONENT LIBRARY — V1.1 Phase 45
+   COMPONENT LIBRARY
    --------------------------------------------------------------------------
-   The shared UI vocabulary, defined once so Phase 47 is composition rather
-   than twelve separate styling jobs. Imported after index.css in main.tsx,
+   The shared UI vocabulary, defined once so each page is composition rather
+   than a separate styling job. Imported after index.css in main.tsx,
    so index.css keeps only tokens, resets and base typography.
 
    Rules that apply to everything below:
      * No raw colour. Every value comes from a token in index.css.
      * No legacy alias (--bg, --text-h, --text, --code-bg). Anything moved
        into this file was re-pointed at the real token on the way in; those
-       four aliases should be gone entirely by the end of Phase 47.
+       four aliases are gone.
      * Every transform-based effect degrades under prefers-reduced-motion —
        see the block at the foot of this file, which is the single place
        that opts out, so a new effect can't quietly forget to.
    ========================================================================== */
 
 /* ==========================================================================
-   46.1 APP SHELL — desktop only since V2 (56A.7)
+   APP SHELL — desktop only
    The calm app region (.ps-app): navbar, a content column capped at
    width-content with the desktop gutter, and a slim footer. #root is a
    min-height flex column, so the footer sits at the bottom of a short page.
@@ -48,7 +48,7 @@
 }
 
 /* Error state pairs colour with a border AND the message text below — never
-   colour alone (49.1). Supports both the class and aria-invalid, so Phase 47
+   colour alone. Supports both the class and aria-invalid, so a page
    can wire up the accessible attribute without a second style pass. */
 [aria-invalid='true'] {
   border-color: color-mix(in srgb, var(--block) 45%, transparent);
@@ -61,7 +61,7 @@
 }
 
 /* ==========================================================================
-   47.1 SIGN-IN PAGES — rebuilt to C10 in 56A.7 (design.md section 15b)
+   SIGN-IN PAGES
    Calm app style with no background: one centred solid card, 400px wide
    (the user's value), with the full product name above it.
    ========================================================================== */
@@ -103,7 +103,7 @@
 }
 
 /* ==========================================================================
-   48.1 CHARTS
+   CHARTS
    recharts renders SVG, which cannot resolve a CSS custom property inside an
    attribute — so the *marks* are coloured from JS (see useChartTokens in
    ChartCard.tsx). This section styles only the frame around them, which is
@@ -196,10 +196,10 @@
 }
 
 /* ==========================================================================
-   45.6 TABLES
+   TABLES
    One treatment for all four (history, review queue, users, audit). They
    already share the .history-table class; .data-table is accepted as an
-   equal so Phase 47 can rename toward the honest name without a flag day.
+   equal, so it can be renamed toward the honest name without a flag day.
    ========================================================================== */
 
 /* ==========================================================================
@@ -210,8 +210,8 @@
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  /* 56A.6: the app keeps only colour and border transitions; under reduced motion
-     they are instant and the spinner stops on a dotted ring (design.md section 10). */
+  /* the app keeps only colour and border transitions; under reduced motion
+     they are instant and the spinner stops on a dotted ring. */
   *,
   *::before,
   *::after {
@@ -222,14 +222,14 @@
 }
 
 /* ==========================================================================
-   DESIGN COMPONENTS (ps-*) — todo 56A.7
+   DESIGN COMPONENTS (ps-*)
    Ported from the design export's components/bundle.css, app side only: the
-   class names and rules are design.md section 15, plus the project components
-   of section 15b. Every font is a `var(--text-*)` style and every padding,
-   margin and gap sits on the --space-* grid (design.md 4b and 6, C9): the
+   class names and rules follow the design, plus the project components
+   the design did not cover. Every font is a `var(--text-*)` style and every padding,
+   margin and gap sits on the --space-* grid: the
    export's 6px became --space-2 and its 10px became --space-3. Public-only
    effects (glass, glow and corner buttons, hero, background, step cards) are
-   built in Phase 57. Phone media queries are not ported (desktop only).
+   built separately. Phone media queries are not ported (desktop only).
    ========================================================================== */
 *,
 *::before,
@@ -786,7 +786,7 @@
 .ps-chip--high { --c: var(--sev-high); --t: var(--sev-high-tint); }
 .ps-chip--medium { --c: var(--sev-medium); --t: var(--sev-medium-tint); }
 
-/* Risk-signal chips (design.md 15b): neutral, pill-shaped, not interactive. */
+/* Risk-signal chips: neutral, pill-shaped, not interactive. */
 .ps-chip--signal {
   --c: var(--line-control);
   --t: transparent;
@@ -1019,7 +1019,7 @@
 .ps-alert--review { --c: var(--review); --t: var(--review-tint); }
 .ps-alert--block { --c: var(--block); --t: var(--block-tint); }
 
-/* --- Risk score bar (app: no fixed notches, C11) ----------------------------- */
+/* --- Risk score bar (app: no fixed notches) ----------------------------- */
 .ps-score {
   display: flex;
   flex-direction: column;
@@ -1091,7 +1091,7 @@
   color: var(--text-secondary);
 }
 
-/* Page header: the page's one h1 and its lead line (design.md section 11, app). */
+/* Page header: the page's one h1 and its lead line (app). */
 .ps-page-head {
   display: flex;
   align-items: flex-start;
@@ -1117,7 +1117,7 @@
   color: var(--text-muted);
 }
 
-/* --- Page messages (design.md 15b) -------------------------------------------- */
+/* --- Page messages -------------------------------------------- */
 .ps-message {
   display: flex;
   gap: var(--space-2);
@@ -1322,7 +1322,7 @@
   }
 }
 
-/* --- Prompt page (56A.7) -------------------------------------------------------- */
+/* --- Prompt page -------------------------------------------------------- */
 .prompt-field-head {
   display: flex;
   align-items: baseline;
@@ -1334,7 +1334,7 @@
   margin-top: var(--space-8);
 }
 
-/* --- Data tables in pages (56A.7) --------------------------------------------- */
+/* --- Data tables in pages --------------------------------------------- */
 .table-filter {
   max-width: 280px;
 }
@@ -1351,7 +1351,7 @@
   max-width: var(--width-reading);
 }
 
-/* --- Pagination (design.md 15b) ------------------------------------------------ */
+/* --- Pagination ------------------------------------------------ */
 .ps-pagination {
   display: flex;
   align-items: center;

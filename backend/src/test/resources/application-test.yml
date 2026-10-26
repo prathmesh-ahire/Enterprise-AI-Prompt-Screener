@@ -1,4 +1,4 @@
-# todo.md Phase 34.1 - "test" profile used by CI (and any local run that activates it) so
+# "test" profile used by CI (and any local run that activates it) so
 # the test suite doesn't need a real MySQL/Ollama instance. All values below are dummy/local
 # placeholders, never real secrets - this file is committed to the repo.
 spring:

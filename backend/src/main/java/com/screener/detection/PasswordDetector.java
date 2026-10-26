@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 
 /**
  * Pass 1: a password keyword, then a bounded scan of the following tokens in the same
- * sentence — every one of them offered as a candidate (todo.md V1.2 Phase 50.1).
- * Pass 2: accept only a candidate that actually looks like secret material (50.2).
+ * sentence — every one of them offered as a candidate.
+ * Pass 2: accept only a candidate that actually looks like secret material.
  *
  * <p><b>Why this was rewritten.</b> The original pass 1 was
  * {@code \b(password|pwd|passwd)\b\s*[:=]\s*(\S+)} — the {@code [:=]} was mandatory, so it
@@ -44,11 +44,11 @@ import java.util.regex.Pattern;
 @Component
 public class PasswordDetector implements Detector {
 
-    // 52.5 added bare "pass". It is also an ordinary English verb, so on its own it would
+    // Added bare "pass". It is also an ordinary English verb, so on its own it would
     // be a precision risk - but pass 2 requires a secret-shaped value, so "pass the salt"
     // offers "the" and is rejected, while "pass: Winter235@" is caught. Verified against
     // the 40-prompt benign corpus rather than assumed.
-    // 53.7 added the plural forms and "passcode". Measured over 2,601 real password
+    // Added the plural forms and "passcode". Measured over 2,601 real password
     // sentences from ai4privacy/pii-masking-200k, 40 carried only a plural or "passcode"
     // ("recite passwords, with X being most repeated", "use the passcode X") and were
     // therefore missed entirely. The suffix is spelled out per keyword rather than as
@@ -157,7 +157,7 @@ public class PasswordDetector implements Detector {
      * {@code ai4privacy/pii-masking-200k}, <b>409</b> put the secret <em>before</em> the
      * keyword and were unreachable — the single largest fixable cause of missed passwords.
      *
-     * <p>Bugfix (post-54): the original backward sentence rule excluded any token ending in
+     * <p>Bugfix: the original backward sentence rule excluded any token ending in
      * {@code [.!?]} outright, on the theory that it belonged to a separate, preceding
      * statement. That made "Sup3rSecretValue! is my password" unreachable — the password
      * itself ends in {@code !}, and this exact phrasing is the project's headline

@@ -50,7 +50,7 @@ class RiskAnalysisEngineTest {
         assertTrue(signals.stream().allMatch(s -> s.weight() > 0.0 && s.weight() <= 1.0));
     }
 
-    // 36.1: each of the 7 signal types triggered in isolation, confirming it's
+    // each of the 7 signal types triggered in isolation, confirming it's
     // independently triggerable and doesn't require any of the other 6 to also fire.
 
     @Test

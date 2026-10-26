@@ -3,13 +3,13 @@ package com.screener.detection;
 import org.springframework.stereotype.Component;
 
 /**
- * Combines the 5 sub-scores (Phase 11.1) into the final 0-100 risk score, per the exact
- * weighted formula specified in todo.md 11.2.1.
+ * Combines the 5 sub-scores into the final 0-100 risk score, per the exact
+ * weighted formula from the project specification.
  */
 @Component
 public class RiskScorer {
 
-    // Public since V2 55.4: ScoreBreakdownDto returns these beside each sub-score, so the
+    // Public so that ScoreBreakdownDto returns these beside each sub-score, so the
     // formula has one source of truth instead of a copy in the frontend.
     public static final double WEIGHT_SENSITIVE_DATA = 0.35;
     public static final double WEIGHT_INJECTION = 0.25;

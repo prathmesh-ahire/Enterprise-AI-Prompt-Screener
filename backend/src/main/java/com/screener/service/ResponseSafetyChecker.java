@@ -12,12 +12,12 @@ import java.util.UUID;
 
 /**
  * Checks an AI response for leaked sensitive data before it's shown to the user
- * (todo.md Phase 16). Two independent checks (16.2/16.3), either one withholds the
+ *. Two independent checks (14.1.2/14.1.3), either one withholds the
  * response.
  *
- * <p>16.5's SAFE/WITHHELD audit write now goes through {@link AuditService} (Phase 17.1)
+ * <p>The SAFE/WITHHELD audit write now goes through {@link AuditService}
  * — this used to write {@code AuditEvent} rows directly since {@code AuditService} didn't
- * exist yet when Phase 16 was built; see docs/NOTE.md.
+ * exist yet.
  */
 @Service
 @RequiredArgsConstructor
@@ -51,15 +51,15 @@ public class ResponseSafetyChecker {
                 : new SafetyCheckResult(true, responseText);
     }
 
-    // 16.2: the response is its own untrusted text — run the same 9 detectors on it that
+    // the response is its own untrusted text — run the same 9 detectors on it that
     // ran on the prompt.
     private boolean responseContainsNewSensitiveData(String responseText) {
         return !detectionEngine.detectAll(responseText).isEmpty();
     }
 
-    // 16.3: flag only if the exact masked VALUE reappears, not merely the same entity
+    // flag only if the exact masked VALUE reappears, not merely the same entity
     // TYPE — flagging on type alone would withhold almost every response whenever the
-    // prompt had any finding, which 16.2 already covers on its own.
+    // prompt had any finding, which the whole-response scan already covers on its own.
     private boolean responseReproducesAMaskedValue(String responseText, String originalPromptText,
                                                      List<DetectionFinding> originalFindings) {
         for (DetectionFinding finding : originalFindings) {

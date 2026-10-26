@@ -1,6 +1,6 @@
 import { Icon } from './Icon'
 
-// todo 56A.7 (design.md section 15, FormFields): a field's error is `.ps-help--error` with a
+// A field's error is `.ps-help--error` with a
 // warning icon and a sentence on how to fix it. The control points at it with
 // aria-describedby and carries aria-invalid, so colour is never the only signal.
 export function FieldError({ id, message }: { id: string; message?: string }) {

@@ -1,6 +1,6 @@
 import { Icon, type IconName } from './Icon'
 
-// todo 56A.7 (design.md section 15, RoleBadge). Who someone is: User, Reviewer or Admin.
+// Who someone is: User, Reviewer or Admin.
 // Admin is the only role in brand colour, because it can change policy. Never decision
 // colours. Unknown role names render as plain outlined text.
 const ROLES: Record<string, { label: string; icon: IconName; modifier?: string }> = {

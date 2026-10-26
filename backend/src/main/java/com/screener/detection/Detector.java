@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Two-pass detector contract: {@link #findCandidates} (pass 1, format matching) followed
  * by {@link #validate} (pass 2, false-positive filtering) — per the project document's
- * detection spec (see Phase 8 note in todo.md).
+ * detection spec.
  */
 public interface Detector {
 

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * Pass 1: case-insensitive word-boundary matching against the admin-maintained
- * {@code org_confidential_terms} dictionary (Phase 20.2/20.4 manage the table's contents).
+ * {@code org_confidential_terms} dictionary (the admin endpoints manage the table's contents).
  * Pass 2 is trivial here — matching the exact admin-curated term already IS the validation,
  * there's no further format check to run.
  */

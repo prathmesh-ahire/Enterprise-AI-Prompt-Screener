@@ -9,7 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Fault-tolerant readers for {@code system_config} values (todo.md V1.1 Phase 42.3).
+ * Fault-tolerant readers for {@code system_config} values.
  *
  * <p>Every config value in this project is read fresh on each use, straight into
  * {@code Integer.parseInt} or {@code EntityType.valueOf}. Both throw on bad input, and

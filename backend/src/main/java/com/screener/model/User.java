@@ -27,7 +27,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 42.4: uniqueness was enforced only by AuthService.register's existsByUsername check -
+    // uniqueness was enforced only by AuthService.register's existsByUsername check -
     // a classic check-then-insert race where two concurrent registrations for the same name
     // could both pass before either commits. The database is the only place that can settle
     // that. A duplicate insert now raises DataIntegrityViolationException, which

@@ -25,8 +25,8 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 /**
- * todo.md Phase 18.1: every route here is usable by REVIEWER and ADMIN alike - the
- * frontend review page (Phase 29.1) is meant to be usable by both roles, so
+ * Every route here is usable by REVIEWER and ADMIN alike - the
+ * frontend review page is meant to be usable by both roles, so
  * {@code @PreAuthorize} allows both on all three endpoints, not just {@code /decide}.
  */
 @RestController

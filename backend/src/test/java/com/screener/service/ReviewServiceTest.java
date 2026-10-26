@@ -137,7 +137,7 @@ class ReviewServiceTest {
         verify(auditService).log(eq(REVIEWER_ID), eq("REVIEWER_APPROVE"), eq(requestId), eq("REVIEW"));
     }
 
-    // 42.2: the forward used to run before the record and audit event were written, so an AI
+    // the forward used to run before the record and audit event were written, so an AI
     // gateway failure (Ollama down - a recurring event on this machine) meant a reviewer who
     // had genuinely acted left no trace at all. The decision must survive the failure, and the
     // exception must still propagate so the prompt stays PENDING_REVIEW and can be re-decided.

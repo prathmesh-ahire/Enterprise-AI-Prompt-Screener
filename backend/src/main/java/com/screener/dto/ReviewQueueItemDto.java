@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * todo.md Phase 18.1's queue listing — deliberately lighter than {@link ReviewDetailsDto}:
+ * Queue listing — deliberately lighter than {@link ReviewDetailsDto}:
  * no masked text, no signal breakdown. A reviewer fetches those separately via
- * {@code GET /api/review/{requestId}/details} (18.5) only for the item they're about to
+ * {@code GET /api/review/{requestId}/details} only for the item they're about to
  * act on, keeping the queue endpoint itself free of prompt content. {@code entityTypes}
- * (added Phase 29.1) is the one exception - just the type labels, still never a value -
+ * (added later) is the one exception - just the type labels, still never a value -
  * the queue list itself needs to show "Entity Types Found" per row.
  */
 public record ReviewQueueItemDto(

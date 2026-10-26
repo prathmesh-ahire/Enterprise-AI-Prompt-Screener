@@ -80,13 +80,13 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-// todo.md Phase 30. ADMIN only (enforced by RoleProtectedRoute in App.tsx).
+// ADMIN only (enforced by RoleProtectedRoute in App.tsx).
 export function AdminPage() {
   const [summary, setSummary] = useState<Summary | null>(null)
   const [entityStats, setEntityStats] = useState<EntityStat[]>([])
   const [recentBlocked, setRecentBlocked] = useState<RecentBlocked[]>([])
   const [processingTime, setProcessingTime] = useState<ProcessingTimeStats | null>(null)
-  // 48.3: the risk-distribution endpoint already existed (Phase 30) but nothing rendered it.
+  // the risk-distribution endpoint already existed but nothing rendered it.
   const [riskBands, setRiskBands] = useState<RiskBandStat[]>([])
   const [repeatedViolations, setRepeatedViolations] = useState<RepeatedViolation[]>([])
   const [dashboardLoading, setDashboardLoading] = useState(true)
@@ -218,7 +218,7 @@ export function AdminPage() {
                 ['Prompts screened', summary.total],
                 ['ALLOW', summary.allowed],
                 ['MASK', summary.masked],
-                // 41.6: Total has always counted CONFIRM decisions, so they get a tile too.
+                // Total has always counted CONFIRM decisions, so they get a tile too.
                 ['CONFIRM', summary.confirm],
                 ['BLOCK', summary.blocked],
                 ['Waiting for review', summary.pendingReview],
@@ -277,7 +277,7 @@ export function AdminPage() {
                 <table className="ps-table">
                   <thead>
                     <tr>
-                      {/* 41.7: answers "who keeps tripping the screener" by name, not id. */}
+                      {/* answers "who keeps tripping the screener" by name, not id. */}
                       <th>User</th>
                       <th className="ps-right">Violations (7 days)</th>
                       <th><span className="ps-sr">Actions</span></th>

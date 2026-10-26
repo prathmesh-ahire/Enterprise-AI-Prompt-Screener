@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * todo.md Phase 19.1 — masked text only, never the raw prompt text.
+ * Masked text only, never the raw prompt text.
  */
 public record PromptHistoryItemDto(
         UUID requestId,

@@ -11,7 +11,7 @@ interface ForgotPasswordForm {
   email: string
 }
 
-// todo.md Phase 25.3 - v1 has no real email service (Phase 5.2.1), so the reset token is
+// V1 has no real email service, so the reset token is
 // only ever logged to the backend console. The backend's own response message is generic
 // by design (anti-enumeration) - this page just adds the "where to actually find it" hint
 // on top, since the backend message alone doesn't mention the console.

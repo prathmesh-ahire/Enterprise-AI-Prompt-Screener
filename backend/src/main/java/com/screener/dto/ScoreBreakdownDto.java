@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * V2 Phase 55.4 - why a prompt got its score and decision: each of the five sub-scores
+ * why a prompt got its score and decision: each of the five sub-scores
  * with its formula weight, the band the score alone gave, and the hard overrides that
  * raised the decision above that band.
  *

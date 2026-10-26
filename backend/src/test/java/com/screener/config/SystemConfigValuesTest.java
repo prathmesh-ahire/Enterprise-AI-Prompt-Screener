@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * V1.1 Phase 42.3 — a malformed {@code system_config} row must degrade to the documented
+ * a malformed {@code system_config} row must degrade to the documented
  * default rather than throwing, because these values are read inside the prompt-screening
  * hot path: one bad row used to break every submission that followed it, not just the
  * feature that owned the setting.

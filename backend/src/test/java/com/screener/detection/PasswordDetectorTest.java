@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * todo.md V1.2 Phase 50.4.
+ * Tests for {@code PasswordDetector}.
  *
  * <p>This detector had <b>no test at all</b> until this class — the only one of the nine
- * without one, and the reason a 14%-recall pass 1 survived from Phase 9 to V1.2. It drives
+ * without one, and the reason a 14%-recall pass 1 survived until the rewrite. It drives
  * the "force at least MASK" hard override, so a miss here is a secret reaching the model.
  *
  * <p>The natural-phrasing cases below are the actual defect the user found:
@@ -32,7 +32,7 @@ class PasswordDetectorTest {
     }
 
     // ---------------------------------------------------------------------
-    // Natural language — every one of these was missed before Phase 50
+    // Natural language — every one of these was missed by the original detector
     // ---------------------------------------------------------------------
     @ParameterizedTest
     @ValueSource(strings = {
@@ -194,7 +194,7 @@ class PasswordDetectorTest {
     }
 
     // ---------------------------------------------------------------------
-    // Backward scan and plural keywords (todo.md V1.2 Phase 53.7)
+    // Backward scan and plural keywords
     // ---------------------------------------------------------------------
 
     // The scan used to run forward only, so a value stated before the keyword was unreachable.

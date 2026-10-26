@@ -18,8 +18,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Maps a numeric risk score to one of the 5 policy bands (todo.md 11.2.2), then applies
- * the 3 hard override rules (11.2.3) that can escalate — never downgrade — the band
+ * Maps a numeric risk score to one of the 5 policy bands, then applies
+ * the 3 hard override rules that can escalate — never downgrade — the band
  * regardless of the numeric score.
  *
  * <p>The REVIEW/CONFIRM split at 65 is this project's own implementation choice — the
@@ -27,14 +27,14 @@ import java.util.stream.Collectors;
  * band. Say so at viva, don't present it as taken directly from the doc.
  *
  * <p>The 4 band boundaries are read from {@code system_config} (falling back to the
- * defaults above) so Phase 20.3's admin policy PUT can actually change them, same
+ * defaults above) so the admin policy PUT can actually change them, same
  * pattern as {@code DetectionEngine}'s per-detector toggle.
  */
 @Component
 @RequiredArgsConstructor
 public class PolicyDecisionEngine {
 
-    // Public: AdminService (Phase 20.3) reads/writes these same keys and defaults.
+    // Public: AdminService reads/writes these same keys and defaults.
     public static final String MASK_THRESHOLD_KEY = "risk_threshold_mask";
     public static final String CONFIRM_THRESHOLD_KEY = "risk_threshold_confirm";
     public static final String REVIEW_THRESHOLD_KEY = "risk_threshold_review";
@@ -75,13 +75,13 @@ public class PolicyDecisionEngine {
         return decide(riskScore, findings, signals, loadThresholds());
     }
 
-    // 43.2/43.3: the prompt pipeline passes thresholds in from the per-request snapshot, so a
+    // the prompt pipeline passes thresholds in from the per-request snapshot, so a
     // decision costs zero config queries instead of up to four.
     public DecisionResult decide(double riskScore, List<DetectionFinding> findings,
                                   List<RiskSignalResult> signals, RiskThresholds thresholds) {
         Decision scoreBand = bandFor(riskScore, thresholds);
         Decision decision = scoreBand;
-        // 55.2: records which rules actually raised the decision. Recording only - the
+        // records which rules actually raised the decision. Recording only - the
         // escalate-only arithmetic below is unchanged.
         List<OverrideRule> applied = new ArrayList<>();
 
@@ -98,7 +98,7 @@ public class PolicyDecisionEngine {
         if (signalTypes.contains(SignalType.INSTRUCTION_OVERRIDE) || signalTypes.contains(SignalType.POLICY_BYPASS)) {
             decision = atLeast(decision, OverrideRule.INJECTION_SIGNAL, applied);
         }
-        // V1.2 Phase 51.1: ANY detected entity forces at least MASK. This replaces the
+        // ANY detected entity forces at least MASK. This replaces the
         // narrower PASSWORD_SECRET-only rule, which it subsumes - a password is a finding
         // like any other.
         //
@@ -108,11 +108,11 @@ public class PolicyDecisionEngine {
         // roughly TWO high-severity findings before anything was masked, and a recall audit
         // confirmed the consequence live - "My card number is 4111 1111 1111 1111 please
         // save it" was detected as PAYMENT_CARD and then ALLOWed, i.e. forwarded to the
-        // model in full. Lone Aadhaar (13.7), PAN (13.4), phone (8.4) and email (8.5) all
+        // model in full. Lone Aadhaar, PAN, phone and email all
         // behaved the same way, and even an email AND a card together only reached 19.2.
         //
         // This supersedes the "a lone email genuinely decides ALLOW, by design" behaviour
-        // documented since Phase 13. That was defensible while it applied to emails; it was
+        // documented earlier. That was defensible while it applied to emails; it was
         // not once the audit showed the same arithmetic released payment cards and national
         // ID numbers. "Detected means masked" is also a far simpler promise to state.
         //
@@ -150,7 +150,7 @@ public class PolicyDecisionEngine {
                 resolveThreshold(BLOCK_THRESHOLD_KEY, DEFAULT_BLOCK_THRESHOLD));
     }
 
-    // 42.3: a non-numeric threshold row used to throw here on every prompt submission.
+    // a non-numeric threshold row used to throw here on every prompt submission.
     private int resolveThreshold(String key, int defaultValue) {
         return systemConfigRepository.findByConfigKey(key)
                 .map(SystemConfig::getConfigValue)

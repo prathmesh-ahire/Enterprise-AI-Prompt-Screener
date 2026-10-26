@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * todo.md Phase 20.1 — every route under {@code /api/admin/**} requires ADMIN, enforced
+ * Every route under {@code /api/admin/**} requires ADMIN, enforced
  * once at the class level since it applies uniformly here (unlike {@code ReviewController},
  * which needed two different roles on different routes).
  */
@@ -61,7 +61,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getUsers(pageable));
     }
 
-    // Phase 30.5 - lets the admin dashboard's Repeated Violations panel link through to a
+    // lets the admin dashboard's Repeated Violations panel link through to a
     // flagged user's history. Reuses PromptService.getMyHistory verbatim (same
     // masked-text-only PromptHistoryItemDto a user gets for their own history) - the only
     // difference is the userId comes from the path instead of the caller's own JWT.
@@ -130,7 +130,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.updateApprovedModel(id, request.active(), adminId(userDetails)));
     }
 
-    // 32.2 - lets the Model Configuration page show a live Online/Unavailable indicator
+    // lets the Model Configuration page show a live Online/Unavailable indicator
     // without sending an actual chat prompt through the gateway.
     @GetMapping("/ollama-status")
     public ResponseEntity<OllamaStatusDto> ollamaStatus() {

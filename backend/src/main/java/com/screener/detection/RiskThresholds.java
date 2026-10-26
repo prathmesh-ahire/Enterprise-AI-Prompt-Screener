@@ -2,7 +2,7 @@ package com.screener.detection;
 
 /**
  * The four risk-band boundaries, resolved once instead of one database read per band
- * (todo.md V1.1 Phase 43.2).
+ *.
  *
  * <p>{@link PolicyDecisionEngine#bandFor} tests the bands in descending order, and each test
  * used to issue its own {@code findByConfigKey} query — so a single decision cost up to four

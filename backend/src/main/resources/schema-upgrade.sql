@@ -1,5 +1,5 @@
 -- ============================================================================
--- Schema upgrade for databases created before V1.1 (todo.md Phase 42.4 / 43.5)
+-- Schema upgrade for databases created before V1.1
 --
 -- WHY THIS FILE EXISTS
 -- Hibernate runs with ddl-auto: update, which adds new tables and new columns but
@@ -75,7 +75,7 @@ BEGIN
     END IF;
 END$$
 
--- V2 55.3: adds a nullable column only if absent. ddl-auto: update does add new columns
+-- adds a nullable column only if absent. ddl-auto: update does add new columns
 -- on its own (unlike indexes), but this keeps the script the single record of every
 -- schema change and makes the upgrade explicit for a database the backend never started on.
 DROP PROCEDURE IF EXISTS add_column_if_missing$$
@@ -93,12 +93,12 @@ END$$
 DELIMITER ;
 
 -- ---------------------------------------------------------------------------
--- 42.4 - close the check-then-insert race on registration at the database level
+-- close the check-then-insert race on registration at the database level
 -- ---------------------------------------------------------------------------
 CALL add_unique_if_missing('users', 'uk_users_username', 'username');
 
 -- ---------------------------------------------------------------------------
--- 43.5 - indexes, each backed by a real query in the code (no speculative ones).
+-- indexes, each backed by a real query in the code (no speculative ones).
 -- Small, admin-curated tables (roles, system_config, org_confidential_terms,
 -- approved_models) are deliberately left alone: MySQL scans a handful of rows
 -- faster than it can consult an index, and every index costs write time.
@@ -134,7 +134,7 @@ CALL add_index_if_missing('audit_events', 'idx_audit_events_created_at', 'create
 CALL add_index_if_missing('user_roles', 'idx_user_roles_user_id', 'user_id');
 
 -- ---------------------------------------------------------------------------
--- V2 55.3 - the score breakdown on screening_decisions. All nullable: rows screened
+-- the score breakdown on screening_decisions. All nullable: rows screened
 -- before V2 have no breakdown, and null means "not recorded". Never back-filled.
 -- Types match what Hibernate generates for these fields on MySQL.
 -- ---------------------------------------------------------------------------

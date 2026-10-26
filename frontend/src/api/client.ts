@@ -1,8 +1,8 @@
 import axios, { AxiosError } from 'axios'
 
-// todo.md Phase 24.3 - JWT is read from localStorage on every request and the user is
+// JWT is read from localStorage on every request and the user is
 // bounced to /login on any 401 (expired/invalid token, disabled account, etc.). Storing
-// the JWT in localStorage is an accepted v1 limitation (XSS-readable) - see AGENTS.md.
+// the JWT in localStorage is an accepted v1 limitation (XSS-readable).
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 })

@@ -35,12 +35,12 @@ interface PromptDetail {
   entityTypes: string[]
 }
 
-// 28.4's filter is by *decision*, not the literal `status` values todo.md named
+// The filter is by *decision*, not by the `status` values
 // (ALLOWED/MASKED/BLOCKED/PENDING_REVIEW). Once a prompt actually gets an AI reply its
 // `status` moves on to COMPLETED (PromptService.sendToAiAndComplete) - so filtering on
 // `status` would hide the common case entirely. `decision` is set once and never changes
-// (same reasoning DashboardService's Phase 21.1 summary already documented for exactly
-// this problem) - see docs/NOTE.md.
+// (same reasoning DashboardService's summary already documented for exactly
+// this problem).
 const DECISION_FILTERS: { value: string; label: string }[] = [
   { value: 'ALL', label: 'All' },
   { value: 'ALLOW', label: 'ALLOW' },

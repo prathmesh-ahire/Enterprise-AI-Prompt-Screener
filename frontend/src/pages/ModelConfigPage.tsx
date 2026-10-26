@@ -25,7 +25,7 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
 }
 
-// todo.md Phase 32. ADMIN only (enforced by RoleProtectedRoute in App.tsx).
+// ADMIN only (enforced by RoleProtectedRoute in App.tsx).
 export function ModelConfigPage() {
   const [models, setModels] = useState<ApprovedModel[] | null>(null)
   const [modelsError, setModelsError] = useState<string | null>(null)
@@ -81,7 +81,7 @@ export function ModelConfigPage() {
 
   // "Remove" deactivates rather than deletes - approved_models has no delete endpoint
   // (unlike org-confidential terms), so this reuses the same active-toggle PUT that
-  // Activate uses. See docs/NOTE.md, Phase 32.
+  // Activate uses.
   const handleToggleActive = async (model: ApprovedModel) => {
     setTogglingModelId(model.id)
     setModelsError(null)

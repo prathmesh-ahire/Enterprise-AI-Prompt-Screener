@@ -1,7 +1,7 @@
-# todo.md Phase 33.3 - multi-stage build. VITE_API_BASE_URL is a build ARG, not a runtime
+# Multi-stage build. VITE_API_BASE_URL is a build ARG, not a runtime
 # environment variable: Vite bakes import.meta.env.* into the static bundle at build time,
-# so a docker-compose `environment:` entry at container start would have no effect (see the
-# Tech Stack Note in todo.md). Served with `serve`, a lightweight static file server, since
+# so a docker-compose `environment:` entry at container start would have no effect.
+# Served with `serve`, a lightweight static file server, since
 # the output is a plain static SPA build with no server-side logic.
 FROM node:20-alpine AS build
 WORKDIR /app

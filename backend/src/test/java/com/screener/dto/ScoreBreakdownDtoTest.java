@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-// V2 55.7: ScoreBreakdownDto.from - "not recorded" stays null, stored values come back in
+// ScoreBreakdownDto.from - "not recorded" stays null, stored values come back in
 // rule order, and the weights it reports reproduce RiskScorer's score.
 class ScoreBreakdownDtoTest {
 

@@ -14,12 +14,12 @@ import java.util.UUID;
 public interface PromptRequestRepository extends JpaRepository<PromptRequest, Long> {
     Optional<PromptRequest> findByRequestId(UUID requestId);
 
-    // 18.1: review queue, oldest-submitted first (FIFO).
+    // review queue, oldest-submitted first (FIFO).
     List<PromptRequest> findByStatusOrderBySubmittedAtAsc(PromptStatus status);
 
-    // 19.1: my-history, paginated.
+    // my-history, paginated.
     Page<PromptRequest> findByUserId(Long userId, Pageable pageable);
 
-    // 20.6b: retention cleanup job.
+    // retention cleanup job.
     List<PromptRequest> findBySubmittedAtBefore(LocalDateTime cutoff);
 }

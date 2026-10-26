@@ -44,7 +44,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Full screening pipeline (todo.md Phase 13): normalise -> detect -> analyse risk ->
+ * Full screening pipeline: normalise -> detect -> analyse risk ->
  * score -> decide -> mask -> persist, then either send straight to the AI (ALLOW) or
  * wait for the user's explicit confirm ({@link #confirmAndSend}).
  */
@@ -54,15 +54,15 @@ public class PromptService {
 
     private static final Logger log = LoggerFactory.getLogger(PromptService.class);
 
-    // Public: AdminService (Phase 20.3) reads/writes these same keys and defaults.
+    // Public: AdminService reads/writes these same keys and defaults.
     public static final String MAX_LENGTH_CONFIG_KEY = "max_prompt_length";
     public static final int DEFAULT_MAX_LENGTH = 2000;
     public static final String POLICY_VERSION_CONFIG_KEY = "policy_version";
     public static final int DEFAULT_POLICY_VERSION = 1;
 
-    // 41.5: ALLOWED is confirmable so a prompt whose AI call failed can be retried. A
-    // successful ALLOW advances to COMPLETED immediately (13.5b), so the only rows left
-    // sitting in ALLOWED are ones whose gateway call threw - exactly the rows 13.8 intended
+    // ALLOWED is confirmable so a prompt whose AI call failed can be retried. A
+    // successful ALLOW advances to COMPLETED immediately, so the only rows left
+    // sitting in ALLOWED are ones whose gateway call threw - exactly the rows the failure handling intended
     // to leave "where they were ... for a retry", which until now no code path could finish.
     private static final Set<PromptStatus> CONFIRMABLE_STATUSES =
             Set.of(PromptStatus.MASKED, PromptStatus.PENDING_CONFIRM, PromptStatus.ALLOWED);
@@ -91,7 +91,7 @@ public class PromptService {
             throw new IllegalArgumentException("Prompt text cannot be blank");
         }
 
-        // 43.3: one read of system_config for the whole submission. Every value below used to
+        // one read of system_config for the whole submission. Every value below used to
         // be fetched separately at the moment it was needed - nine queries against an
         // eight-row table per prompt. Snapshot, not cache: it dies with this method call, so
         // an admin policy change still applies to the very next prompt.
@@ -106,7 +106,7 @@ public class PromptService {
         UUID requestId = UUID.randomUUID();
         String role = resolveRole(userId);
 
-        // Steps 2-5 only (13.4) - excludes normalise (1), masking (6), and any AI call.
+        // Steps 2-5 only - excludes normalise (1), masking (6), and any AI call.
         long pipelineStartMs = System.currentTimeMillis();
         List<DetectionFinding> findings = detectionEngine.detectAll(normalised, config.disabledDetectors());
         List<RiskSignalResult> signals = riskAnalysisEngine.analyze(normalised, userId);
@@ -116,7 +116,7 @@ public class PromptService {
         long processingTimeMs = System.currentTimeMillis() - pipelineStartMs;
         logDecisionOutcome(requestId, decisionResult, findings.size(), signals.size(), processingTimeMs);
 
-        // 13.1: mask whenever there are any findings at all, regardless of decision, so a
+        // mask whenever there are any findings at all, regardless of decision, so a
         // REVIEW/BLOCK prompt still has a masked copy for the reviewer/audit trail.
         String maskedText = findings.isEmpty() ? null : maskingService.getMaskedPreview(normalised, findings);
 
@@ -135,16 +135,16 @@ public class PromptService {
         ScreeningDecision savedDecision =
                 saveDecision(requestId, decisionResult, subScores, processingTimeMs, config.policyVersion());
 
-        // 17.2: one event for the intake itself, one for the decision outcome. The
+        // one event for the intake itself, one for the decision outcome. The
         // decision's action is always decision.name() (ALLOW/MASK/CONFIRM/REVIEW/BLOCK) -
-        // this is what satisfies 17.2's "prompt blocked"/"prompt masked" as well as the
-        // BLOCK/REVIEW literals Phase 10.8's repeated-attack-pattern query depends on,
+        // this is what satisfies the "prompt blocked"/"prompt masked" audit events as well as the
+        // BLOCK/REVIEW literals the repeated-attack-pattern query depends on,
         // without special-casing any one decision.
         auditService.log(userId, "SUBMITTED", requestId, decisionResult.decision().name());
         auditService.log(userId, decisionResult.decision().name(), requestId, decisionResult.decision().name());
 
-        // 13.5b: ALLOW forwards the unmodified text immediately, in this same call - not
-        // deferred to /confirm. If AiGatewayService throws, it propagates uncaught (13.8):
+        // ALLOW forwards the unmodified text immediately, in this same call - not
+        // deferred to /confirm. If AiGatewayService throws, it propagates uncaught:
         // the row above is already saved as ALLOWED, but never advances to COMPLETED.
         if (decisionResult.decision() == Decision.ALLOW) {
             sendToAiAndComplete(promptRequest, findings, decisionResult.decision().name());
@@ -171,10 +171,10 @@ public class PromptService {
 
         log.info("Prompt {} confirmed by user {}, forwarding to AI gateway", requestId, userId);
 
-        // 13.7: MASK/CONFIRM forward the masked text, never the raw text.
-        // 41.5: an ALLOWED row only reaches this endpoint because its original AI call failed.
-        // It forwards the same raw text the ALLOW path itself would have sent (13.5b) - note
-        // an ALLOW prompt can still carry findings and therefore a non-null maskedText (13.1
+        // MASK/CONFIRM forward the masked text, never the raw text.
+        // an ALLOWED row only reaches this endpoint because its original AI call failed.
+        // It forwards the same raw text the ALLOW path itself would have sent - note
+        // an ALLOW prompt can still carry findings and therefore a non-null maskedText (the pipeline
         // masks whenever there is any finding, whatever the decision), so reusing the masked
         // branch here would silently send different text on the retry than on the first try.
         String textToSend = promptRequest.getStatus() == PromptStatus.ALLOWED
@@ -186,12 +186,12 @@ public class PromptService {
                 decision);
     }
 
-    // 18.3: reviewer approves (or marks FALSE_POSITIVE) a PENDING_REVIEW prompt. Forwards
-    // the masked text, same as /confirm (13.7) - except when there are no findings at all
-    // to mask (13.1 only masks when findings exist), in which case the raw text is safe
+    // reviewer approves (or marks FALSE_POSITIVE) a PENDING_REVIEW prompt. Forwards
+    // the masked text, same as /confirm - except when there are no findings at all
+    // to mask (the pipeline only masks when findings exist), in which case the raw text is safe
     // to forward as-is since nothing sensitive was ever detected in it. This is the one
-    // case where todo.md 18.3's "the already-masked text ... now guarantees it exists"
-    // doesn't literally hold - see docs/NOTE.md.
+    // case where the assumption that a masked version always exists
+    // doesn't literally hold.
     public PromptResponseDto approveFromReview(UUID requestId) {
         PromptRequest promptRequest = requirePendingReview(requestId);
         ScreeningDecision decision = requireDecision(requestId);
@@ -205,9 +205,9 @@ public class PromptService {
                 decision);
     }
 
-    // 41.1: masked text is null whenever DetectionEngine found zero entities - which happens
+    // masked text is null whenever DetectionEngine found zero entities - which happens
     // even on MASK/CONFIRM/REVIEW, since those can be reached by risk score or by a hard
-    // override (11.2.3) with no finding to mask. Forwarding it unguarded put a null into
+    // override with no finding to mask. Forwarding it unguarded put a null into
     // AiGatewayService.send and 500'd, stranding the prompt with no way to proceed. Falling
     // back to the raw text is safe by construction: "no masked version exists" and "nothing
     // sensitive was detected to mask" are the same condition.
@@ -217,7 +217,7 @@ public class PromptService {
                 : promptRequest.getPromptText();
     }
 
-    // 18.3: reviewer rejects (or requests correction) - never reaches AiGatewayService.
+    // reviewer rejects (or requests correction) - never reaches AiGatewayService.
     public PromptResponseDto rejectFromReview(UUID requestId) {
         PromptRequest promptRequest = requirePendingReview(requestId);
         ScreeningDecision decision = requireDecision(requestId);
@@ -230,7 +230,7 @@ public class PromptService {
                 decision);
     }
 
-    // 19.1: paginated, masked-text-only history for the caller's own prompts. Batches the
+    // paginated, masked-text-only history for the caller's own prompts. Batches the
     // ScreeningDecision lookup for the whole page instead of one query per row.
     public Page<PromptHistoryItemDto> getMyHistory(Long userId, Pageable pageable) {
         Page<PromptRequest> page = promptRequestRepository.findByUserId(userId, pageable);
@@ -241,7 +241,7 @@ public class PromptService {
         return page.map(promptRequest -> toHistoryItem(promptRequest, decisionsByRequestId.get(promptRequest.getRequestId())));
     }
 
-    // 19.2: ownership-checked single lookup - reuses PromptResponseDto, which already
+    // ownership-checked single lookup - reuses PromptResponseDto, which already
     // never carries raw prompt text (same shape /submit and /confirm return).
     public PromptResponseDto getMyPromptDetails(UUID requestId, Long userId) {
         PromptRequest promptRequest = promptRequestRepository.findByRequestId(requestId)
@@ -285,9 +285,9 @@ public class PromptService {
         sendToAiAndComplete(promptRequest, promptRequest.getPromptText(), findings, riskBand);
     }
 
-    // Shared by both the ALLOW path (13.5b) and /confirm (13.7). If aiGatewayService.send
+    // Shared by both the ALLOW path and /confirm. If aiGatewayService.send
     // throws, it propagates to the caller uncaught - promptRequest is never saved as
-    // COMPLETED (13.8).
+    // COMPLETED.
     private void sendToAiAndComplete(PromptRequest promptRequest, String textToSend,
                                       List<DetectionFinding> findings, String riskBand) {
         log.debug("Prompt {} forwarding to AI gateway (riskBand={})", promptRequest.getRequestId(), riskBand);
@@ -304,7 +304,7 @@ public class PromptService {
         promptRequestRepository.save(promptRequest);
     }
 
-    // 40.2: entity/signal counts and the decision only - never the prompt text or any
+    // entity/signal counts and the decision only - never the prompt text or any
     // finding value. WARN for the two decisions that stop a prompt from reaching the AI
     // model unmodified (BLOCK/REVIEW), INFO for the rest.
     private void logDecisionOutcome(UUID requestId, DecisionResult decisionResult, int findingCount,
@@ -338,7 +338,7 @@ public class PromptService {
         riskSignalRepository.saveAll(entities);
     }
 
-    // 55.3: the breakdown is stored from the sub-scores and decision already computed above -
+    // the breakdown is stored from the sub-scores and decision already computed above -
     // nothing is recomputed, and nothing from the prompt itself is stored here.
     // Returns the entity it built (not save()'s return value) so the response can carry the
     // breakdown without a second read.
@@ -375,15 +375,15 @@ public class PromptService {
         };
     }
 
-    // 43.4: one join instead of one query for the links plus one per role.
+    // one join instead of one query for the links plus one per role.
     private String resolveRole(Long userId) {
         return Role.mostPrivileged(userRoleRepository.findRoleNamesByUserId(userId));
     }
 
-    // Phase 27.3/27.4: riskScore and entityTypes ride along on every PromptResponseDto so
+    // riskScore and entityTypes ride along on every PromptResponseDto so
     // the frontend result screen can render the score bar + entity chips regardless of
     // which call site produced the response (submit/confirm/review-decide/history-detail).
-    // 55.4: scoreBreakdown rides along the same way, from the stored decision (null for a
+    // scoreBreakdown rides along the same way, from the stored decision (null for a
     // decision recorded before V2, or no decision at all).
     private PromptResponseDto toDto(PromptRequest promptRequest, String decisionName, String explanation,
                                     Double riskScore, ScreeningDecision decision) {
@@ -399,7 +399,7 @@ public class PromptService {
                 ScoreBreakdownDto.from(decision));
     }
 
-    // Entity type labels only - never raw values, matching ReviewDetailsDto's (18.5) same
+    // Entity type labels only - never raw values, matching ReviewDetailsDto's same
     // pattern of exposing what was found without exposing the sensitive value itself.
     private List<String> entityTypesFor(UUID requestId) {
         return detectionFindingRepository.findByRequestId(requestId).stream()
@@ -415,7 +415,7 @@ public class PromptService {
 
     // Strips only C0/DEL control characters (except \n and \t) — deliberately leaves
     // zero-width/unicode-spacing characters untouched so RiskAnalysisEngine's Obfuscation
-    // Signal check (Phase 10.7) still sees them.
+    // Signal check still sees them.
     private String stripUnsafeControlChars(String text) {
         StringBuilder cleaned = new StringBuilder(text.length());
         for (int i = 0; i < text.length(); i++) {
@@ -428,7 +428,7 @@ public class PromptService {
         return cleaned.toString();
     }
 
-    // 43.3 removed the per-key resolveMaxLength()/resolvePolicyVersion() helpers that used to
+    // The per-key resolveMaxLength()/resolvePolicyVersion() helpers were removed; they used to
     // live here. Both values now come from the single SystemConfigSnapshot taken at the top of
     // processPrompt, so reading them again mid-method would reintroduce exactly the extra
     // queries that phase removed. The public key/default constants above are kept: AdminService

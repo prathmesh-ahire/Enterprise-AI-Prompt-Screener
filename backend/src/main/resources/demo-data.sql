@@ -1,4 +1,4 @@
--- todo.md Phase 40.4 - demo-data.sql
+-- demo-data.sql
 -- Seeds realistic-looking demo content on top of what DataSeeder already creates on
 -- every backend startup (the 3 roles, the ADMIN account from .env, and 1 approved model).
 --
@@ -6,7 +6,7 @@
 -- roles + admin + default approved model already exist):
 --   docker exec -i screener-mysql mysql -uroot -p<DB_PASSWORD> screener_db < demo-data.sql
 --
--- WHAT THIS DOES NOT DO: it does not create a second admin account. todo.md 40.4 asks for
+-- WHAT THIS DOES NOT DO: it does not create a second admin account. the project plan asks for
 -- "1 admin" among the demo accounts - that admin is the one DataSeeder already seeds from
 -- ADMIN_USERNAME/ADMIN_PASSWORD/ADMIN_EMAIL in .env on every startup. Creating a second,
 -- separate admin row here would just be a confusing duplicate with no natural login
@@ -23,12 +23,12 @@
 -- wrapped in a stored procedure that exits immediately if demo_user1 already exists, so a
 -- second run neither duplicates the demo users nor doubles up the 10 sample prompt rows.
 --
--- KNOWN GAP, found while writing this script (see docs/NOTE.md): `users.username` has no
+-- KNOWN GAP, found while writing this script: `users.username` has no
 -- UNIQUE constraint at the database level - only AuthService.register()'s own
 -- existsByUsername() check prevents duplicates at the application layer. This script's own
 -- idempotency is handled explicitly below (an early-exit guard checked before any INSERT
 -- runs) rather than relying on a unique key, precisely because that database-level backstop
--- doesn't exist. Flagged to the user; not fixed here as it's outside Phase 40.4's own scope.
+-- doesn't exist. Flagged to the user; not fixed here as it's outside this script's scope.
 
 DELIMITER $$
 
@@ -53,7 +53,7 @@ BEGIN
             ('demo_user3', 'demo.user3@example.com',
              '$2a$10$TKXHbseg2NefFiPCCOOvx.E6zcTve931A5HmoxvPxaNxzo6GWHZpa', 'ACTIVE', NOW() - INTERVAL 10 DAY);
 
-        -- 41.3: demo_reviewer holds USER as well as REVIEWER. Roles are exclusive, not
+        -- demo_reviewer holds USER as well as REVIEWER. Roles are exclusive, not
         -- cumulative, and PromptController/AuditController are hasRole('USER') - so without
         -- this the reviewer gets 403 on the Prompt and History pages the navbar links them
         -- to. Same reasoning as DataSeeder granting the admin USER alongside ADMIN.
@@ -66,7 +66,7 @@ BEGIN
             ((SELECT id FROM users WHERE username = 'demo_user3'), (SELECT id FROM roles WHERE name = 'USER'));
 
         -- ============================================================
-        -- Org-confidential terms (20.4) - "ProjectAtlas" is deliberately reused by one of
+        -- Org-confidential terms - "ProjectAtlas" is deliberately reused by one of
         -- the 10 sample prompts below so the ORG_CONFIDENTIAL finding on that row is real,
         -- not just a label.
         -- ============================================================
@@ -84,7 +84,7 @@ BEGIN
             ('InternalCodename-Falcon', @admin_id, true);
 
         -- ============================================================
-        -- Approved models (20.5) - the default model is already seeded by DataSeeder;
+        -- Approved models - the default model is already seeded by DataSeeder;
         -- these two give the admin's Model Configuration page something to show beyond a
         -- single row.
         -- ============================================================
@@ -243,7 +243,7 @@ CALL seed_demo_data();
 DROP PROCEDURE seed_demo_data;
 
 -- ============================================================
--- 41.3 repair step - deliberately OUTSIDE the early-exit guard above.
+-- Repair step - deliberately OUTSIDE the early-exit guard above.
 --
 -- The guard skips the whole procedure body once demo_user1 exists, so a database that was
 -- seeded before this fix would never pick up demo_reviewer's new USER role. This statement

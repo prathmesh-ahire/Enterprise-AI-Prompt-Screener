@@ -1,5 +1,4 @@
-// todo.md Phase 27.4, reworked in V2 56A.4 and moved onto the design's RiskScoreBar in
-// 56A.7 (design.md C11, F1). The fill is coloured from the band the API returns
+// The fill is coloured from the band the API returns
 // (scoreBreakdown.scoreBand) - the live policy's band, so it stays right after an admin
 // changes the thresholds. A prompt screened before breakdowns were stored has no band, so
 // its bar takes the decision's colour instead. The UI never computes a band from the

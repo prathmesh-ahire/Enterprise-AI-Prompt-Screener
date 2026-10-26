@@ -20,17 +20,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * todo.md Phase 38.1/38.2 - measures real screening-pipeline latency (detect -> analyse
+ * Measures real screening-pipeline latency (detect -> analyse
  * signals -> sub-scores -> score -> decide) across a batch of 50 prompts, calling the same
  * real beans {@code PromptService} uses rather than a hand-rolled timing harness. Mirrors
  * exactly the "steps 2-5" scope {@code PromptService.processPrompt}'s own
- * {@code processingTimeMs} already measures (13.4) - normalise, masking, and any AI call
+ * {@code processingTimeMs} already measures - normalise, masking, and any AI call
  * are deliberately excluded, same as that field.
  *
- * <p>Runs against the H2 "test" profile (Phase 34.1), same as every other {@code @SpringBootTest}
+ * <p>Runs against the H2 "test" profile, same as every other {@code @SpringBootTest}
  * in this suite - no live MySQL/Ollama required, so this is safe to run as part of the normal
  * {@code mvn test} / CI build. The separate, genuinely-live Ollama measurement is
- * {@link OllamaLatencyManualIT} (38.3), not this class.
+ * {@link OllamaLatencyManualIT}, not this class.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -75,7 +75,7 @@ class ScreeningPipelineLatencyTest {
         System.out.println("Per-prompt latencies (ms): " + latenciesMs);
 
         assertEquals(BATCH_SIZE, latenciesMs.size());
-        // Loose sanity bound, not a tuned SLA - todo.md 38.1/38.2 asks to record and print
+        // Loose sanity bound, not a tuned SLA - the goal is to record and print
         // the numbers, not to pass/fail against a target. This just catches the pipeline
         // hanging or regressing by an order of magnitude, not normal machine-to-machine
         // variance.

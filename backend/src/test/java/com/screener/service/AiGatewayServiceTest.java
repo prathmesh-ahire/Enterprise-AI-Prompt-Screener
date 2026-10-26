@@ -66,7 +66,7 @@ class AiGatewayServiceTest {
             return callResponseSpec;
         });
 
-        // Deliberately unreasonably low timeout (1ms), mirroring 15.7's manual timeout check.
+        // Deliberately unreasonably low timeout (1ms), mirroring the manual timeout check.
         AiGatewayService gateway = new AiGatewayService(builder, fluentRestBuilderMock(), 1, 500, "http://localhost:11434");
 
         assertThrows(AiGatewayException.class, () -> gateway.send("hi"));

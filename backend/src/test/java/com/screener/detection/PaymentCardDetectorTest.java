@@ -38,7 +38,7 @@ class PaymentCardDetectorTest {
     }
 
     // ---------------------------------------------------------------------
-    // Issuer prefix validation (todo.md V1.2 Phase 53.7)
+    // Issuer prefix validation
     // ---------------------------------------------------------------------
 
     // An IMEI carries its own Luhn check digit, so length + Luhn alone cannot tell it from

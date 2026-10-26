@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * todo.md Phase 20.3 — active thresholds, which detectors are enabled (mirrored here as
+ * Active thresholds, which detectors are enabled (mirrored here as
  * the disabled set, same representation {@code DetectionEngine} stores), max prompt
  * length. Same shape for both GET's response and PUT's request body; {@code policyVersion}
  * is ignored on PUT (server-incremented) and only meaningful on the GET response.

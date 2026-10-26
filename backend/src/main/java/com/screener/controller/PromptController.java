@@ -56,9 +56,9 @@ public class PromptController {
     // without it the page came back oldest-first, so a user's most recent prompt sat on
     // the LAST page - submit a prompt, open History, and it appears to be missing. The
     // latent one matters more: an unsorted query gives SQL no ordering obligation at all,
-    // so pagination is only accidentally stable, and Phase 43's twelve new indexes can
+    // so pagination is only accidentally stable, and the twelve new indexes can
     // change the access path and therefore the natural order. A row could then appear on
-    // two pages, or on none, with nothing reporting an error. (V1.1 Phase 47 finding.)
+    // two pages, or on none, with nothing reporting an error.
     @GetMapping("/my-history")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<PromptHistoryItemDto>> myHistory(@AuthenticationPrincipal UserDetails userDetails,

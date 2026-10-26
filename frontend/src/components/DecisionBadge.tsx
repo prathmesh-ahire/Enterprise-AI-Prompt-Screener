@@ -1,7 +1,7 @@
 import { Icon, type IconName } from './Icon'
 
-// todo 56A.7 (design.md section 15, DecisionBadge). Coloured by the *decision* itself, never
-// by a score - an 11.2.3 hard override (a REVIEW forced by an injection phrase on an
+// Coloured by the *decision* itself, never
+// by a score - a hard override (a REVIEW forced by an injection phrase on an
 // otherwise low-scoring prompt) has to read as REVIEW, which a score-coloured badge would
 // misrepresent. Every badge carries its icon AND its word, so colour is never the only
 // signal. Replaces V1's decisionBadge.ts colour mapping.

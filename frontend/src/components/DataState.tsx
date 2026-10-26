@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 
-// todo.md Phase 46.4, moved onto the design's LoadingState and EmptyState (56A.7, design.md
-// section 15). Errors have their own component, PageMessage.
+// LoadingState and EmptyState. Errors have their own component, PageMessage.
 //
 // LoadingState: the status line names the work in words; the spinner is decoration, and
 // the skeleton bars stand in for the content to come. Nothing already loaded is hidden.

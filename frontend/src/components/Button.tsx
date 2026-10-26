@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-// todo.md Phase 45.1, moved onto the design's Button (56A.7, design.md section 15). Most of
+// Most of
 // the library is plain CSS classes; a button is one of the few places that needs real
 // behaviour, so it gets a component. `loading` sets `disabled` as well as showing the
 // spinner and aria-busy - otherwise an impatient second click fires the same request

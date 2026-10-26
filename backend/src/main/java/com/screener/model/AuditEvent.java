@@ -32,9 +32,9 @@ public class AuditEvent {
     private Long userId;
 
     // Free-form action label (e.g. "LOGIN", "BLOCK", "REVIEW") — kept as a plain
-    // string since the full vocabulary isn't finalised until Phase 17 wires up
-    // AuditService; the exact literals "BLOCK"/"REVIEW" are load-bearing for the
-    // Phase 10.8 repeated-attack-pattern query.
+    // string since the full vocabulary isn't finalised until the audit service is wired up;
+    // the exact literals "BLOCK"/"REVIEW" are load-bearing for the
+    // repeated-attack-pattern query.
     private String action;
 
     private UUID requestId;

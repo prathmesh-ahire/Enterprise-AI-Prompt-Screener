@@ -12,18 +12,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
- * todo.md Phase 38.3 - separately measures average real Ollama response latency on this
+ * Separately measures average real Ollama response latency on this
  * machine, calling the real {@link AiGatewayService} against a genuinely running Ollama
- * instance (Phase 15). Deliberately named with an "IT" suffix, not "...Test" - Maven
+ * instance. Deliberately named with an "IT" suffix, not "...Test" - Maven
  * Surefire's default include patterns ({@code **}{@code /*Test.java}, {@code Test*.java},
  * {@code *Tests.java}, {@code *TestCase.java}) do not match it and no Failsafe plugin is
- * configured in this project, so `mvn test` / the Phase 34 CI build never picks this class
+ * configured in this project, so `mvn test` / the CI build never picks this class
  * up automatically - it has no access to a live Ollama container. Run it explicitly and
  * manually, only when Ollama is actually up:
  *
  * <pre>mvnw test -Dtest=OllamaLatencyManualIT</pre>
  *
- * <p>The first call is a deliberate throw-away warm-up (Phase 15/18/22's already-documented
+ * <p>The first call is a deliberate throw-away warm-up (the already-documented
  * cold-start behaviour: an idle-unloaded model's first request can time out or take far
  * longer while it loads) and is excluded from the reported average so the number reflects
  * steady-state latency, not a one-off outlier.

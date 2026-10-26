@@ -48,7 +48,7 @@ public class ScreeningDecision {
 
     private Long processingTimeMs;
 
-    // V2 Phase 55.3 - the score breakdown. Every column is nullable: rows screened before V2
+    // the score breakdown. Every column is nullable: rows screened before V2
     // have none of it, and null means "not recorded", never zero. Never back-filled - a
     // re-screen today would use today's thresholds and history, not the ones that decided.
     private Double sensitiveDataScore;

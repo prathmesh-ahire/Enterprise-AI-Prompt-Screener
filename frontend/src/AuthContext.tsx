@@ -54,9 +54,9 @@ function readInitialState(): AuthState {
   }
 }
 
-// todo.md Phase 24.4. login() stores the JWT in localStorage (see api/client.ts's own
+// Login stores the JWT in localStorage (see api/client.ts's own
 // note on the accepted XSS trade-off); logout() calls the backend logout endpoint
-// (Phase 5.1.6, audit-only - there's no server-side session to destroy) but clears local
+// (audit-only - there's no server-side session to destroy) but clears local
 // state regardless of whether that call succeeds, so the user is never stuck "logged in"
 // client-side just because the network request failed.
 export function AuthProvider({ children }: { children: ReactNode }) {

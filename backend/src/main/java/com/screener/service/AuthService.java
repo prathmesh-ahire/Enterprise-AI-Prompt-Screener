@@ -107,7 +107,7 @@ public class AuthService {
         passwordResetTokenRepository.save(resetToken);
 
         // v1 has no email service — logging the raw token to console is an accepted, documented
-        // exception to the "never log secrets" rule (todo.md 5.2.1 / AGENTS.md).
+        // exception to the "never log secrets" rule.
         log.info("Password reset requested for userId={} — token={} (expires {})",
                 user.getId(), resetToken.getToken(), resetToken.getExpiresAt());
 
@@ -130,7 +130,7 @@ public class AuthService {
         passwordResetTokenRepository.save(resetToken);
     }
 
-    // 41.2: picks the most-privileged role the user holds, matching PromptService. This used
+    // picks the most-privileged role the user holds, matching PromptService. This used
     // to be findFirst() over an unordered repository result, so a multi-role account's login
     // response - and therefore its navbar and landing page - was effectively arbitrary.
     private String resolveRole(Long userId) {

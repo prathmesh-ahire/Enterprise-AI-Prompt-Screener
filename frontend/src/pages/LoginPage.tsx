@@ -19,7 +19,6 @@ interface AuthResponse {
   role: Role
 }
 
-// todo.md Phase 25.1/25.5.
 export function LoginPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>()
   const [serverError, setServerError] = useState<string | null>(null)

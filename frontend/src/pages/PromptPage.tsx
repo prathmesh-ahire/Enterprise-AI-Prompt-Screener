@@ -12,7 +12,7 @@ import type { ScoreBreakdown } from '../api/types'
 
 const MAX_LENGTH = 2000
 
-// 47.2, on the design's DecisionAlert in 56A.7: the title is "DECISION · what happened",
+// The title is "DECISION · what happened",
 // so the result says what happened before the reader parses a score or a colour. Keyed on
 // the decision string, never the score: a hard-overridden REVIEW at score 23 must read as
 // REVIEW, and anything keyed on the score would call it safe.
@@ -44,9 +44,8 @@ interface PromptResult {
   scoreBreakdown: ScoreBreakdown | null
 }
 
-// todo.md Phase 26 (ALLOW/MASK+CONFIRM/BLOCK) + Phase 27 (REVIEW, CONFIRM's own
-// Cancel button, entity chips, risk score bar). REVIEW and CONFIRM used to share Phase
-// 26's generic fallback / plain "Confirm & Send" - both are now fully specialised here.
+// Handles every result state: ALLOW, MASK/CONFIRM, BLOCK and REVIEW, with CONFIRM's own
+// Cancel button, entity chips and the risk score bar.
 export function PromptPage() {
   const [text, setText] = useState('')
   const [result, setResult] = useState<PromptResult | null>(null)
@@ -76,7 +75,7 @@ export function PromptPage() {
       const response = await apiClient.post<PromptResult>(`/api/prompts/${result.requestId}/confirm`)
       setResult(response.data)
     } catch (err) {
-      // 13.8: on AI-gateway failure the backend leaves the prompt in its pending state -
+      // on AI-gateway failure the backend leaves the prompt in its pending state -
       // keep `result` as-is so the masked preview + Confirm & Send button stay available
       // for a retry, instead of discarding the in-progress request.
       setError(extractErrorMessage(err))
@@ -85,7 +84,7 @@ export function PromptPage() {
     }
   }
 
-  // 27.2: CONFIRM's Cancel button. No backend "cancel" endpoint exists - the request just
+  // CONFIRM's Cancel button. No backend "cancel" endpoint exists - the request just
   // sits server-side in PENDING_CONFIRM until confirmed, so cancelling is purely a client-
   // side abandon: clear the result so the user can edit the text and resubmit if they want.
   const handleCancel = () => {
@@ -156,12 +155,12 @@ export function PromptPage() {
             <div className="ps-alert__body ps-stack">
               {result.explanation && <p>{result.explanation}</p>}
 
-              {/* 27.1: the tracking ID, so a held prompt can be followed up. */}
+              {/* the tracking ID, so a held prompt can be followed up. */}
               {pendingReview && (
                 <p>Tracking ID: <span className="ps-mono">{result.requestId}</span></p>
               )}
 
-              {/* 27.2: CONFIRM's plain summary of what was found. */}
+              {/* CONFIRM's plain summary of what was found. */}
               {awaitingConfirm && result.decision === 'CONFIRM' && (
                 <p>
                   {result.entityTypes.length > 0
@@ -170,7 +169,7 @@ export function PromptPage() {
                 </p>
               )}
 
-              {/* 41.4: only the preview is conditional; the actions always render, so a
+              {/* only the preview is conditional; the actions always render, so a
                   MASK/CONFIRM reached with nothing to mask can still be sent. */}
               {awaitingConfirm && (
                 result.maskedText
@@ -203,7 +202,7 @@ export function PromptPage() {
             )}
           </div>
 
-          {/* 27.3-27.5: the score and what was detected, for every still-pending state. */}
+          {/* the score and what was detected, for every still-pending state. */}
           {(awaitingConfirm || pendingReview) && (
             <div className="ps-card">
               <RiskScoreBar score={result.riskScore} band={result.scoreBreakdown?.scoreBand} decision={result.decision} />

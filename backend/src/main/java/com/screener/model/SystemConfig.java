@@ -13,9 +13,9 @@ import lombok.Setter;
 
 /**
  * Generic key/value store backing the various admin-configurable settings referenced
- * across todo.md (max prompt length 7.2, per-detector toggles 9.6, policy thresholds
- * and policy_version 20.3, retention days 20.6) — none of which had a dedicated table
- * from Phase 2.2's entity list. Added here since 7.2 is the first task that needs it.
+ * across the app (max prompt length, per-detector toggles, policy thresholds
+ * and policy_version, retention days) — none of which had a dedicated table
+ * of its own. Added when the first of them (max prompt length) needed it.
  */
 @Entity
 @Table(name = "system_config")

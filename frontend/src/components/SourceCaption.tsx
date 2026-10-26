@@ -1,4 +1,4 @@
-// todo 56A.7 (design.md section 15b, "Live-number captions"). One caption per panel of
+// One caption per panel of
 // live numbers: "Source: this system's screening records · <window> · updated <HH:MM>".
 // The window states what the numbers cover; the time says when they were last loaded.
 function formatTime(date: Date): string {

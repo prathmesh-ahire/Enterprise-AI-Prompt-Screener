@@ -28,13 +28,13 @@ class RiskScorerTest {
         assertEquals(59.75, scorer.score(subScores), DELTA);
     }
 
-    // 36.2: a synthetic sub-score tuple modeling one HIGH-severity finding (sensitiveData
+    // a synthetic sub-score tuple modeling one HIGH-severity finding (sensitiveData
     // 0.5, secretCriticality 1.0 - the per-finding caps a single finding can reach) plus a
     // realistic policy-context baseline (0.6) and a touch of accompanying injection-style
     // language (0.3). This is a RiskScorer-formula test with hand-picked inputs, same as
     // weightsTheFiveSubScoresPerTheSpecifiedFormula above - NOT a claim that a single
     // finding alone (with injectionScore/obfuscationScore at 0) can reach this band; it
-    // provably cannot under this formula (max ceiling 47.5). See docs/NOTE.md.
+    // provably cannot under this formula (max ceiling 47.5).
     @Test
     void oneHighSeverityFindingWithAccompanyingContextLandsInConfirmReviewBand() {
         // 100 * (0.35*0.5 + 0.25*0.3 + 0.20*1.0 + 0.10*0.6 + 0.10*0) = 51.0

@@ -26,15 +26,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Backs {@code /api/dashboard/**} (todo.md Phase 21). Every query is an aggregate
- * {@code @Query}/derived-count query (21.7) — none of these methods load full result sets
+ * Backs {@code /api/dashboard/**}. Every query is an aggregate
+ * {@code @Query}/derived-count query — none of these methods load full result sets
  * into memory to compute a count.
  */
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
 
-    // Matches RiskAnalysisEngine's own REPEATED_ATTACK_PATTERN threshold (Phase 10.8).
+    // Matches RiskAnalysisEngine's own REPEATED_ATTACK_PATTERN threshold.
     private static final long REPEATED_VIOLATION_MIN_COUNT = 3;
     private static final List<String> VIOLATION_ACTIONS = List.of("BLOCK", "REVIEW");
     private static final int LOOKBACK_DAYS = 7;
@@ -43,20 +43,20 @@ public class DashboardService {
     private final DetectionFindingRepository detectionFindingRepository;
     private final AuditEventRepository auditEventRepository;
 
-    // 21.1
+    
     public DashboardSummaryDto getSummary() {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
         return toSummary(screeningDecisionRepository.countByDecisionSince(startOfToday));
     }
 
-    // 21.2
+    
     public List<EntityStatDto> getEntityStats() {
         return detectionFindingRepository.countGroupedByEntityType().stream()
                 .map(row -> new EntityStatDto(((EntityType) row[0]).name(), (Long) row[1]))
                 .toList();
     }
 
-    // 21.3
+    
     public List<RiskBandStatDto> getRiskDistribution() {
         LocalDateTime since = LocalDateTime.now().minusDays(LOOKBACK_DAYS);
         return screeningDecisionRepository.countByDecisionSince(since).stream()
@@ -64,14 +64,14 @@ public class DashboardService {
                 .toList();
     }
 
-    // 21.4
+    
     public List<RecentBlockedDto> getRecentBlocked() {
         return screeningDecisionRepository.findTop10ByDecisionOrderByTimestampDesc(Decision.BLOCK).stream()
                 .map(this::toRecentBlockedDto)
                 .toList();
     }
 
-    // 21.5 - defaults to the last 7 days when the caller doesn't select a period.
+    // defaults to the last 7 days when the caller doesn't select a period.
     public ProcessingTimeStatsDto getProcessingTimeStats(LocalDate from, LocalDate to) {
         Object[] row = screeningDecisionRepository.processingTimeStatsBetween(rangeStart(from), rangeEnd(to)).get(0);
         Double average = row[0] != null ? ((Number) row[0]).doubleValue() : null;
@@ -79,8 +79,8 @@ public class DashboardService {
         return new ProcessingTimeStatsDto(average, max);
     }
 
-    // 22.2/22.3: report-export variants of 21.1/21.2/21.3, bounded to a caller-selected date
-    // range (rather than "today"/"last 7 days") - same defaulting convention as 21.5 above.
+    // Report-export variants of the summary, entity-stats and risk-distribution queries, bounded to a
+    // caller-selected date range (rather than "today"/"last 7 days") - same defaulting convention as above.
     public DashboardSummaryDto getSummaryForRange(LocalDate from, LocalDate to) {
         return toSummary(screeningDecisionRepository.countByDecisionBetween(rangeStart(from), rangeEnd(to)));
     }
@@ -105,7 +105,7 @@ public class DashboardService {
         return (to != null ? to : LocalDate.now()).atTime(LocalTime.MAX);
     }
 
-    // 21.6
+    
     public List<RepeatedViolationDto> getRepeatedViolations() {
         LocalDateTime since = LocalDateTime.now().minusDays(LOOKBACK_DAYS);
         return auditEventRepository.findUserIdsWithActionCountAtLeast(VIOLATION_ACTIONS, since, REPEATED_VIOLATION_MIN_COUNT)
@@ -127,7 +127,7 @@ public class DashboardService {
                 counts.getOrDefault(Decision.REVIEW, 0L));
     }
 
-    // 21.4: picks the single most severe finding (DetectionEngine's own severity order)
+    // picks the single most severe finding (DetectionEngine's own severity order)
     // as "the" trigger when a blocked request has more than one; null if the request was
     // blocked purely by score/signal with no PII/secret finding at all.
     private RecentBlockedDto toRecentBlockedDto(ScreeningDecision decision) {

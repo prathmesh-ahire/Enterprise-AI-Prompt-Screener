@@ -2,7 +2,7 @@ package com.screener.service;
 
 /**
  * Thrown by {@link AiGatewayService} whenever the AI model call fails or times out
- * (todo.md 15.6). Caught by the caller (Phase 13.8) and turned into a 503 response —
+ *. Caught by the caller and turned into a 503 response —
  * the prompt must never be marked COMPLETED when this is thrown.
  */
 public class AiGatewayException extends RuntimeException {

@@ -1,7 +1,7 @@
-// todo.md Phase 27.3, moved onto the design's EntityChip (56A.7). Tiering mirrors
-// RiskSubScoreCalculator's SEVERITY_WEIGHT (backend Phase 11.1.1) exactly - CRITICAL =
+// Tiering mirrors
+// RiskSubScoreCalculator's SEVERITY_WEIGHT (backend) exactly - CRITICAL =
 // key/password material, HIGH = financial/govt-ID/org data, MEDIUM = basic PII - which is
-// the real mapping design.md section 13 says to use instead of the design's placeholder one.
+// the real mapping, not the design's placeholder one.
 // Only ever renders the entity *type*, never the underlying value (PromptResponseDto
 // carries labels only). Each chip prints its severity word, so colour is never the only cue.
 const ENTITY_TIERS: Record<string, 'critical' | 'high' | 'medium'> = {
@@ -16,7 +16,7 @@ const ENTITY_TIERS: Record<string, 'critical' | 'high' | 'medium'> = {
   PERSONAL_EMAIL: 'medium',
 }
 
-// Sentence case (design.md section 2).
+// Sentence case.
 const ENTITY_LABELS: Record<string, string> = {
   PRIVATE_KEY: 'Private key',
   API_KEY: 'API key',

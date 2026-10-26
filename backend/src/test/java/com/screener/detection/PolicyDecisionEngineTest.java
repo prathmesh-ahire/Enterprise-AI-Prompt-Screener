@@ -31,7 +31,7 @@ class PolicyDecisionEngineTest {
     private PolicyDecisionEngine engine;
 
     // Empty repo -> every threshold falls back to its default (25/50/65/75), matching
-    // the behaviour before thresholds became system_config-driven (20.3).
+    // the behaviour before thresholds became system_config-driven.
     @BeforeEach
     void setUp() {
         engine = new PolicyDecisionEngine(systemConfigRepository);
@@ -80,7 +80,7 @@ class PolicyDecisionEngineTest {
     }
 
     // ---------------------------------------------------------------------
-    // Phase 51.1 - ANY detected entity forces at least MASK.
+    // ANY detected entity forces at least MASK.
     //
     // The score alone could not protect a single piece of sensitive data: one HIGH finding
     // is worth ~10.5 points against a MASK floor of 25, so it took roughly two of them
@@ -107,7 +107,7 @@ class PolicyDecisionEngineTest {
     @Test
     void aLoneEmailIsMaskedRatherThanAllowed() {
         // Supersedes the long-documented "a lone email genuinely decides ALLOW, by design"
-        // behaviour - see the Phase 51 note in todo.md for why that was retired.
+        // behaviour for why that was retired.
         assertEquals(Decision.MASK, engine.decide(8.5, List.of(finding(EntityType.PERSONAL_EMAIL)), List.of()).decision());
     }
 
@@ -152,7 +152,7 @@ class PolicyDecisionEngineTest {
     }
 
     // ---------------------------------------------------------------------
-    // V2 55.7: scoreBand and appliedOverrides record what happened - for each rule, one
+    // scoreBand and appliedOverrides record what happened - for each rule, one
     // case where it raises the decision and one where it matches but the decision is
     // already at or above its floor, so it is not "applied".
     // ---------------------------------------------------------------------

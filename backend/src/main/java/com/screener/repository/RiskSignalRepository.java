@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface RiskSignalRepository extends JpaRepository<RiskSignal, Long> {
-    // 18.5: matched signals for the review-details screen.
+    // matched signals for the review-details screen.
     List<RiskSignal> findByRequestId(UUID requestId);
 
-    // 20.6b: retention cleanup job.
+    // retention cleanup job.
     void deleteByRequestIdIn(List<UUID> requestIds);
 }

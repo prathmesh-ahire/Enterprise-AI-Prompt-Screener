@@ -12,8 +12,8 @@ interface ResetPasswordForm {
   newPassword: string
 }
 
-// todo.md Phase 25.4. Pre-fills the token from a ?token= query param, in case a real
-// reset link ever carries one - v1 doesn't send one (Phase 5.2.1), so it's normally typed
+// Pre-fills the token from a ?token= query param, in case a real
+// reset link ever carries one - v1 doesn't send one, so it's normally typed
 // in by hand from the backend console log.
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()

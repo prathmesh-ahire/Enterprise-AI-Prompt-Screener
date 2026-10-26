@@ -35,7 +35,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * Backs every {@code /api/admin/**} route (todo.md Phase 20). Reads/writes the exact same
+ * Backs every {@code /api/admin/**} route. Reads/writes the exact same
  * {@code system_config} keys {@code DetectionEngine}/{@code PromptService}/
  * {@code PolicyDecisionEngine} already consult, so a PUT here changes real screening
  * behaviour immediately rather than being decorative.
@@ -54,7 +54,7 @@ public class AdminService {
     private final ApprovedModelRepository approvedModelRepository;
     private final AuditService auditService;
 
-    // 20.2
+    
     public Page<AdminUserDto> getUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(this::toUserDto);
     }
@@ -69,7 +69,7 @@ public class AdminService {
         return toUserDto(user);
     }
 
-    // 20.3
+    
     public AdminPolicyDto getPolicy() {
         return new AdminPolicyDto(
                 resolveInt(PromptService.MAX_LENGTH_CONFIG_KEY, PromptService.DEFAULT_MAX_LENGTH),
@@ -101,7 +101,7 @@ public class AdminService {
         return getPolicy();
     }
 
-    // 20.4
+    
     public List<OrgTermDto> getOrgTerms() {
         return orgConfidentialTermRepository.findAll().stream().map(this::toTermDto).toList();
     }
@@ -132,7 +132,7 @@ public class AdminService {
         auditService.log(adminId, "ADMIN_ORG_TERM_DELETED", null, null);
     }
 
-    // 20.5
+    
     public List<ApprovedModelDto> getApprovedModels() {
         return approvedModelRepository.findAll().stream().map(this::toModelDto).toList();
     }
@@ -158,7 +158,7 @@ public class AdminService {
         return toModelDto(model);
     }
 
-    // 20.6
+    
     public RetentionDto getRetention() {
         return new RetentionDto(resolveInt(RetentionCleanupJob.RETENTION_DAYS_KEY, RetentionCleanupJob.DEFAULT_RETENTION_DAYS));
     }

@@ -6,7 +6,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: screener_db
-      # NOTE.md open item, 2026-09-22: containers ran on UTC while the deployment machine
+      # 2026-09-22: containers ran on UTC while the deployment machine
       # is IST, so UI timestamps displayed 5.5h behind and the dashboard's "today" cards
       # could read 0 between 00:00-05:30 IST. Both services need it: mysql for its own
       # session clock, backend for LocalDateTime.now()'s "today" boundary.
@@ -25,9 +25,9 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
-  # Phase 33.1. DB_URL/OLLAMA_BASE_URL are deliberately NOT taken from the root .env here -
+  # DB_URL/OLLAMA_BASE_URL are deliberately NOT taken from the root .env here -
   # that file's values (localhost:3306/localhost:11434) are correct for running the backend
-  # as a native process on the host (Phase 2/15's dev workflow), but inside this compose
+  # as a native process on the host (the dev workflow), but inside this compose
   # network "localhost" would mean the backend container itself, not the mysql/ollama
   # containers - so those two are hardcoded to the Compose service names instead.
   backend:

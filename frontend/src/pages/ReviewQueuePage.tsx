@@ -50,7 +50,7 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
 }
 
-// todo.md Phase 29. REVIEWER/ADMIN only (enforced by RoleProtectedRoute in App.tsx).
+// REVIEWER/ADMIN only (enforced by RoleProtectedRoute in App.tsx).
 export function ReviewQueuePage() {
   const [queue, setQueue] = useState<QueueItem[] | null>(null)
   const [loading, setLoading] = useState(true)
@@ -204,7 +204,7 @@ export function ReviewQueuePage() {
                                 {detail.matchedSignals.length > 0 && (
                                   <div>
                                     <p className="ps-detail__k">Matched signals</p>
-                                    {/* Neutral, pill-shaped and not interactive (design.md 15b). */}
+                                    {/* Neutral, pill-shaped and not interactive. */}
                                     <div className="ps-chips">
                                       {detail.matchedSignals.map((signal) => (
                                         <span key={signal} className="ps-chip ps-chip--signal">{signalLabel(signal)}</span>
@@ -225,7 +225,7 @@ export function ReviewQueuePage() {
                                   placeholder="Explain your decision…"
                                   aria-describedby="review-reason-help"
                                 />
-                                {/* 47.4: the four actions stay disabled until a reason is typed,
+                                {/* the four actions stay disabled until a reason is typed,
                                     and this line says so - four greyed-out buttons with no
                                     explanation read as "you lack permission". */}
                                 <p id="review-reason-help" className="ps-help">

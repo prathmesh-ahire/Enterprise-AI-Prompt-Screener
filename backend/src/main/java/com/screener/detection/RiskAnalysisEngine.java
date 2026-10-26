@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
 
 /**
  * Prompt-injection / policy-risk signal detection — the project document's 7 required
- * risk categories (Section 8.3). Phrase-matching checks (10.2-10.6) share one helper;
- * Obfuscation (10.7) and Repeated Attack Pattern (10.8) are each their own thing since
+ * risk categories (Section 8.3). The five phrase-matching checks share one helper;
+ * Obfuscation and Repeated Attack Pattern are each their own thing since
  * they don't fit the phrase-list shape.
  */
 @Component
@@ -43,7 +43,7 @@ public class RiskAnalysisEngine {
     private static final String REPEATED_ATTACK_PATTERN_DESC =
             "This user has triggered multiple blocked or reviewed prompts in the last 24 hours.";
 
-    // V1.2 Phase 52.9. The recall audit put a number on the long-documented "exact phrase
+    // The recall audit put a number on the long-documented "exact phrase
     // only" limitation: 8 of 10 realistic paraphrases were missed, including "forget your
     // rules", "developer mode" and "act as DAN". Matching is STILL exact-substring - this
     // is a bigger list, not a smarter mechanism, and it cannot close the gap in principle
@@ -133,7 +133,7 @@ public class RiskAnalysisEngine {
     }
 
     // Combines 4 obfuscation heuristics via max() — a single worst-case-wins strength,
-    // since 11.1.5 later reads OBFUSCATION_SIGNAL.strength as one scalar 0-1 value.
+    // since the obfuscation sub-score later reads OBFUSCATION_SIGNAL.strength as one scalar 0-1 value.
     private List<RiskSignalResult> checkObfuscationSignal(String text) {
         ObfuscationCandidate strongest = List.of(
                         base64Candidate(text),
@@ -224,8 +224,8 @@ public class RiskAnalysisEngine {
     }
 
     // Strength scales linearly with count above the 3-occurrence threshold, saturating
-    // at 10+ occurrences in 24h — a project-specific choice (todo.md 10.8 only says
-    // "scaled to the count", no formula given), documented here rather than in NOTE.md
+    // at 10+ occurrences in 24h — a project-specific choice (the spec only says
+    // "scaled to the count", no formula given), documented here
     // since it's a small, local, non-controversial default.
     private List<RiskSignalResult> checkRepeatedAttackPattern(Long userId) {
         if (userId == null) {

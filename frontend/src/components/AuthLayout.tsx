@@ -2,9 +2,8 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { APP_NAME } from './AppShell'
 
-// todo.md Phase 47.1, rebuilt to C10 in 56A.7 (design.md section 15b, "Sign-in pages"): the
-// calm app style with no moving background, and one centred 400px solid card. The full
-// product name sits above it (C8). The card holds the page's one h1, the form fields, one
+// The calm app style with no moving background, and one centred 400px solid card. The full
+// product name sits above it. The card holds the page's one h1, the form fields, one
 // primary button, and the secondary links under the button. V1's two-column split, with
 // its statement panel, is gone.
 //

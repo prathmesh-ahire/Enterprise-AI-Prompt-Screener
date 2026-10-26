@@ -1,15 +1,14 @@
 import { useState, type ReactNode } from 'react'
 import { LiveSourceCaption } from './SourceCaption'
 
-// todo.md Phase 48.1, on the design in 56A.7 (design.md section 15b, Charts and Live-number
-// captions). The shared frame every chart sits in: an app Card with a title, one line of
+// The shared frame every chart sits in: an app Card with a title, one line of
 // context, the chart, and one SourceCaption for the panel stating its window and when it
 // was loaded.
 //
 // The window is deliberately REQUIRED. This dashboard's panels genuinely use three
 // different windows - summary cards are today only, entity stats are all-time, and risk
-// distribution / processing time / repeated violations are the last 7 days. NOTE.md records
-// that discrepancy being mistaken for a bug during manual testing ("the card says 3
+// distribution / processing time / repeated violations are the last 7 days. That discrepancy was once
+// mistaken for a bug during manual testing ("the card says 3
 // blocked, the database says 30"). V1's period pill was only a label, so the caption
 // replaces it.
 interface ChartCardProps {
@@ -34,7 +33,7 @@ export function ChartCard({ title, subtitle, window, updatedAt, children }: Char
 // Recharts renders SVG, which cannot read a CSS custom property — `fill="var(--brand-base)"`
 // resolves to nothing inside an SVG attribute. Every colour therefore has to be handed to
 // it as a literal, which means reading the tokens off the document at runtime. The UI is
-// dark only (56A.3), so the tokens never change after load and are read once.
+// dark only, so the tokens never change after load and are read once.
 export function useChartTokens() {
   const read = () => {
     const s = getComputedStyle(document.documentElement)
@@ -58,7 +57,7 @@ export function useChartTokens() {
 }
 
 // One tooltip for every chart, built from the tokens rather than recharts' default white
-// box: surface-raised, a line-strong border and shadow-pop (design.md 15b).
+// box: surface-raised, a line-strong border and shadow-pop.
 export function ChartTooltip({ active, payload, label, suffix = '' }: {
   active?: boolean
   payload?: Array<{ name?: string; value?: number | string; payload?: { name?: string } }>
@@ -77,7 +76,7 @@ export function ChartTooltip({ active, payload, label, suffix = '' }: {
 }
 
 // Recharts draws an axis and an empty plot area when handed an empty array, which reads
-// as a broken chart rather than "nothing happened in this window" (48.6).
+// as a broken chart rather than "nothing happened in this window".
 export function ChartEmpty({ message }: { message: string }) {
   return <p className="chart-empty">{message}</p>
 }

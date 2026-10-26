@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * todo.md Phase 20.2 — no password field, ever.
+ * No password field, ever.
  */
 public record AdminUserDto(
         Long id,

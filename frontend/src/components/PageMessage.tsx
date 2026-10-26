@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 
-// todo 56A.7 (design.md section 15b, "Page messages"). Replaces V1's coloured banners.
+// Replaces V1's coloured banners.
 // Errors use the field-error style - block text with a warning icon and a sentence on how
 // to fix it - and role="alert", so a screen reader announces them. Success is a quiet
 // text-secondary line with a check icon and role="status": no coloured box and no green,

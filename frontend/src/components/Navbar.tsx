@@ -3,12 +3,12 @@ import { useAuth } from '../AuthContext'
 import { Button } from './Button'
 import { RoleBadge } from './RoleBadge'
 
-// todo 56A.7, the design's AppNavbar as C10 sets it out (design.md section 15): the
+// The app navbar: the
 // wordmark · Prompt, History, Review queue · a separator · the admin links · then, on the
 // right, the RoleBadge, the user ID and a small ghost "Log out". Each role sees only the
 // links it can open, additive by role (ADMIN > REVIEWER > USER, as PromptService.resolveRole
-// orders them). The "About" link joins in 56.5, once the public site it points to exists,
-// and Audit log and Reports in 60.7, with their pages.
+// orders them). The "About" link joins once the public site it points to exists,
+// and Audit log and Reports with their pages.
 //
 // Desktop only: one row at 1280px and up, so there is no collapsed menu any more. NavLink
 // sets aria-current="page" on the current link, which is what draws its bottom bar.

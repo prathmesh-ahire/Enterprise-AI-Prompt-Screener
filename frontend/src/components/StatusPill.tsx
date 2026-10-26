@@ -1,6 +1,6 @@
 import { Icon, type IconName } from './Icon'
 
-// todo 56A.7 (design.md section 15b, "Status labels"). The workflow state of a record, not
+// The workflow state of a record, not
 // its decision: neutral on purpose, so it never competes with the decision colours. The
 // icon SHAPE carries the state and the word is always shown - no colour, ever.
 interface StatusLook {
@@ -12,7 +12,7 @@ interface StatusLook {
 const PROMPT_STATUS: Record<string, StatusLook> = {
   MASKED: { label: 'Awaiting confirmation', icon: 'status-pending' },
   PENDING_CONFIRM: { label: 'Awaiting confirmation', icon: 'status-pending' },
-  // An ALLOWED row only stays ALLOWED when its send to the model failed (41.5), so it is
+  // An ALLOWED row only stays ALLOWED when its send to the model failed, so it is
   // waiting for a retry from the user, like the two above.
   ALLOWED: { label: 'Awaiting confirmation', icon: 'status-pending' },
   PENDING_REVIEW: { label: 'In review', icon: 'status-in-review' },

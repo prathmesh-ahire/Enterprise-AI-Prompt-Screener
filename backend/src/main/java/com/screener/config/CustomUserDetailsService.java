@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new DisabledException("Account is disabled: " + username);
         }
 
-        // 43.4: one join instead of one query for the link rows plus one per role. This is the
+        // one join instead of one query for the link rows plus one per role. This is the
         // highest-traffic instance of that N+1 in the project - JwtAuthFilter calls this on
         // EVERY authenticated request, not just prompt submissions.
         List<SimpleGrantedAuthority> authorities = userRoleRepository.findRoleNamesByUserId(user.getId()).stream()

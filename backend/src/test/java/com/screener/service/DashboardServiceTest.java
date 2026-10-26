@@ -155,7 +155,7 @@ class DashboardServiceTest {
         assertNull(stats.maxMs());
     }
 
-    // 41.7: the query now returns (userId, username, count) so the panel can name the user
+    // the query now returns (userId, username, count) so the panel can name the user
     // instead of showing a bare numeric id.
     @Test
     void repeatedViolationsMapsUserIdUsernameAndCount() {

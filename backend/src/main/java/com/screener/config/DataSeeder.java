@@ -60,12 +60,12 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
 
-    // 41.3: the admin holds USER in addition to ADMIN, because roles here are exclusive rather
+    // the admin holds USER in addition to ADMIN, because roles here are exclusive rather
     // than cumulative and PromptController/AuditController are @PreAuthorize("hasRole('USER')")
     // - so without it the seeded admin gets 403 on the Prompt and History pages the navbar
     // links them to. Granting USER widens nothing: ADMIN is already the most privileged role,
     // and PromptService.resolveRole still resolves this account to ADMIN, so
-    // policyContextScore's role baseline (11.1.4) is unchanged and no risk score moves.
+    // policyContextScore's role baseline is unchanged and no risk score moves.
     //
     // Role granting runs on every startup, not only when the admin row is first created: the
     // old version returned early whenever the username already existed, which would have left

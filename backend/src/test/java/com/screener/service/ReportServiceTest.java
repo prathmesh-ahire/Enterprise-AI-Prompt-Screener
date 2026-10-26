@@ -35,7 +35,7 @@ class ReportServiceTest {
         reportService = new ReportService(dashboardService, adminService);
 
         when(dashboardService.getSummaryForRange(any(), any()))
-                // 41.6: (total, allowed, masked, confirm, blocked, pendingReview) - the
+                // (total, allowed, masked, confirm, blocked, pendingReview) - the
                 // categories deliberately sum to the total so the report's own arithmetic
                 // is exercised: 6+2+1+... see summaryCategoriesSumToTotal below.
                 .thenReturn(new DashboardSummaryDto(10, 5, 2, 1, 1, 1));
@@ -63,7 +63,7 @@ class ReportServiceTest {
         assertFalse(csv.contains("@"));
     }
 
-    // 41.6: the Summary block used to omit CONFIRM entirely while Total counted it, so the
+    // the Summary block used to omit CONFIRM entirely while Total counted it, so the
     // categories an examiner can add up did not reach the total printed above them. Asserts
     // the row exists and that the five categories reconcile against Total.
     @Test

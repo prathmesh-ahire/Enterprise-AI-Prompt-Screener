@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 @Component
 public class PhoneDetector implements Detector {
 
-    // V1.2 Phase 52.1. Was "[6-9]\d{9}" - ten CONTIGUOUS digits and nothing else, so the
+    // Was "[6-9]\d{9}" - ten CONTIGUOUS digits and nothing else, so the
     // audit found it missed "+91 98765 43210", "+919876543210", "98765-43210" and
     // "98765 43210", i.e. most of the ways an Indian mobile number is actually written.
     //

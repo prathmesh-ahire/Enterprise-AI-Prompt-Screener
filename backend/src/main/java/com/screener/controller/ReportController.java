@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 
 /**
- * todo.md Phase 22 - dashboard-equivalent aggregate report, downloadable as CSV or PDF for
+ * Dashboard-equivalent aggregate report, downloadable as CSV or PDF for
  * a caller-selected date range. ADMIN-only, same as the dashboard's own recent-blocked/
- * processing-time/repeated-violations routes (Phase 21).
+ * processing-time/repeated-violations routes.
  */
 @RestController
 @RequestMapping("/api/reports")

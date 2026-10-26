@@ -26,8 +26,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * todo.md Phase 22 - exports the same aggregate-only figures already shown on the admin
- * dashboard (Phase 21) as a downloadable CSV or PDF for a caller-selected date range.
+ * Exports the same aggregate-only figures already shown on the admin
+ * dashboard as a downloadable CSV or PDF for a caller-selected date range.
  * Every value here is a count grouped by decision/entity type - no raw prompt text, no
  * per-user data - matching {@code DashboardService}'s existing privacy posture.
  */
@@ -48,7 +48,7 @@ public class ReportService {
     private final DashboardService dashboardService;
     private final AdminService adminService;
 
-    // 22.2
+    
     public byte[] exportCsv(LocalDate from, LocalDate to) {
         ReportData data = buildReportData(from, to);
         StringBuilder csv = new StringBuilder();
@@ -84,7 +84,7 @@ public class ReportService {
         return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    // 22.3
+    
     public byte[] exportPdf(LocalDate from, LocalDate to) {
         ReportData data = buildReportData(from, to);
         ByteArrayOutputStream out = new ByteArrayOutputStream();

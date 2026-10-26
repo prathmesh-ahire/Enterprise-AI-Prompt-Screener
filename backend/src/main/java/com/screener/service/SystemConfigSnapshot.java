@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * Every {@code system_config} value the screening pipeline needs, read once per prompt
- * submission (todo.md V1.1 Phase 43.3).
+ * submission.
  *
  * <p>Each value used to be fetched with its own {@code findByConfigKey} query at the moment
  * it was needed, scattered across four classes — nine reads of a table holding eight rows,
@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
  * <p><b>Deliberately a per-request snapshot, not a cache.</b> It is built at the top of
  * {@code processPrompt} and discarded when that call returns, so an admin's policy change
  * still takes effect on the very next prompt with no eviction logic, no staleness window and
- * nothing to invalidate. Phase 20's per-call-no-caching decision is preserved exactly; only
+ * nothing to invalidate. The per-call-no-caching decision is preserved exactly; only
  * the number of round trips changes.
  *
  * <p>Parsing goes through {@link SystemConfigValues}, so a malformed row degrades to its
- * documented default here exactly as it did at the original call sites (Phase 42.3).
+ * documented default here exactly as it did at the original call sites.
  */
 public record SystemConfigSnapshot(
         int maxPromptLength,

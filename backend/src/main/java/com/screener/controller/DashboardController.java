@@ -20,8 +20,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * todo.md Phase 21. 21.2/21.3 don't name a role in their task text — given they're
- * plain aggregate counts with no user-identifying info, same sensitivity as 21.1's
+ * The entity-stats and risk-distribution endpoints name no role of their own — given they're
+ * plain aggregate counts with no user-identifying info, same sensitivity as the
  * summary, they get the same ADMIN+REVIEWER access rather than defaulting to ADMIN-only.
  */
 @RestController

@@ -19,8 +19,8 @@ import java.util.Set;
  * Runs every registered {@link Detector} bean and returns the merged, overlap-resolved
  * findings. Skips detectors named in the {@code disabled_detectors} system_config row
  * (comma-separated {@link EntityType} names, all enabled if the row is missing/blank) —
- * this is what makes the admin's per-detector toggle (Phase 20.3/31.1) actually do
- * something. Adding a new {@link Detector} bean (as this class did for Phase 9) requires
+ * this is what makes the admin's per-detector toggle actually do
+ * something. Adding a new {@link Detector} bean requires
  * no change here — Spring collects them into {@code detectors} automatically.
  */
 @Component
@@ -29,12 +29,12 @@ public class DetectionEngine {
 
     private static final Logger log = LoggerFactory.getLogger(DetectionEngine.class);
 
-    // Public: AdminService (Phase 20.3) reads/writes this same key.
+    // Public: AdminService reads/writes this same key.
     public static final String DISABLED_DETECTORS_CONFIG_KEY = "disabled_detectors";
 
     // Priority order for tie-breaking overlapping findings of equal confidence — most
     // severe first, so e.g. PRIVATE_KEY always wins over a lower-severity overlap.
-    // Public: DashboardService (Phase 21.4) reuses this same ordering to pick a single
+    // Public: DashboardService reuses this same ordering to pick a single
     // "triggering" entity type when a blocked request has more than one finding.
     public static final List<EntityType> SEVERITY_ORDER = List.of(
             EntityType.PRIVATE_KEY,
@@ -59,7 +59,7 @@ public class DetectionEngine {
         return detectAll(text, loadDisabledDetectors());
     }
 
-    // 43.3: the prompt pipeline passes the set in from the per-request SystemConfigSnapshot so
+    // the prompt pipeline passes the set in from the per-request SystemConfigSnapshot so
     // this class does not issue its own config query on every submission.
     public List<DetectionFinding> detectAll(String text, Set<EntityType> disabled) {
         List<DetectionFinding> findings = new ArrayList<>();
@@ -77,7 +77,7 @@ public class DetectionEngine {
     }
 
     private Set<EntityType> loadDisabledDetectors() {
-        // 42.3: an unknown detector name in this row used to throw from EntityType.valueOf on
+        // an unknown detector name in this row used to throw from EntityType.valueOf on
         // every submission thereafter. Unknown entries are now skipped with a WARN instead.
         return systemConfigRepository.findByConfigKey(DISABLED_DETECTORS_CONFIG_KEY)
                 .map(SystemConfig::getConfigValue)

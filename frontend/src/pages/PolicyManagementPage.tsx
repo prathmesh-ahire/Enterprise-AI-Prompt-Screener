@@ -6,7 +6,7 @@ import { PageHeader } from '../components/PageHeader'
 import { Button } from '../components/Button'
 import { PageMessage } from '../components/PageMessage'
 
-// Same 9 EntityType values DetectionEngine (backend Phase 9.6) checks against
+// Same 9 EntityType values DetectionEngine (backend) checks against
 // disabled_detectors - reusing EntityChips' key list keeps this in one place.
 const DETECTOR_TYPES = [
   'PERSONAL_EMAIL', 'PHONE_NUMBER', 'PAN_LIKE_ID', 'AADHAAR_LIKE_ID', 'PAYMENT_CARD',
@@ -34,7 +34,7 @@ interface Retention {
   retentionDays: number
 }
 
-// 41.8: an empty <input type="number"> reports value '', and Number('') is 0 - so binding
+// an empty <input type="number"> reports value '', and Number('') is 0 - so binding
 // these fields straight through `setX(Number(e.target.value))` wrote a 0 straight back into
 // the box the instant it was cleared, and whatever the admin typed next was appended to that
 // stray zero ("25" came out as "025"). Holding '' as a distinct state lets the field actually
@@ -47,7 +47,7 @@ const toNumberField = (raw: string): NumberField => (raw === '' ? '' : Number(ra
 const blankFields = (fields: Record<string, NumberField>): string[] =>
   Object.entries(fields).filter(([, value]) => value === '').map(([label]) => label)
 
-// todo.md Phase 31. ADMIN only (enforced by RoleProtectedRoute in App.tsx).
+// ADMIN only (enforced by RoleProtectedRoute in App.tsx).
 export function PolicyManagementPage() {
   const [policy, setPolicy] = useState<AdminPolicy | null>(null)
   const [disabled, setDisabled] = useState<Set<string>>(new Set())
@@ -124,7 +124,7 @@ export function PolicyManagementPage() {
     setPolicyError(null)
     setPolicySuccess(null)
 
-    // 41.8: reconcile the possibly-empty fields back to numbers before sending. Refusing the
+    // reconcile the possibly-empty fields back to numbers before sending. Refusing the
     // save with a message that names the empty boxes is better than silently submitting a 0,
     // which the backend's ascending-threshold validation would reject with a vaguer error.
     const blank = blankFields({

@@ -13,7 +13,7 @@ interface RegisterForm {
   password: string
 }
 
-// todo.md Phase 25.2/25.5. Mirrors AuthController's RegisterRequest validation
+// Mirrors AuthController's RegisterRequest validation
 // (username 3-50 chars, valid email, password min 8 chars) client-side for fast feedback;
 // the server remains authoritative and its message is shown verbatim on failure (e.g.
 // duplicate username -> 409).

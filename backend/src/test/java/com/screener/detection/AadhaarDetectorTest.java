@@ -22,7 +22,7 @@ class AadhaarDetectorTest {
     }
 
     // Same shape as a 12-digit phone-like number but fails the Verhoeff checksum —
-    // must not be flagged, per todo.md 8.6's example.
+    // must not be flagged example.
     @Test
     void rejectsPhoneLikeNumberThatFailsChecksum() {
         List<DetectionFinding> findings = detector.detect("Number seen: 987654321098 here");

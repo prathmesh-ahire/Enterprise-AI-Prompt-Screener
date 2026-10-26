@@ -6,8 +6,7 @@ import { ChartCard, ChartEmpty, ChartTooltip, useChartTokens } from './ChartCard
 import { DecisionBadge } from './DecisionBadge'
 import { entityLabel } from './EntityChips'
 
-// todo.md Phase 48, restyled to the design in 56A.7 (design.md section 15b, Charts). The
-// risk-band donut is a decision chart, so it uses the five decision colours, each with its
+// The risk-band donut is a decision chart, so it uses the five decision colours, each with its
 // label, plus a legend with numbers and a plain table for screen readers. Every other chart
 // uses only brand-base plus greys. No chart animates.
 export interface RiskBandStat { riskBand: string; count: number }
@@ -124,8 +123,8 @@ export function EntityBreakdownChart({ data, updatedAt }: { data: EntityStat[]; 
   )
 }
 
-// 48.5: the live figures beside the recorded baseline, so the dashboard shows the Phase 43
-// work rather than only the report claiming it. The baseline is a recorded figure, so it
+// the live figures beside the recorded baseline, so the dashboard shows the query
+// optimisation rather than only the report claiming it. The baseline is a recorded figure, so it
 // carries its own dated source; no version label is shown.
 const BASELINE_AVG_MS = 17.96
 const BASELINE_MAX_MS = 89

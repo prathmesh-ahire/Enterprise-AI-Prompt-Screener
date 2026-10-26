@@ -1,6 +1,6 @@
 import { Button } from './Button'
 
-// todo 56A.7 (design.md section 15b, Pagination): "Previous" and "Next" with "Page X of Y"
+// "Previous" and "Next" with "Page X of Y"
 // between them, and no rows of page numbers. A button is disabled at its end, and the
 // position is announced politely when it changes.
 interface PaginationProps {

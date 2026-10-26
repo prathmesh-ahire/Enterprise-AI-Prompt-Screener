@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 
-// todo 56A.7/56A.8 (design.md section 14). The design system's inline line icons: a 24px
+// The design system's inline line icons: a 24px
 // grid, 1.75px stroke, round caps and currentColor, with the SVG paths copied from the
 // export's components/*/preview.html. Always shown beside a word, never on their own;
 // aria-hidden because the word carries the meaning. `not-sent` and `disabled` are the two
-// status shapes the user added (design.md 15b), drawn to the same rules.
+// status shapes added to the set, drawn to the same rules.
 const PATHS: Record<string, ReactNode> = {
   check: <path d="M20 6 9 17l-5-5" />,
   'eye-slash': (

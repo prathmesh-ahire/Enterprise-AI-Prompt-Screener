@@ -35,9 +35,9 @@ class ApiKeyDetectorTest {
         assertTrue(findings.isEmpty());
     }
 
-    // 37.2: found live - an underscore-prefixed keyword ("test_api_key", not "api_key")
+    // found live - an underscore-prefixed keyword ("test_api_key", not "api_key")
     // used to fail the leading \b boundary entirely, and the 19-char example value used
-    // to fall 1 character short of the old 20-char floor. See docs/NOTE.md.
+    // to fall 1 character short of the old 20-char floor.
     @Test
     void detectsAnUnderscorePrefixedKeywordWithAShorterRealisticToken() {
         List<DetectionFinding> findings = detector.detect("test_api_key=sk-12345abcdefghijk");
@@ -45,7 +45,7 @@ class ApiKeyDetectorTest {
         assertEquals(EntityType.API_KEY, findings.get(0).getEntityType());
     }
 
-    // V1.2 Phase 50.3. All four of these matched NOTHING before: "api key" as two words
+    // All four of these matched NOTHING before: "api key" as two words
     // was not a keyword at all (only apikey/api_key/api-key were), "secret key" and
     // "access key" were not keywords, and an "is"/"was" between the keyword and the value
     // broke the match because the value had to follow the keyword or a separator directly.
@@ -82,7 +82,7 @@ class ApiKeyDetectorTest {
     // because KEY_SHAPED's charset has neither. The AWS secret access key below is the
     // headline case: 40 base64 characters that split into 13/7/18-character fragments,
     // none of which reached the 16-character bar, so the whole prompt screened ALLOW with
-    // no findings and the secret was forwarded to the model. See docs/NOTE.md.
+    // no findings and the secret was forwarded to the model.
     @ParameterizedTest
     @ValueSource(strings = {
             "aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",

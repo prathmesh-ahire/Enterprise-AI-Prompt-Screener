@@ -27,18 +27,17 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Human review workflow (todo.md Phase 18). Owns the review queue, review-details view,
+ * Human review workflow. Owns the review queue, review-details view,
  * and {@link ReviewRecord} persistence; delegates the actual "forward to AI" / "block"
  * side effect to {@link PromptService#approveFromReview} / {@link PromptService#rejectFromReview}
  * so the AiGatewayService+ResponseSafetyChecker forwarding logic stays in one place
- * (shared with the ALLOW path and /confirm, per Phase 13/15/16).
+ * (shared with the ALLOW path and /confirm).
  *
  * <p>{@code REQUEST_CORRECTION} is treated the same as {@code REJECT} (never reaches the
  * AI gateway, status becomes BLOCKED) and {@code FALSE_POSITIVE} the same as
- * {@code APPROVE} (forwarded to the AI gateway) - todo.md 18.2/18.3 only spell out
+ * {@code APPROVE} (forwarded to the AI gateway) - the spec only spells out
  * behaviour for APPROVE/REJECT explicitly, and {@link PromptStatus} has no third
- * "returned for correction" state to represent anything else. Documented assumption, see
- * docs/NOTE.md.
+ * "returned for correction" state to represent anything else. Documented assumption.
  */
 @Service
 @RequiredArgsConstructor
@@ -83,7 +82,7 @@ public class ReviewService {
     public PromptResponseDto decide(UUID requestId, Long reviewerId, ReviewAction action, String reason) {
         log.info("Reviewer {} decided {} on prompt {}", reviewerId, action, requestId);
 
-        // 42.2: the forward used to run first with the record and audit event after it, so an
+        // the forward used to run first with the record and audit event after it, so an
         // AiGatewayException (Ollama down or timed out - a documented, recurring event on this
         // machine) propagated before either was written. The reviewer had genuinely acted, yet
         // the decision left no trace at all: "a reviewer clicked Approve" and "a ReviewRecord
@@ -113,8 +112,8 @@ public class ReviewService {
         return result;
     }
 
-    // 18.4: the raw prompt text only when there is no masked version to show instead -
-    // which only happens when detection found nothing to mask (13.1), meaning the raw
+    // the raw prompt text only when there is no masked version to show instead -
+    // which only happens when detection found nothing to mask, meaning the raw
     // text itself contains no sensitive findings by definition.
     private String reviewerVisibleText(PromptRequest promptRequest) {
         return promptRequest.getMaskedText() != null ? promptRequest.getMaskedText() : promptRequest.getPromptText();

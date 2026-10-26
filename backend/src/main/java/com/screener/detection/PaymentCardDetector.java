@@ -48,7 +48,7 @@ public class PaymentCardDetector implements Detector {
     }
 
     /**
-     * Pass 2b (todo.md V1.2 Phase 53.7): the digits must also start with a real issuer
+     * Pass 2b: the digits must also start with a real issuer
      * prefix <em>at a length that issuer actually uses</em>.
      *
      * <p><b>Why Luhn alone is not enough.</b> Luhn is a single check digit, so about one in

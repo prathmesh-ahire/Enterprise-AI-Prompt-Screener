@@ -17,13 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * V2 55.7: the seven breakdown columns survive a real save and reload through JPA, and a
+ * the seven breakdown columns survive a real save and reload through JPA, and a
  * row saved without them reads back as null, not zero.
  *
  * <p>Not transactional on purpose: each repository call runs in its own transaction, so
  * the reload is a fresh read from the database rather than the entity still held in a
  * persistence context. This proves the mapping on H2 only - the real MySQL schema is
- * checked separately with SHOW CREATE TABLE (Docs/NOTE.md standing rule).
+ * checked separately with SHOW CREATE TABLE (a standing rule for schema changes).
  */
 @SpringBootTest
 @ActiveProfiles("test")

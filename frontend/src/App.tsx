@@ -14,9 +14,9 @@ import { AdminPage } from './pages/AdminPage'
 import { PolicyManagementPage } from './pages/PolicyManagementPage'
 import { ModelConfigPage } from './pages/ModelConfigPage'
 
-// todo.md Phase 24.2/24.5 (ProtectedRoute: authenticated-vs-not) + Phase 29.1
-// (RoleProtectedRoute: REVIEWER/ADMIN on /review) + Phase 30.1/31.1/32.1 (ADMIN-only on
-// /admin, /admin/policy, /admin/models).
+// Route guards: ProtectedRoute (authenticated-vs-not) wraps every private route;
+// RoleProtectedRoute restricts /review to REVIEWER/ADMIN and /admin, /admin/policy and
+// /admin/models to ADMIN.
 function App() {
   return (
     <BrowserRouter>

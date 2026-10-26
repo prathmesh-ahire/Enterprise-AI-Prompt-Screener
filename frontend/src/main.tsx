@@ -1,10 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// 44.5: fonts are npm packages bundled at build time, never a CDN link. This project's
+// fonts are npm packages bundled at build time, never a CDN link. This project's
 // central claim is that it runs with no internet, so a Google Fonts <link> would break
 // offline operation outright. Only the weights actually used are imported.
-// 56A.5: the same five faces as the design (Inter 500/600/700, Source Sans 3 400/600),
-// Latin subset only, as design.md section 4 specifies. Self-hosted: no request leaves
+// the same five faces as the design (Inter 500/600/700, Source Sans 3 400/600),
+// Latin subset only, as the design specifies. Self-hosted: no request leaves
 // the page for a font.
 import '@fontsource/inter/latin-500.css'
 import '@fontsource/inter/latin-600.css'

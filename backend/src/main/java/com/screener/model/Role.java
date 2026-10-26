@@ -21,13 +21,13 @@ import java.util.List;
 @AllArgsConstructor
 public class Role {
 
-    // Phase 41.2: the single answer to "which role wins when a user holds more than one".
+    // the single answer to "which role wins when a user holds more than one".
     // Two callers need it and must never disagree: AuthService (the role in the login
     // response, which drives the navbar, route guards and post-login landing page) and
-    // PromptService (policyContextScore's role baseline, 11.1.4). They used to answer it
+    // PromptService (policyContextScore's role baseline). They used to answer it
     // two different ways - AuthService took whichever role the repository happened to
     // return first - which was harmless only while every account held exactly one role.
-    // Phase 41.3 gives the admin a second role, so this had to be settled first.
+    // The admin holds a second role, so this had to be settled first.
     public static final List<String> PRIORITY = List.of("ADMIN", "REVIEWER", "USER");
     public static final String DEFAULT_ROLE = "USER";
 

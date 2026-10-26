@@ -1,13 +1,12 @@
 /* ==========================================================================
-   DESIGN TOKENS — V2 (todo 56A.2)
+   DESIGN TOKENS — V2
    --------------------------------------------------------------------------
-   Copied by script from FOR_DEVELOPER_ONLY/design/prompt-screener-ds/tokens.json
-   (names and values exactly as the design gives them), plus the C9 additions
-   from design.md section 4b: a --text-* variable per type style, used as
-   `font: var(--text-<style>)`, and --space-hero-top. design.md is the single
+   Copied by script from the design's token file (names and values exactly as the
+   design gives them), plus a --text-* variable per type style, used as
+   `font: var(--text-<style>)`, and --space-hero-top. The design is the single
    source of truth for the look; nothing here may be rounded or renamed.
 
-   Dark only (todo 56A.3): there is no light theme and no theme toggle, so
+   Dark only: there is no light theme and no theme toggle, so
    every token is defined once, here. No component rule may contain a raw
    colour, a raw font size or an off-grid spacing value.
    ========================================================================== */
@@ -89,7 +88,7 @@
   --space-12: 48px;
   --space-14: 56px;
   --space-16: 64px;
-  --space-hero-top: 112px;   /* C9: the public hero's top padding (bundle.css .ps-hero) */
+  --space-hero-top: 112px;   /* the public hero's top padding */
 
   /* --- radius ------------------------------------------------------------ */
   --radius-xs: 4px;
@@ -130,7 +129,7 @@
   --font-body: "Source Sans 3", system-ui, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* --- type styles (design.md 4b, C9): font shorthand values ----------- */
+  /* --- type styles: font shorthand values ----------- */
   --text-display-hero: 700 60px/64px var(--font-heading);
   --text-display-section: 600 40px/46px var(--font-heading);
   --text-stat: 600 30px/36px var(--font-heading);
@@ -169,9 +168,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 44.2: the fixed 1126px centred, side-bordered box was the Vite starter
+/* the fixed 1126px centred, side-bordered box was the Vite starter
    template's own demo-page layout - the single biggest reason every screen
-   read as narrow and generic. The app shell in Phase 46 builds on this. */
+   read as narrow and generic. The app shell builds on this. */
 #root {
   min-height: 100svh;
   display: flex;
@@ -215,8 +214,8 @@ body {
   background: var(--surface-page);
 }
 
-/* Visible keyboard focus everywhere, on the brand colour (accessibility pass
-   in 49.1 verifies this; defining it here keeps it consistent from the start). */
+/* Visible keyboard focus everywhere, on the brand colour (defining it here keeps
+   it consistent from the start). */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--brand-soft);
   outline-offset: 2px;
@@ -224,7 +223,7 @@ body {
 }
 
 /* Inter for headings, Source Sans 3 for body - the pairing from the reference
-   design. 44.5 self-hosts both; the reference project named them but never
+   design. Both are self-hosted; the reference project named them but never
    actually loaded them, so it was silently falling back to system fonts. */
 /* Weight must be one of the faces actually imported in main.tsx (500/600/700).
    `font-synthesis: none` is set, and @fontsource ships discrete static weights
@@ -239,7 +238,7 @@ h3 {
 }
 
 /* Was 56px - the Vite template's landing-page hero scale, far too loud for an
-   application screen. Phase 46.2 introduces the real page-header pattern. */
+   application screen. The real page-header pattern lives in components.css. */
 h1 {
   font: var(--text-h1);
   letter-spacing: -0.01em;
@@ -254,7 +253,7 @@ p {
   margin: 0;
 }
 
-/* 44.1: `.counter` removed here - it was the Vite starter template's demo
+/* `.counter` removed here - it was the Vite starter template's demo
    click-counter, matched by nothing in this app. */
 code {
   font-family: var(--font-mono);
@@ -270,20 +269,19 @@ code {
   background: var(--surface-raised);
 }
 
-/* Phase 25+ shared form/nav styles - kept plain (no CSS framework in the locked stack). */
-/* V1.2 UI pass: the Phase 25 `.auth-page` rule that sat here (380px wide, a 64px top
-   margin, its own 16px padding) was superseded by Phase 47's centred card and then left
+/* Shared form/nav styles - kept plain (no CSS framework in the locked stack). */
+/* V1.2 UI pass: the old `.auth-page` rule that sat here (380px wide, a 64px top
+   margin, its own 16px padding) was superseded by the centred card and then left
    behind. components.css loads after this file and redefines width and margin, so only
    the stale padding was still landing - 16px of inset nothing else in the auth column
    accounted for. Removed rather than overridden. */
 
 
-/* Page body. 56A.7: forms and tables use the full width-content (design.md
-   section 5); long help text is capped at width-reading where it appears. */
+/* Page body. Forms and tables use the full width-content; long help text is capped at width-reading where it appears. */
 .page-content {
   width: 100%;
   text-align: left;
 }
 
-/* 47.5/47.6: .admin-section became a real panel — see styles/components.css. */
+/*.admin-section became a real panel — see styles/components.css. */
 

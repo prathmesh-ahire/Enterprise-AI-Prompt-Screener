@@ -3,7 +3,7 @@ package com.screener.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// V2 55.6 added username, for the admin audit log. userId is kept: additive only.
+// Carries username, for the admin audit log. userId is kept: additive only.
 // Null when the event has no user or the user no longer exists.
 public record AuditEventDto(
         Long id,

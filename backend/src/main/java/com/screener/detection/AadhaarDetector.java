@@ -12,12 +12,12 @@ import java.util.regex.Pattern;
  * Pass 1: 12-digit candidate (with optional single-space grouping, e.g. "1234 5678 9012"),
  * first digit restricted to 2-9 since real Aadhaar numbers never start with 0 or 1.
  * Pass 2: Verhoeff checksum validation (the actual algorithm UIDAI uses for Aadhaar's
- * check digit) — this is the "optional checksum-style validation" called for in todo.md 8.5.
+ * check digit) — the optional checksum-style validation of Aadhaar-like numbers.
  */
 @Component
 public class AadhaarDetector implements Detector {
 
-    // V1.2 Phase 52.3: hyphens as well as spaces. The pattern already allowed the common
+    // hyphens as well as spaces. The pattern already allowed the common
     // "2345 6789 0124" grouping but not "2345-6789-0124", which the audit caught. The
     // Verhoeff checksum in pass 2 already strips non-digits, so nothing else changes.
     private static final Pattern CANDIDATE_PATTERN =
@@ -67,7 +67,7 @@ public class AadhaarDetector implements Detector {
 
     @Override
     public double validate(String text, Candidate candidate) {
-        // Strips hyphens as well as spaces (52.3) - pass 1 now accepts both groupings, and
+        // Strips hyphens as well as spaces - pass 1 now accepts both groupings, and
         // leaving the hyphens in would make this 14 characters and fail the length check.
         String digits = candidate.value().replaceAll("[\\s-]", "");
         if (digits.length() != 12) {

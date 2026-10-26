@@ -28,19 +28,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
- * todo.md Phase 39 - loads {@code test-prompts.json} (39.1/39.2, 20 synthetic prompts) and
+ * Loads {@code test-prompts.json} (38.1.1/38.1.2, 20 synthetic prompts) and
  * runs each one through the real screening pipeline, then reports pass/fail per prompt plus
- * aggregate precision/recall/F1 for entity detection (39.4).
+ * aggregate precision/recall/F1 for entity detection.
  *
- * <p>39.3's own wording names only {@code DetectionEngine} + {@code PolicyDecisionEngine},
+ * <p>The spec names only {@code DetectionEngine} + {@code PolicyDecisionEngine},
  * but {@code PolicyDecisionEngine.decide} also needs a risk score and the signal list to
  * produce a realistic decision (its REVIEW override, for the injection-category prompts,
  * is keyed off {@code RiskSignalResult}s that only {@link RiskAnalysisEngine} produces) -
  * so this also wires in {@code RiskAnalysisEngine}/{@code RiskSubScoreCalculator}/
- * {@code RiskScorer}, the same real-bean, Ollama-excluded scope Phase 38's
- * {@code ScreeningPipelineLatencyTest} already uses. See docs/NOTE.md.
+ * {@code RiskScorer}, the same real-bean, Ollama-excluded scope
+ * {@code ScreeningPipelineLatencyTest} already uses.
  *
- * <p>Per 39.5 ("review the report... tell the AI agent which detector to fix"), reviewing
+ * <p>Reviewing
  * and acting on a low score is explicitly a human call - this test does not hard-fail the
  * build on a mismatch or a sub-80% metric, it only asserts the harness itself ran cleanly
  * (loaded all 20 entries, no exceptions) and prints the full report for that manual review.

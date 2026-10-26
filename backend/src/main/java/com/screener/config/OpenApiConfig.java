@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * todo.md Phase 23.2 - registers the JWT bearer scheme so Swagger UI's "Authorize" button
+ * Registers the JWT bearer scheme so Swagger UI's "Authorize" button
  * can actually exercise the protected routes (almost every controller but AuthController
  * requires a Bearer token), not just render their schemas read-only.
  */

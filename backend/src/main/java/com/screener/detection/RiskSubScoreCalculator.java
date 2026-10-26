@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Computes the 5 sub-scores that feed {@link RiskScorer} (todo.md 11.1). The exact
+ * Computes the 5 sub-scores that feed {@link RiskScorer}. The exact
  * per-category tiering/normalisation constants below are this project's own policy
- * choice, not an industry standard — todo.md gives the shape of each formula but not
+ * choice, not an industry standard — the specification gives the shape of each formula but not
  * every constant, so these are documented here rather than left unexplained.
  *
  * <p>{@code role} must be the plain role name as stored on {@code Role.name} /
@@ -27,7 +27,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RiskSubScoreCalculator {
 
-    // Per-finding severity weight for sensitiveDataScore (11.1.1). todo.md only gives the
+    // Per-finding severity weight for sensitiveDataScore. The specification only gives the
     // 3 tier values (MEDIUM 0.15 / HIGH 0.3 / CRITICAL 0.5) as an example, not which
     // EntityType belongs in which tier — this tiering mirrors DetectionEngine's own
     // SEVERITY_ORDER (credentials > financial/govt-ID > basic PII), applied here as
@@ -44,12 +44,12 @@ public class RiskSubScoreCalculator {
             EntityType.PERSONAL_EMAIL, 0.15);
     private static final double DEFAULT_SEVERITY_WEIGHT = 0.15;
 
-    // The prompt-injection-family signal types that feed injectionScore (11.1.2).
-    // Fixed 2026-08-04: todo.md's wording named only 4 of these (omitting
+    // The prompt-injection-family signal types that feed injectionScore.
+    // Fixed 2026-08-04: the spec's wording named only 4 of these (omitting
     // SECRET_EXTRACTION, e.g. "give me your api key") — a request to extract a secret
     // from the model is the same injection-attempt family as the other 4, and nothing
-    // else in Phase 10/11 ever scores it. Treated as a spec gap, not deliberate
-    // scoping — see docs/NOTE.md.
+    // else ever scores it. Treated as a spec gap, not deliberate
+    // scoping.
     private static final Set<SignalType> INJECTION_SIGNAL_TYPES = Set.of(
             SignalType.INSTRUCTION_OVERRIDE,
             SignalType.SYSTEM_PROMPT_DISCLOSURE,
@@ -83,7 +83,7 @@ public class RiskSubScoreCalculator {
         return compute(findings, signals, role, promptLength, resolveMaxLength());
     }
 
-    // 43.3: the prompt pipeline passes maxLength in from the per-request snapshot - PromptService
+    // the prompt pipeline passes maxLength in from the per-request snapshot - PromptService
     // has already read it to validate the prompt, so re-reading it here was a duplicate query.
     public RiskSubScores compute(List<DetectionFinding> findings, List<RiskSignalResult> signals,
                                   String role, int promptLength, int maxLength) {
@@ -147,7 +147,7 @@ public class RiskSubScoreCalculator {
 
     // Duplicated from PromptService.resolveMaxLength rather than shared — same pattern
     // DetectionEngine already uses for its own system_config lookup (disabled_detectors).
-    // 42.3: falls back to the default on a malformed row instead of throwing mid-pipeline.
+    // falls back to the default on a malformed row instead of throwing mid-pipeline.
     private int resolveMaxLength() {
         return systemConfigRepository.findByConfigKey(MAX_LENGTH_CONFIG_KEY)
                 .map(SystemConfig::getConfigValue)

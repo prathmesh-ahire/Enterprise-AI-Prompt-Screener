@@ -1,7 +1,7 @@
 package com.screener.model;
 
 /**
- * V2 Phase 55.1 - the three hard override rules in {@code PolicyDecisionEngine}, as
+ * the three hard override rules in {@code PolicyDecisionEngine}, as
  * persisted identifiers. Each carries the decision floor it enforces and a fixed,
  * plain-English description the UI can show. The description is about the rule, never
  * about the prompt, so it is safe to return to any caller.

@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Request body must be application/json");
     }
 
-    // 42.5: a known route reached with the wrong verb (e.g. GET /api/auth/login) is a client
+    // a known route reached with the wrong verb (e.g. GET /api/auth/login) is a client
     // error, not a server fault - it used to fall through to the 500 catch-all. Fourth and last
     // member of the malformed-request family fixed in this project, after the body, content-type
     // and path-variable handlers above. The message names no request content, same as those.
@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    // 13.8: Ollama unreachable/timed out — the caller (PromptService) never marks the
+    // Ollama unreachable/timed out — the caller (PromptService) never marks the
     // prompt COMPLETED when this is thrown, so the request row is left exactly where it
     // was (ALLOWED-but-not-yet-sent, or still MASKED/PENDING_CONFIRM) for a retry.
     @ExceptionHandler(AiGatewayException.class)

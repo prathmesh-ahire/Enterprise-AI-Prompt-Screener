@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Simple in-memory fixed-window rate limiter — no external dependency (todo.md 6.1's
- * zero-dependency option). Two independent limits: per-user on prompt submission endpoints,
+ * Simple in-memory fixed-window rate limiter — no external dependency.
+ * Two independent limits: per-user on prompt submission endpoints,
  * per-IP on unauthenticated auth endpoints (which have no user to key on yet).
  */
 @Component
@@ -32,7 +32,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
     private static final long WINDOW_MS = 60_000L;
 
-    // 42.1: a window untouched for this long cannot affect any live limit (the window itself
+    // a window untouched for this long cannot affect any live limit (the window itself
     // is one minute), so it is safe to forget. Swept every SWEEP_INTERVAL_REQUESTS writes so
     // the cost is amortised to nothing on a normal request.
     private static final long STALE_AFTER_MS = WINDOW_MS * 10;
@@ -112,7 +112,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
     }
 
-    // 42.1: the map gained one permanent entry per distinct prompt:<username>/auth:<ip> key
+    // the map gained one permanent entry per distinct prompt:<username>/auth:<ip> key
     // and never released one - expired windows were reset in place, never removed - so it grew
     // without bound in principle. Swept opportunistically on write rather than by a scheduled
     // job or a bucket library, which would be exactly the over-engineering this project avoids.

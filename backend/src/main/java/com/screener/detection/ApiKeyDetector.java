@@ -28,7 +28,7 @@ public class ApiKeyDetector implements Detector {
     // Minimum candidate length lowered from 20 to 16: 20 excluded real-shaped short keys
     // (e.g. "sk-12345abcdefghijk", 19 chars) that still clear the entropy check below.
     //
-    // V1.2 Phase 50.3 widened pass 1 in three ways, all of them plain misses before:
+    // Widened pass 1 in three ways, all of them plain misses before:
     //   * "[\s_-]?" instead of "[_-]?" - "api key" written as TWO WORDS matched nothing at
     //     all, which is how a person writes it in a sentence.
     //   * "secret key" and "access key" added as keywords.
@@ -39,8 +39,8 @@ public class ApiKeyDetector implements Detector {
     // PasswordDetector, whose pass 2 was the weak link and had to be rebuilt first.)
     // "private key" is deliberately NOT a keyword - PrivateKeyDetector owns that entity
     // type, and adding it here would raise a second, competing finding for one secret.
-    // V1.2 Phase 54 replaced the adjacency rule with a proximity window, for the same
-    // reason PasswordDetector was rebuilt in Phase 50. The old pattern allowed an optional
+    // Replaced the adjacency rule with a proximity window, for the same
+    // reason PasswordDetector was rebuilt. The old pattern allowed an optional
     // separator and an optional "is"/"was", then demanded the value IMMEDIATELY - so
     // "the API key is set to <key>" failed on the two extra words, and a value stated
     // before its keyword ("expects <key> in its credential slot") was unreachable in
@@ -50,7 +50,7 @@ public class ApiKeyDetector implements Detector {
     // Widening pass 1 this far is safe HERE specifically because pass 2 is strong and
     // unchanged: the token must be 16+ characters drawn only from [A-Za-z0-9_-.] AND clear
     // Shannon entropy 3.5. That is what lets the net be cast this wide - the same argument
-    // Phase 50 made, and the reason PasswordDetector's pass 2 had to be fixed first.
+    // that rebuild made, and the reason PasswordDetector's pass 2 had to be fixed first.
     private static final Pattern KEYWORD_PATTERN = Pattern.compile(
             "(?i)(?<![A-Za-z0-9])(?:"
                     + "(?:api|secret|access|auth)[\\s_-]?keys?"
@@ -90,7 +90,7 @@ public class ApiKeyDetector implements Detector {
     private static final Pattern LEADING_NOISE = Pattern.compile("^[(\"'`\\[=:]+");
     private static final Pattern TRAILING_NOISE = Pattern.compile("[)\"'`\\].,;:!?]+$");
 
-    // V1.2 Phase 52.4. A pasted key very often arrives with NO keyword near it at all -
+    // A pasted key very often arrives with NO keyword near it at all -
     // somebody copies it straight out of a config file or a provider's dashboard. These are
     // the well-known issuer prefixes, which are themselves strong evidence: nothing else
     // looks like "sk-" or "ghp_" followed by twenty-odd high-entropy characters.

@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Precision and recall for the post-54 widening that let {@code ApiKeyDetector} see base64
- * key material containing {@code '/'} or {@code '+'} (see docs/NOTE.md).
+ * Precision and recall for the widening that let {@code ApiKeyDetector} see base64
+ * key material containing {@code '/'} or {@code '+'}.
  *
  * <p>Both corpora are committed rather than deleted after use. The 12,000-row benign corpus
- * that validated earlier detector changes was thrown away once Phase 53 finished, which
+ * that validated earlier detector changes was thrown away once that audit finished, which
  * later left no safe way to confirm a PhoneDetector widening - that widening had to be
  * abandoned for lack of evidence. This test exists so the same thing does not happen to the
  * next person who wants to touch this charset.

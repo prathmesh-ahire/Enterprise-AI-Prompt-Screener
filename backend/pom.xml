@@ -68,7 +68,7 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<!-- Phase 34.1 - CI's "test" profile (application-test.yml) points at this
+			<!-- CI's "test" profile (application-test.yml) points at this
 			     instead of MySQL, so the CI workflow doesn't need a MySQL service container. -->
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>

@@ -6,11 +6,11 @@ import com.screener.model.OverrideRule;
 import java.util.List;
 
 /**
- * Output of {@link PolicyDecisionEngine} (todo.md 11.2.4). {@code explanation} is the
+ * Output of {@link PolicyDecisionEngine}. {@code explanation} is the
  * plain-English, safe-to-show text for the band; {@code safeAction} is a short
  * human-readable statement of what happens to the prompt next.
  *
- * <p>V2 Phase 55.2 added {@code scoreBand} - the band the score alone gives, before any
+ * <p>Added {@code scoreBand} - the band the score alone gives, before any
  * override - and {@code appliedOverrides}, the rules that actually raised the decision
  * above it, in rule order. A rule whose condition matched but found the decision already
  * at or above its floor is not in the list.

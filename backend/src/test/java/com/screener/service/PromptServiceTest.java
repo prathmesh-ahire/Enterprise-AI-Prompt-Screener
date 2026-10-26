@@ -84,7 +84,7 @@ class PromptServiceTest {
                 riskSubScoreCalculator, riskScorer, policyDecisionEngine, maskingService,
                 aiGatewayService, responseSafetyChecker, auditService);
 
-        // 43.3/43.4: the pipeline now reads all of system_config once and resolves the caller's
+        // the pipeline now reads all of system_config once and resolves the caller's
         // role with a single join, then hands those values to the engines - so these stubs
         // mirror the snapshot-taking call rather than the old per-value lookups.
         lenient().when(systemConfigRepository.findAll()).thenReturn(List.of());
@@ -142,7 +142,7 @@ class PromptServiceTest {
         verify(aiGatewayService, never()).send(any());
     }
 
-    // 36.5: full-pipeline test with all detectors/engines mocked, verifying the entity
+    // full-pipeline test with all detectors/engines mocked, verifying the entity
     // actually persisted to screeningDecisionRepository (not just the returned DTO)
     // matches what PolicyDecisionEngine decided.
     @Test
@@ -165,7 +165,7 @@ class PromptServiceTest {
         assertEquals(PromptService.DEFAULT_POLICY_VERSION, saved.getPolicyVersion());
     }
 
-    // V2 55.7: the breakdown is stored from the sub-scores and the DecisionResult the
+    // the breakdown is stored from the sub-scores and the DecisionResult the
     // pipeline already had, and the same values come back on the response.
     @Test
     void fullPipelinePersistsAndReturnsTheScoreBreakdown() {

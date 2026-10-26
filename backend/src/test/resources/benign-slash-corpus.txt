@@ -1,4 +1,4 @@
-# Benign corpus for the post-54 ApiKeyDetector base64 widening (docs/NOTE.md).
+# Benign corpus for the ApiKeyDetector base64 widening.
 # Every line is harmless and must produce ZERO API_KEY findings. Lines deliberately
 # pair an ApiKeyDetector keyword with a '/'- or '+'-bearing token, because that is the
 # only combination the widening can fire on. Kept in the repo on purpose: the 12,000-row

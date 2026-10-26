@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-// todo.md Phase 46.2, on the design's app type (56A.7): the page's one h1 (28px) and a
+// The page's one h1 (28px) and a
 // lead line capped at the reading width. The description is not decoration: several
 // pages show figures over windows that are easy to misread, and one line of context at
 // the top is the cheapest way to prevent that.
