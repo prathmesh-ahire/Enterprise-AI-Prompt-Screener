@@ -3,7 +3,7 @@
    --------------------------------------------------------------------------
    Copied by script from the design's token file (names and values exactly as the
    design gives them), plus a --text-* variable per type style, used as
-   `font: var(--text-<style>)`, and --space-hero-top. The design is the single
+   `font: var(--text-<style>)`, --space-hero-top and --bends-strength-low. The design is the single
    source of truth for the look; nothing here may be rounded or renamed.
 
    Dark only: there is no light theme and no theme toggle, so
@@ -62,6 +62,7 @@
   --bends-1: var(--brand-strong);
   --bends-2: #8A5CFF;
   --bends-3: #FF9FFC;
+  --bends-strength-low: 30%;   /* the bands everywhere except behind the Home hero */
   --corner-accent: #D4EDF9;
   --shimmer-mid: #E9E2F4;
   --shimmer-peak: #FFFFFF;

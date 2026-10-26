@@ -11,21 +11,25 @@ import { LiveSourceCaption } from './SourceCaption'
 // mistaken for a bug during manual testing ("the card says 3
 // blocked, the database says 30"). V1's period pill was only a label, so the caption
 // replaces it.
-interface ChartCardProps {
+//
+// A chart on a public page shows recorded figures, not live ones, so it passes its own
+// `caption` (a SourceCaption naming the source and the day it was recorded) instead of a
+// window and a load time. It is the same Card either way: solid in the app, glass on a
+// public page.
+type ChartCardProps = {
   title: string
   subtitle?: string
-  window: string
-  updatedAt: Date | null
   children: ReactNode
-}
+} & ({ window: string; updatedAt: Date | null } | { caption: ReactNode })
 
-export function ChartCard({ title, subtitle, window, updatedAt, children }: ChartCardProps) {
+export function ChartCard(props: ChartCardProps) {
+  const { title, subtitle, children } = props
   return (
     <section className="ps-card chart-card">
       <h3 className="ps-card__title">{title}</h3>
       {subtitle && <p className="ps-card__text">{subtitle}</p>}
       <div className="chart-body">{children}</div>
-      <LiveSourceCaption window={window} updatedAt={updatedAt} />
+      {'caption' in props ? props.caption : <LiveSourceCaption window={props.window} updatedAt={props.updatedAt} />}
     </section>
   )
 }

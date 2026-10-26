@@ -12,7 +12,7 @@ import '@fontsource/inter/latin-700.css'
 import '@fontsource/source-sans-3/latin-400.css'
 import '@fontsource/source-sans-3/latin-600.css'
 import './index.css'
-// 45: the component library. Imported after index.css on purpose - index.css owns the
+// The component library. Imported after index.css on purpose - index.css owns the
 // tokens and base typography, this owns every component's appearance, and later-wins
 // ordering means a component rule never has to fight the base with extra specificity.
 import './styles/components.css'

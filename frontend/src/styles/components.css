@@ -405,7 +405,8 @@
 }
 
 /* --- Text link ------------------------------------------------------------ */
-.ps-link {
+.ps-link,
+.ps-prose a {
   color: var(--link);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -414,11 +415,13 @@
   transition: color var(--duration-fast) var(--ease-out);
 }
 
-.ps-link:visited {
+.ps-link:visited,
+.ps-prose a:visited {
   color: var(--link);
 }
 
-.ps-link:hover {
+.ps-link:hover,
+.ps-prose a:hover {
   color: var(--link-hover);
   text-decoration-color: currentColor;
   text-decoration-thickness: 2px;
@@ -1084,6 +1087,7 @@
 .ps-section-head__title {
   font: var(--text-h2);
   color: var(--text-primary);
+  margin: 0;
 }
 
 .ps-section-head__text {
@@ -1115,6 +1119,18 @@
 .ps-source {
   font: var(--text-caption);
   color: var(--text-muted);
+}
+
+/* A linked source is text-secondary with a thin underline. */
+.ps-source a {
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+}
+
+.ps-source a:hover {
+  color: var(--link-hover);
 }
 
 /* --- Page messages -------------------------------------------- */
@@ -1463,7 +1479,9 @@
 }
 
 .ps-site-head {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 40;
   height: var(--height-nav);
   display: flex;
   align-items: center;
@@ -1575,4 +1593,755 @@
   max-width: var(--width-content);
   margin: 0 auto;
   padding: var(--space-12) var(--space-8) var(--space-16);
+}
+
+/* ==========================================================================
+   PUBLIC COMPONENTS
+   The showcase side of the shared components, ported from the design export's
+   bundle.css under its ps- names. Public-only effects (glass, glow, the hero, the
+   moving background, the corner button) live under .ps-public or in classes that only
+   public pages use; .ps-app switches them off. Phone media queries, the phone menu and
+   stacking rules are not ported (desktop only).
+   ========================================================================== */
+
+/* Reading width for long text. Links inside it take the link style. */
+.ps-prose {
+  max-width: var(--width-reading);
+  font: var(--text-lead);
+  color: var(--text-primary);
+}
+
+.ps-prose p + p {
+  margin-top: var(--space-4);
+}
+
+/* A figure: a picture or diagram with its visible caption underneath. */
+.ps-figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Colours for a decision's name in text. */
+.c-allow { color: var(--allow); }
+.c-mask { color: var(--mask); }
+.c-confirm { color: var(--confirm); }
+.c-review { color: var(--review); }
+.c-block { color: var(--block); }
+
+/* --- Glass cards ----------------------------------------------------------------- */
+.ps-public .ps-card,
+.ps-public .ps-step {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition:
+    box-shadow var(--duration-card) var(--ease-effect),
+    border-color var(--duration-card) var(--ease-effect);
+}
+
+.ps-public .ps-card {
+  padding: var(--space-7);
+}
+
+.ps-public .ps-card:hover,
+.ps-public .ps-step:hover {
+  box-shadow: var(--glow-card-hover);
+  border-color: var(--glass-border-hover);
+}
+
+/* --- Numbered step card ---------------------------------------------------------- */
+.ps-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 232px;
+  padding: var(--space-7);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-subtle);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+.ps-step__num {
+  font: var(--text-display-step);
+  letter-spacing: -0.03em;
+  color: var(--brand-faint);
+  font-variant-numeric: tabular-nums;
+  padding-bottom: var(--space-10);
+}
+
+.ps-step__title {
+  font: var(--text-h3);
+  margin: 0;
+}
+
+.ps-step__text {
+  font: var(--text-body);
+  color: var(--text-secondary);
+}
+
+.ps-step--active {
+  background: var(--gradient-card-glow), var(--surface-card);
+  border-color: color-mix(in srgb, var(--brand-base) 45%, transparent);
+  box-shadow: var(--glow-card);
+}
+
+.ps-public .ps-step--active {
+  background: var(--gradient-card-glow), var(--glass-fill);
+  box-shadow: var(--glow-card);
+}
+
+.ps-app .ps-step--active {
+  background: var(--surface-selected);
+  box-shadow: none;
+  border-color: var(--line-strong);
+}
+
+/* --- Metric tile (public): the figure on a rule, with no box --------------------------- */
+.ps-public .ps-metric {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line-strong);
+  border-radius: 0;
+  padding: var(--space-5) 0 0;
+}
+
+.ps-public .ps-metric__value {
+  font: var(--text-display-metric);
+  letter-spacing: -0.03em;
+}
+
+.ps-metric .ps-source {
+  margin-top: var(--space-3);
+}
+
+/* --- Section header (public): display size with a short glow line ------------------------ */
+.ps-section-head {
+  scroll-margin-top: calc(var(--height-nav) + var(--space-6));
+}
+
+.ps-public .ps-section-head {
+  gap: var(--space-4);
+}
+
+.ps-public .ps-section-head__title {
+  font: var(--text-display-section);
+  letter-spacing: -0.02em;
+}
+
+.ps-public .ps-section-head::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 2px;
+  margin-top: var(--space-2);
+  background: var(--gradient-glow-line);
+}
+
+/* --- Callout -------------------------------------------------------------------------- */
+.ps-callout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  border: 1px solid var(--line-strong);
+  max-width: var(--width-reading);
+}
+
+.ps-callout__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ps-callout__body {
+  font: var(--text-body);
+  color: var(--text-primary);
+}
+
+.ps-callout--note .ps-callout__kind {
+  color: var(--brand-soft);
+}
+
+.ps-callout--caution {
+  border-color: color-mix(in srgb, var(--sev-high) 45%, transparent);
+}
+
+.ps-callout--caution .ps-callout__kind {
+  color: var(--sev-high);
+}
+
+.ps-callout--honesty {
+  background: var(--surface-raised);
+  border-style: dashed;
+  border-color: var(--line-control);
+}
+
+.ps-callout--honesty .ps-callout__kind {
+  color: var(--text-secondary);
+}
+
+/* --- Five-band strip (public only) ----------------------------------------------------- */
+.ps-bands {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* The column widths are set inline from the ranges, so a segment is as wide as its band. */
+.ps-bands__bar,
+.ps-bands__labels {
+  display: grid;
+  gap: 2px;
+}
+
+.ps-bands__bar {
+  position: relative;
+  height: 12px;
+}
+
+.ps-bands__seg {
+  border-radius: 2px;
+}
+
+.ps-bands__seg:first-child {
+  border-radius: var(--radius-xs) 2px 2px var(--radius-xs);
+}
+
+.ps-bands__seg:last-child {
+  border-radius: 2px var(--radius-xs) var(--radius-xs) 2px;
+}
+
+.ps-bands__lab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ps-bands__name {
+  font: var(--text-tag);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ps-bands__range {
+  font: var(--text-caption);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-bands__marker {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text-primary);
+  border-radius: 1px;
+  box-shadow: 0 0 0 2px var(--surface-page);
+}
+
+.ps-bands--marked {
+  padding-top: var(--space-2);
+}
+
+/* --- Score breakdown ---------------------------------------------------------------- */
+.ps-breakdown {
+  display: flex;
+  flex-direction: column;
+  font: var(--text-body-sm);
+}
+
+.ps-breakdown__row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.2fr) minmax(80px, 2fr) 56px 64px 56px;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line-subtle);
+}
+
+.ps-breakdown__row--head {
+  border-top: 0;
+  padding-top: 0;
+  font: var(--text-label);
+  color: var(--text-muted);
+}
+
+.ps-breakdown__row--total {
+  border-top: 1px solid var(--line-strong);
+  font-weight: 600;
+}
+
+.ps-breakdown__bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-hover);
+  position: relative;
+  overflow: hidden;
+}
+
+.ps-breakdown__bar > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--brand-base);
+  border-radius: var(--radius-pill);
+}
+
+.ps-breakdown .ps-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-breakdown .ps-muted {
+  color: var(--text-muted);
+}
+
+/* --- Diagram -------------------------------------------------------------------------- */
+.ps-diagram {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.ps-node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  min-width: 136px;
+  border-radius: var(--radius-lg);
+  background: var(--diagram-node);
+  border: 1px solid var(--diagram-node-border);
+  color: var(--diagram-label);
+}
+
+.ps-node__title {
+  font: var(--text-node-title);
+}
+
+.ps-node__meta {
+  font: var(--text-caption);
+  color: var(--text-muted);
+}
+
+.ps-node--group {
+  border-style: dashed;
+}
+
+.ps-edge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--space-1);
+  color: var(--diagram-edge);
+}
+
+.ps-edge svg {
+  display: block;
+  width: 56px;
+  height: 12px;
+}
+
+.ps-edge__label {
+  font: var(--text-edge-label);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* A diagram bigger than one row, drawn as SVG from the same tokens. */
+.ps-svg-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ps-svg-node {
+  fill: var(--diagram-node);
+  stroke: var(--diagram-node-border);
+  stroke-width: 1;
+  rx: var(--radius-lg);
+}
+
+.ps-svg-node--group {
+  stroke-dasharray: 4 4;
+}
+
+.ps-svg-node__title {
+  font: var(--text-node-title);
+  fill: var(--diagram-label);
+}
+
+.ps-svg-node__meta {
+  font: var(--text-caption);
+  fill: var(--text-muted);
+}
+
+.ps-svg-edge {
+  fill: none;
+  stroke: var(--diagram-edge);
+  stroke-width: 1.5;
+}
+
+.ps-svg-edge--dashed {
+  stroke-dasharray: 4 4;
+}
+
+.ps-svg-arrow {
+  fill: var(--diagram-edge);
+}
+
+.ps-svg-edge-label {
+  font: var(--text-edge-label);
+  fill: var(--text-muted);
+}
+
+/* --- Table of contents ---------------------------------------------------------------- */
+/* The list on the left, the content column beside it. The list's width is built from the
+   spacing grid (the design gives none). */
+.ps-toc-layout {
+  display: grid;
+  grid-template-columns: calc(var(--space-16) * 3) minmax(0, 1fr);
+  gap: var(--space-12);
+  align-items: start;
+}
+
+.ps-toc {
+  position: sticky;
+  top: calc(var(--height-nav) + var(--space-6));
+}
+
+.ps-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ps-toc a {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid transparent;
+  font: var(--text-nav);
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.ps-toc a:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.ps-toc a[aria-current='location'] {
+  color: var(--text-primary);
+  border-left-color: var(--brand-base);
+}
+
+/* --- Filters ----------------------------------------------------------------------- */
+.ps-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ps-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--height-control-sm);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-control);
+  background: transparent;
+  color: var(--text-secondary);
+  font: var(--text-button-sm);
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.ps-pill:hover {
+  background: var(--surface-hover);
+}
+
+.ps-pill[aria-pressed='true'] {
+  background: var(--brand-strong);
+  border-color: var(--brand-strong);
+  color: var(--on-brand);
+}
+
+/* A decision's colour does not reach 4.5:1 on the indigo fill, so a DecisionBadge held in a
+   selected pill sits on the page surface, where every decision colour does. */
+.ps-pill[aria-pressed='true'] .ps-badge {
+  background: var(--surface-page);
+}
+
+/* --- Tabs ------------------------------------------------------------------------------ */
+.ps-tabs__list {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.ps-tab {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: var(--text-nav);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.ps-tab:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.ps-tab[aria-selected='true'] {
+  color: var(--text-primary);
+  box-shadow: inset 0 -2px 0 var(--brand-base);
+}
+
+.ps-tabs__panel {
+  padding-top: var(--space-6);
+}
+
+/* --- Corner button (public secondary action) -------------------------------------------- */
+.ps-btn--corner {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 0 var(--space-6);
+  color: var(--on-brand);
+  background: transparent;
+  border: 0;
+  transition: transform var(--duration-card) var(--ease-effect);
+}
+
+.ps-btn--corner .ps-btn__label {
+  position: relative;
+  z-index: 2;
+}
+
+.ps-btn__shine {
+  position: absolute;
+  left: -75%;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  z-index: 1;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--shimmer-peak) 20%, transparent);
+  transform: rotate(12deg);
+  filter: blur(8px);
+  transition: left var(--duration-shine) var(--ease-effect);
+}
+
+.ps-btn--corner:hover .ps-btn__shine {
+  left: 125%;
+}
+
+.ps-btn__c {
+  position: absolute;
+  display: block;
+  width: 50%;
+  pointer-events: none;
+  border: 0 solid var(--corner-accent);
+  transition: height var(--duration-card) var(--ease-effect);
+}
+
+.ps-btn__c--tl { top: 0; left: 0; height: 20%; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: var(--radius-md); }
+.ps-btn__c--tr { top: 0; right: 0; height: 60%; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: var(--radius-md); }
+.ps-btn__c--bl { bottom: 0; left: 0; height: 60%; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: var(--radius-md); }
+.ps-btn__c--br { bottom: 0; right: 0; height: 20%; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: var(--radius-md); }
+
+.ps-btn--corner:hover .ps-btn__c--tr,
+.ps-btn--corner:hover .ps-btn__c--bl {
+  height: 90%;
+}
+
+/* --- Hero with glow ---------------------------------------------------------------------- */
+.ps-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: var(--space-hero-top) var(--space-6) var(--space-16);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.ps-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--gradient-hero-scrim);
+}
+
+.ps-hero__title {
+  font: var(--text-display-hero);
+  letter-spacing: -0.03em;
+  max-width: 18ch;
+  margin: 0;
+  text-wrap: balance;
+  color: var(--text-secondary);
+}
+
+.ps-shimmer {
+  display: inline-block;
+  color: var(--text-secondary);
+  background-image: var(--gradient-shimmer);
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  background-position: 8% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ps-shimmer-sweep var(--duration-shimmer) var(--ease-effect) infinite;
+}
+
+@keyframes ps-shimmer-sweep {
+  from {
+    background-position: 8% 0;
+  }
+  to {
+    background-position: 92% 0;
+  }
+}
+
+.ps-hero__lead {
+  font: var(--text-lead);
+  color: var(--text-secondary);
+  max-width: 52ch;
+}
+
+.ps-hero__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+/* --- Colour-bends background (public pages only) ------------------------------------------ */
+/* The zone is one grid cell holding both the background and the page content, so the sticky
+   one-screen-tall background pins while the page scrolls over it and ends exactly where the
+   zone ends.
+
+   Strength: the bands are at full strength only behind the Home page's hero. Everywhere else -
+   Home below its hero, and every other page from the top - they show at
+   --bends-strength-low, so text over a band's bright core stays readable. */
+.ps-bends-zone {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+}
+
+.ps-bends-bg {
+  grid-area: 1 / 1;
+  align-self: start;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--bends-strength-low);
+}
+
+/* Home: full strength, with everything after the hero on a veil of the page colour that lets
+   only --bends-strength-low of the bands through. The veil's top edge fades in over the hero's
+   empty bottom padding, so there is no hard line. */
+.ps-bends-zone--home .ps-bends-bg {
+  opacity: 1;
+}
+
+.ps-bends-veil {
+  --veil: color-mix(in srgb, var(--surface-page) calc(100% - var(--bends-strength-low)), transparent);
+  position: relative;
+  background: var(--veil);
+}
+
+.ps-bends-veil::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--space-16);
+  background: linear-gradient(to bottom, transparent, var(--veil));
+  pointer-events: none;
+}
+
+.ps-bends-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ps-bends-content {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+/* The app is calm: no hero scrim, no background. */
+.ps-app .ps-hero::before,
+.ps-app .ps-bends-bg {
+  display: none;
+}
+
+/* Public animations have a still version: the headline stops on plain text-secondary and the
+   corner button's streak is hidden. The background draws one still frame (colorBends.ts), at
+   the same strength as with motion. */
+@media (prefers-reduced-motion: reduce) {
+  .ps-shimmer {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  .ps-btn__shine {
+    display: none;
+  }
+}
+
+/* --- Captions over the moving background -------------------------------------------------- */
+/* text-muted fails WCAG AA where a bright band passes behind a caption, so on public pages
+   every caption-level text sits in text-secondary instead. */
+.ps-public .ps-source,
+.ps-public .ps-bands__range,
+.ps-public .ps-edge__label,
+.ps-public .ps-breakdown__row--head,
+.ps-public .ps-breakdown .ps-muted {
+  color: var(--text-secondary);
+}
+
+.ps-public .ps-svg-edge-label {
+  fill: var(--text-secondary);
 }
