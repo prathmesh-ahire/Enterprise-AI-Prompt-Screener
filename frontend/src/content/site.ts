@@ -85,6 +85,8 @@ export const APP_PAGE_LABELS: Record<string, string> = {
   '/admin': 'Admin dashboard',
   '/admin/policy': 'Policy',
   '/admin/models': 'Models',
+  '/admin/audit': 'Audit log',
+  '/admin/reports': 'Reports',
 }
 
 // A figure the site shows. "measured" means it was re-run when the site was built;
@@ -112,6 +114,10 @@ export const FIGURES = {
   // Synthetic dataset of 20 prompts the project wrote itself.
   syntheticPassed: {
     value: 20, label: 'of 20 synthetic prompts screened exactly as expected',
+    source: 'SyntheticDatasetEvaluationTest, test-prompts.json', date: MEASURED, kind: 'measured',
+  },
+  syntheticFound: {
+    value: 13, label: 'expected sensitive items found, with none missed and no false alarms',
     source: 'SyntheticDatasetEvaluationTest, test-prompts.json', date: MEASURED, kind: 'measured',
   },
   syntheticPrecision: {
@@ -186,29 +192,42 @@ export const FIGURES = {
   },
 } as const satisfies Record<string, Figure>
 
-// Public synthetic PII dataset, English file, with values localised to this project's scope.
-// Recorded after the audit's own fixes; a later fix to the password detector came afterwards.
-export const PUBLIC_DATASET_AUDIT: readonly Figure[] = [
-  { value: '100.00% (4033/4033)', label: 'Email address', source: 'Public dataset audit, English file of 43,501 rows', date: '2026-08-16', kind: 'recorded' },
-  { value: '99.92% (2406/2408)', label: 'Phone number', source: 'Public dataset audit, English file of 43,501 rows', date: '2026-08-16', kind: 'recorded' },
-  { value: '99.61% (2550/2560)', label: 'Payment card', source: 'Public dataset audit, English file of 43,501 rows', date: '2026-08-16', kind: 'recorded' },
-  { value: '57.09% (1485/2601)', label: 'Password', source: 'Public dataset audit, English file of 43,501 rows', date: '2026-08-16', kind: 'recorded' },
-  { value: '89.42%', label: 'Prompts with every item detected', source: 'Public dataset audit, English file of 43,501 rows', date: '2026-08-16', kind: 'recorded' },
-  { value: '99.64% (of 12,000)', label: 'Harmless rows left clean', source: 'Public dataset audit, 12,000 harmless rows', date: '2026-08-16', kind: 'recorded' },
-]
+// Whole-set results of the two outside audits. The per-entity results live in evaluation.ts,
+// as counts, so a percentage is always calculated from them. Both were recorded before the
+// later fixes noted on the Evaluation page.
+export const PUBLIC_DATASET_SUMMARY = {
+  fullyDetected: {
+    value: '89.42%', label: 'of prompts had every in-scope item detected',
+    source: 'Public dataset audit, English file of 43,501 rows', date: '2026-08-16', kind: 'recorded',
+  },
+  harmlessClean: {
+    value: '99.64%', label: 'of 12,000 harmless rows left clean',
+    source: 'Public dataset audit, 12,000 harmless rows', date: '2026-08-16', kind: 'recorded',
+  },
+} as const satisfies Record<string, Figure>
 
-// A corpus commissioned for this project. The API-key figure was recorded before the
-// 2026-10-09 fix for base64-style keys.
-export const COMMISSIONED_CORPUS_AUDIT: readonly Figure[] = [
-  { value: '100% (199/199)', label: 'Aadhaar number', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-  { value: '100% (217/217)', label: 'PAN number', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-  { value: '100% (140/140)', label: 'Confidential term', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-  { value: '100% (17/17)', label: 'Private key', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-  { value: '85.35% (169/198)', label: 'API key', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-  { value: '95.40%', label: 'Prompts with every item detected', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-  { value: '0 of 100', label: 'False positives on harmless rows', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-  { value: '1,500 delivered, 731 usable', label: 'Rows after removing 769 exact duplicates (51%)', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
-]
+export const COMMISSIONED_SUMMARY = {
+  fullyDetected: {
+    value: '95.40%', label: 'of prompts had every item detected',
+    source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded',
+  },
+  falsePositives: {
+    value: '0 of 100', label: 'harmless rows flagged',
+    source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded',
+  },
+  rowsDelivered: {
+    value: 1500, label: 'rows delivered',
+    source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded',
+  },
+  duplicates: {
+    value: 769, label: 'of them exact duplicates, 51%',
+    source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded',
+  },
+  usable: {
+    value: 731, label: 'usable rows after removing the duplicates',
+    source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded',
+  },
+} as const satisfies Record<string, Figure>
 
 // When repeated attempts count as a signal: this many blocked or reviewed prompts from one
 // user inside this many hours (read from RiskAnalysisEngine).

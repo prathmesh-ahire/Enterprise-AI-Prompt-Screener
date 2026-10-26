@@ -93,3 +93,17 @@ export function bandRanges(thresholds: PipelineSnapshot['thresholds'] = PIPELINE
   const edges = [0, thresholds.mask, thresholds.confirm, thresholds.review, thresholds.block, 101]
   return DECISIONS.map((decision, i) => ({ decision, from: edges[i], to: edges[i + 1] - 1 }))
 }
+
+const scoreFormat = new Intl.NumberFormat('en', { maximumFractionDigits: 2 })
+const ruleByName = Object.fromEntries(PIPELINE.overrideRules.map((r) => [r.rule, r]))
+
+// One sentence on how a decision came about: the band the score alone gave, and any rule
+// that raised it.
+export function decisionSentence(example: SnapshotExample): string {
+  const score = scoreFormat.format(example.riskScore)
+  if (example.appliedOverrides.length === 0) {
+    return `The score of ${score} is in the ${example.scoreBand} band, and no rule changes it.`
+  }
+  const raised = example.appliedOverrides.map((name) => ruleByName[name].description.replace(/\.$/, '')).join('; ')
+  return `The score of ${score} alone would give ${example.scoreBand}. ${raised}: ${example.decision}.`
+}

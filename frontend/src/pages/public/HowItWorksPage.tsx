@@ -14,7 +14,7 @@ import { SvgDiagram } from '../../components/site/Diagram'
 import { Section } from '../../components/site/Section'
 import { StepCard } from '../../components/site/StepCard'
 import {
-  bandRanges, detectorExample, PIPELINE, SNAPSHOT_SOURCE, snapshotExample, type SnapshotExample,
+  bandRanges, decisionSentence, detectorExample, PIPELINE, SNAPSHOT_SOURCE, snapshotExample, type SnapshotExample,
 } from '../../content/snapshot'
 
 const TOC = [
@@ -64,7 +64,6 @@ const weightFormat = new Intl.NumberFormat('en', { minimumFractionDigits: 2, max
 
 const rules = PIPELINE.subScoreRules
 const weights = PIPELINE.formulaWeights
-const ruleByName = Object.fromEntries(PIPELINE.overrideRules.map((r) => [r.rule, r]))
 
 // The entity types whose per-finding weight equals `weight`, as readable names.
 const typesWithSeverity = (weight: number) => Object.entries(rules.severityPerFinding)
@@ -74,17 +73,6 @@ const secretWeights = Object.entries(rules.secretCriticality).filter(([, w]) => 
 
 const ranges = bandRanges()
 const { thresholds } = PIPELINE
-
-// One sentence on how the decision came about: the band the score alone gave, and any rule
-// that raised it.
-function outcome(example: SnapshotExample): string {
-  const score = number.format(example.riskScore)
-  if (example.appliedOverrides.length === 0) {
-    return `The score of ${score} is in the ${example.scoreBand} band, and no rule changes it.`
-  }
-  const raised = example.appliedOverrides.map((name) => ruleByName[name].description.replace(/\.$/, '')).join('; ')
-  return `The score of ${score} alone would give ${example.scoreBand}. ${raised}: ${example.decision}.`
-}
 
 function WorkedExample({ title, example }: { title: string; example: SnapshotExample }) {
   return (
@@ -98,7 +86,7 @@ function WorkedExample({ title, example }: { title: string; example: SnapshotExa
         decision={example.decision}
         caption={`Score breakdown: ${title.toLowerCase()}`}
       />
-      <p className="ps-card__text">{outcome(example)}</p>
+      <p className="ps-card__text">{decisionSentence(example)}</p>
     </article>
   )
 }
