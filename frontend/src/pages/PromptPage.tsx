@@ -1,10 +1,13 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
 import { Button } from '../components/Button'
 import { EntityChips, entityLabel } from '../components/EntityChips'
 import { PageHeader } from '../components/PageHeader'
 import { RiskScoreBar } from '../components/RiskScoreBar'
+import { BreakdownPanel } from '../components/BreakdownPanel'
+import { exampleTitle, PROMPT_EXAMPLES } from '../content/examples'
 import { Icon, type IconName } from '../components/Icon'
 import { PageMessage } from '../components/PageMessage'
 import { FieldError } from '../components/FieldError'
@@ -110,6 +113,8 @@ export function PromptPage() {
 
       {error && <PageMessage kind="error">{error}</PageMessage>}
 
+      <div className="prompt-layout">
+      <div className="ps-stack">
       <form className="ps-stack" onSubmit={handleSubmit}>
         <div className="ps-field">
           <div className="prompt-field-head">
@@ -130,6 +135,23 @@ export function PromptPage() {
             id="prompt-error"
             message={tooLong ? `Shorten your prompt to ${MAX_LENGTH} characters or fewer.` : undefined}
           />
+        </div>
+
+        {/* One click fills the box and nothing more: the prompt is only sent from the button below. */}
+        <div className="ps-field">
+          <span className="ps-label" id="prompt-examples-label">Try an example (synthetic)</span>
+          <div className="ps-chips" role="group" aria-labelledby="prompt-examples-label">
+            {PROMPT_EXAMPLES.map((example) => (
+              <button
+                key={example.id}
+                type="button"
+                className="ps-chip ps-chip--example"
+                onClick={() => { setError(null); setText(example.text) }}
+              >
+                {exampleTitle(example)}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -202,18 +224,17 @@ export function PromptPage() {
             )}
           </div>
 
-          {/* the score and what was detected, for every still-pending state. */}
-          {(awaitingConfirm || pendingReview) && (
-            <div className="ps-card">
-              <RiskScoreBar score={result.riskScore} band={result.scoreBreakdown?.scoreBand} decision={result.decision} />
-              {result.entityTypes.length > 0 && (
-                <div className="ps-field">
-                  <p className="ps-detail__k">Detected items</p>
-                  <EntityChips entityTypes={result.entityTypes} />
-                </div>
-              )}
-            </div>
-          )}
+          {/* the score, what was detected and how the score was made, for every decision. */}
+          <div className="ps-card ps-stack">
+            <RiskScoreBar score={result.riskScore} band={result.scoreBreakdown?.scoreBand} decision={result.decision} />
+            {result.entityTypes.length > 0 && (
+              <div className="ps-field">
+                <p className="ps-detail__k">Detected items</p>
+                <EntityChips entityTypes={result.entityTypes} />
+              </div>
+            )}
+            <BreakdownPanel breakdown={result.scoreBreakdown} decision={result.decision} riskScore={result.riskScore} own />
+          </div>
 
           {result.status === 'COMPLETED' && (
             <div className="ps-card">
@@ -227,6 +248,20 @@ export function PromptPage() {
           )}
         </section>
       )}
+      </div>
+
+      <aside className="ps-card prompt-aside" aria-label="About screening">
+        <h2 className="ps-card__title">Before you send</h2>
+        <p className="ps-card__text">
+          Every prompt is checked on this machine before it can reach the AI model. Sensitive items are replaced by placeholders
+          that name their type, and attempts to override the model are held for a reviewer or blocked.
+        </p>
+        <p className="ps-card__text">
+          The score and its breakdown appear under the decision, so you can see why it came out that way.
+        </p>
+        <Link className="ps-link" to="/detectors">See what is detected</Link>
+      </aside>
+      </div>
     </div>
   )
 }

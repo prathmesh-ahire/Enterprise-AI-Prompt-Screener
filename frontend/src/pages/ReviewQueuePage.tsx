@@ -8,6 +8,9 @@ import { RiskScoreBar } from '../components/RiskScoreBar'
 import { Icon } from '../components/Icon'
 import { PageMessage } from '../components/PageMessage'
 import { Button } from '../components/Button'
+import { BreakdownPanel } from '../components/BreakdownPanel'
+import { InsightsStrip } from '../components/InsightsStrip'
+import { SIGNALS } from '../content/detectors'
 import type { ScoreBreakdown } from '../api/types'
 
 interface QueueItem {
@@ -125,12 +128,16 @@ export function ReviewQueuePage() {
       {error && <PageMessage kind="error">{error}</PageMessage>}
       {successMessage && <PageMessage kind="success">{successMessage}</PageMessage>}
 
+      <div className="review-strip">
+        <InsightsStrip />
+      </div>
+
       {loading && <LoadingState label="Loading the review queue…" />}
 
       {!loading && queue && queue.length === 0 && (
         <EmptyState
           title="Nothing waiting for review"
-          hint="Prompts arrive here when they score in the REVIEW band or trip a hard override."
+          hint="A prompt lands here when its score falls in the REVIEW band, or when an attempt to override the model or bypass its rules is detected. It waits, unsent, until a reviewer approves or rejects it, so a person decides when a rule alone cannot."
         />
       )}
 
@@ -204,14 +211,24 @@ export function ReviewQueuePage() {
                                 {detail.matchedSignals.length > 0 && (
                                   <div>
                                     <p className="ps-detail__k">Matched signals</p>
-                                    {/* Neutral, pill-shaped and not interactive. */}
-                                    <div className="ps-chips">
-                                      {detail.matchedSignals.map((signal) => (
-                                        <span key={signal} className="ps-chip ps-chip--signal">{signalLabel(signal)}</span>
-                                      ))}
-                                    </div>
+                                    <dl className="ps-facts">
+                                      {detail.matchedSignals.map((signal) => {
+                                        const info = SIGNALS.find((s) => s.type === signal)
+                                        return (
+                                          <div key={signal}>
+                                            <dt><span className="ps-chip ps-chip--signal">{info?.label ?? signalLabel(signal)}</span></dt>
+                                            {info && <dd>{info.text}</dd>}
+                                          </div>
+                                        )
+                                      })}
+                                    </dl>
                                   </div>
                                 )}
+                              </div>
+
+                              <div>
+                                <p className="ps-detail__k">How the score was made</p>
+                                <BreakdownPanel breakdown={detail.scoreBreakdown} decision="REVIEW" riskScore={detail.riskScore} />
                               </div>
 
                               <div className="ps-field review-reason">

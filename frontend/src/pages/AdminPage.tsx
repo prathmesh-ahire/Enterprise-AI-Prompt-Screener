@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { EmptyState, LoadingState } from '../components/DataState'
 import { PageHeader } from '../components/PageHeader'
@@ -68,18 +69,6 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
 }
 
-// Triggers a browser download for a blob response - axios doesn't do this on its own.
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  URL.revokeObjectURL(url)
-}
-
 // ADMIN only (enforced by RoleProtectedRoute in App.tsx).
 export function AdminPage() {
   const [summary, setSummary] = useState<Summary | null>(null)
@@ -103,9 +92,6 @@ export function AdminPage() {
   const [usersLoading, setUsersLoading] = useState(true)
   const [usersError, setUsersError] = useState<string | null>(null)
   const [togglingUserId, setTogglingUserId] = useState<number | null>(null)
-
-  const [exporting, setExporting] = useState<'csv' | 'pdf' | null>(null)
-  const [exportError, setExportError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -181,19 +167,6 @@ export function AdminPage() {
       setDashboardError(extractErrorMessage(err))
     } finally {
       setUserHistoryLoadingId(null)
-    }
-  }
-
-  const handleExport = async (format: 'csv' | 'pdf') => {
-    setExporting(format)
-    setExportError(null)
-    try {
-      const response = await apiClient.get(`/api/reports/export`, { params: { format }, responseType: 'blob' })
-      downloadBlob(response.data as Blob, `screening-report.${format}`)
-    } catch (err) {
-      setExportError(extractErrorMessage(err))
-    } finally {
-      setExporting(null)
     }
   }
 
@@ -350,15 +323,10 @@ export function AdminPage() {
 
       <div className="ps-stack admin-stack">
         <section className="ps-card">
-          <h2 className="ps-card__title">Export a report</h2>
-          {exportError && <PageMessage kind="error">{exportError}</PageMessage>}
-          <div className="ps-row">
-            <Button variant="secondary" disabled={exporting !== null} loading={exporting === 'csv'} onClick={() => handleExport('csv')}>
-              {exporting === 'csv' ? 'Exporting…' : 'Export CSV'}
-            </Button>
-            <Button variant="secondary" disabled={exporting !== null} loading={exporting === 'pdf'} onClick={() => handleExport('pdf')}>
-              {exporting === 'pdf' ? 'Exporting…' : 'Export PDF'}
-            </Button>
+          <h2 className="ps-card__title">Reports</h2>
+          <p className="ps-card__text">Export the screening figures for a date range as CSV or PDF.</p>
+          <div>
+            <Link className="ps-btn ps-btn--secondary" to="/admin/reports">Open reports</Link>
           </div>
         </section>
 

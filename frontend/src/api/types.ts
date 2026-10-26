@@ -15,3 +15,15 @@ export interface PageResponse<T> {
   first: boolean
   last: boolean
 }
+
+// One row of /api/audit/my-history and /api/audit/all. Types and counts only, never prompt
+// content. The user is null when the event has none or the account no longer exists.
+export interface AuditEvent {
+  id: number
+  userId: number | null
+  username: string | null
+  action: string
+  requestId: string | null
+  riskBand: string | null
+  createdAt: string
+}

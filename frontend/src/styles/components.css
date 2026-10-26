@@ -2486,3 +2486,60 @@
 .ps-closing .ps-section-head__title {
   margin: 0;
 }
+
+/* --- Prompt page: the form and results beside a help panel ---------------------------------- */
+.prompt-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.prompt-aside {
+  position: sticky;
+  top: calc(var(--height-nav) + var(--space-6));
+}
+
+.prompt-aside .ps-card__text {
+  font: var(--text-body-sm);
+  color: var(--text-secondary);
+}
+
+/* An example-prompt chip: the entity chip's shape without its dot or colour, and a button. */
+.ps-chip--example {
+  --c: var(--line-control);
+  --t: transparent;
+  padding: 0 var(--space-3);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.ps-chip--example::before {
+  display: none;
+}
+
+.ps-chip--example:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.ps-chip--example:focus-visible {
+  outline: 2px solid var(--brand-soft);
+  outline-offset: 2px;
+}
+
+/* --- Reports: the From and To date fields -------------------------------------------------- */
+.report-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.report-dates .ps-input {
+  width: 200px;
+}
+
+/* Review queue: the figures strip sits clear of the queue below it. */
+.review-strip {
+  margin-bottom: var(--space-8);
+}

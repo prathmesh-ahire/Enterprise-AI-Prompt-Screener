@@ -14,6 +14,8 @@ import { ReviewQueuePage } from './pages/ReviewQueuePage'
 import { AdminPage } from './pages/AdminPage'
 import { PolicyManagementPage } from './pages/PolicyManagementPage'
 import { ModelConfigPage } from './pages/ModelConfigPage'
+import { AdminAuditPage } from './pages/AdminAuditPage'
+import { AdminReportsPage } from './pages/AdminReportsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PublicLayout } from './components/site/PublicLayout'
 import { RouteTitle } from './components/RouteTitle'
@@ -28,8 +30,8 @@ const LimitationsPage = lazy(() => import('./pages/public/LimitationsPage').then
 const ArchitecturePage = lazy(() => import('./pages/public/ArchitecturePage').then((m) => ({ default: m.ArchitecturePage })))
 
 // Route guards: ProtectedRoute (authenticated-vs-not) wraps every private route;
-// RoleProtectedRoute restricts /review to REVIEWER/ADMIN and /admin, /admin/policy and
-// /admin/models to ADMIN. The public pages and Not Found need no sign-in and make no API calls.
+// RoleProtectedRoute restricts /review to REVIEWER/ADMIN and /admin, /admin/policy,
+// /admin/models, /admin/audit and /admin/reports to ADMIN. The public pages and Not Found need no sign-in and make no API calls.
 function App() {
   return (
     <BrowserRouter>
@@ -53,6 +55,8 @@ function App() {
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/admin/policy" element={<PolicyManagementPage />} />
               <Route path="/admin/models" element={<ModelConfigPage />} />
+              <Route path="/admin/audit" element={<AdminAuditPage />} />
+              <Route path="/admin/reports" element={<AdminReportsPage />} />
             </Route>
           </Route>
 

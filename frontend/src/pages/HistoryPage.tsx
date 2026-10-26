@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { apiClient, extractErrorMessage } from '../api/client'
 import { MaskedText } from '../components/MaskedText'
 import { EntityChips } from '../components/EntityChips'
@@ -10,7 +11,11 @@ import { Icon } from '../components/Icon'
 import { PageMessage } from '../components/PageMessage'
 import { Pagination } from '../components/Pagination'
 import { Button } from '../components/Button'
-import type { PageResponse } from '../api/types'
+import { AuditLegend } from '../components/AuditLegend'
+import { AuditTable } from '../components/AuditTable'
+import { BreakdownPanel } from '../components/BreakdownPanel'
+import { Tabs } from '../components/Tabs'
+import type { PageResponse, ScoreBreakdown } from '../api/types'
 
 const PAGE_SIZE = 10
 
@@ -33,6 +38,7 @@ interface PromptDetail {
   aiResponse: string | null
   riskScore: number | null
   entityTypes: string[]
+  scoreBreakdown: ScoreBreakdown | null
 }
 
 // The filter is by *decision*, not by the `status` values
@@ -54,7 +60,9 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString()
 }
 
-export function HistoryPage() {
+// The prompts tab: the caller's own prompts, each expandable to its masked text, findings and
+// how its score was made.
+function PromptsPanel() {
   const [page, setPage] = useState(0)
   const [pageData, setPageData] = useState<PageResponse<HistoryItem> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -107,19 +115,15 @@ export function HistoryPage() {
   const filteredItems = filter === 'ALL' ? items : items.filter((item) => item.decision === filter)
 
   return (
-    <div className="page-content">
-      <PageHeader
-        title="Prompt history"
-        description="Every prompt you have submitted, with the decision it received and why."
-      />
-
+    <div className="ps-stack">
       {error && <PageMessage kind="error">{error}</PageMessage>}
 
       {/* "No history at all" — distinct from "no rows match the filter" below. */}
       {!loading && pageData && pageData.totalElements === 0 && (
         <EmptyState
           title="No prompts yet"
-          hint="Submit one from the Prompt page and it will appear here with its decision."
+          hint="Each prompt you submit will appear here with its decision, its score and the masked text that was sent."
+          action={<Link className="ps-btn ps-btn--secondary" to="/prompt">Go to Prompt</Link>}
         />
       )}
 
@@ -182,6 +186,7 @@ export function HistoryPage() {
                                   <PageMessage kind="error">{detailError}</PageMessage>
                                 )}
                                 {details[item.requestId] && (
+                                  <div className="ps-stack">
                                   <div className="ps-detail__grid">
                                     <div>
                                       <p className="ps-detail__k">Sent as</p>
@@ -207,6 +212,16 @@ export function HistoryPage() {
                                         <div className="ps-nested">{details[item.requestId].aiResponse}</div>
                                       </div>
                                     )}
+                                  </div>
+                                  <div>
+                                    <p className="ps-detail__k">How the score was made</p>
+                                    <BreakdownPanel
+                                      breakdown={details[item.requestId].scoreBreakdown}
+                                      decision={details[item.requestId].decision}
+                                      riskScore={details[item.requestId].riskScore}
+                                      own
+                                    />
+                                  </div>
                                   </div>
                                 )}
                               </td>
@@ -241,6 +256,38 @@ export function HistoryPage() {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+export function HistoryPage() {
+  return (
+    <div className="page-content">
+      <PageHeader
+        title="Prompt history"
+        description="Every prompt you have submitted, with the decision it received and why, and the audit trail of what you did."
+      />
+      <Tabs
+        label="History"
+        tabs={[
+          { id: 'prompts', label: 'Prompts', panel: <PromptsPanel /> },
+          {
+            id: 'audit',
+            label: 'Audit trail',
+            panel: (
+              <div className="ps-stack">
+                <AuditTable
+                  endpoint="/api/audit/my-history"
+                  caption="Your audit trail, newest first."
+                  emptyTitle="No activity yet"
+                  emptyHint="Signing in, submitting a prompt and the decisions made on it will be recorded here."
+                />
+                <AuditLegend />
+              </div>
+            ),
+          },
+        ]}
+      />
     </div>
   )
 }
