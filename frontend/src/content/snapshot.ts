@@ -15,15 +15,67 @@ export interface SnapshotExample {
   maskedText: string
 }
 
+// A short synthetic sentence run through the detectors: one each detector catches
+// ("caught"), a look-alike its second pass rejects ("ignored"), and documented gaps ("missed").
+export interface DetectorExample {
+  id: string
+  entityType: string
+  kind: 'caught' | 'ignored' | 'missed'
+  text: string
+  entityTypes: string[]
+  maskedText: string
+}
+
 export interface PipelineSnapshot {
   formulaWeights: Record<string, number>
   thresholds: { mask: number; confirm: number; review: number; block: number }
   placeholders: Record<string, string>
   signalTypes: string[]
+  subScoreRules: {
+    severityPerFinding: Record<string, number>
+    secretCriticality: Record<string, number>
+    injectionPerPhrase: number
+    roleBaseline: Record<string, number>
+    lengthShareCap: number
+  }
+  overrideRules: { rule: string; floor: string; description: string }[]
+  defaults: { maxPromptLength: number; retentionDays: number }
   examples: SnapshotExample[]
+  orgTermForExamples: string
+  detectorExamples: DetectorExample[]
 }
 
 export const PIPELINE: PipelineSnapshot = snapshotJson as PipelineSnapshot
+
+// The day the snapshot was last written by the backend test, for its SourceCaption.
+export const SNAPSHOT_SOURCE = {
+  source: 'pipeline snapshot written by PipelineSnapshotTest',
+  date: '2026-10-26',
+  kind: 'measured',
+} as const
+
+export function snapshotExample(id: string): SnapshotExample {
+  const found = PIPELINE.examples.find((e) => e.id === id)
+  if (!found) throw new Error(`No snapshot example "${id}"`)
+  return found
+}
+
+export function detectorExample(id: string): DetectorExample {
+  const found = PIPELINE.detectorExamples.find((e) => e.id === id)
+  if (!found) throw new Error(`No detector example "${id}"`)
+  return found
+}
+
+// Severity tier of an entity type, read from the backend's per-finding weight: the heaviest
+// weight is critical, the next high, and the rest medium.
+const SEVERITY_LEVELS = [...new Set(Object.values(PIPELINE.subScoreRules.severityPerFinding))].sort((a, b) => b - a)
+
+export function severityTier(entityType: string): 'critical' | 'high' | 'medium' {
+  const level = SEVERITY_LEVELS.indexOf(PIPELINE.subScoreRules.severityPerFinding[entityType])
+  if (level === 0) return 'critical'
+  if (level === 1) return 'high'
+  return 'medium'
+}
 
 export const DECISIONS = ['ALLOW', 'MASK', 'CONFIRM', 'REVIEW', 'BLOCK'] as const
 export type DecisionName = (typeof DECISIONS)[number]

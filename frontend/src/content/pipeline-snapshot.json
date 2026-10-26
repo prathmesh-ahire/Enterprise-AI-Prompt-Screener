@@ -32,6 +32,58 @@
     "OBFUSCATION_SIGNAL",
     "REPEATED_ATTACK_PATTERN"
   ],
+  "subScoreRules": {
+    "severityPerFinding": {
+      "PERSONAL_EMAIL": 0.15,
+      "PHONE_NUMBER": 0.15,
+      "PAN_LIKE_ID": 0.15,
+      "AADHAAR_LIKE_ID": 0.3,
+      "PAYMENT_CARD": 0.3,
+      "API_KEY": 0.5,
+      "PASSWORD_SECRET": 0.5,
+      "PRIVATE_KEY": 0.5,
+      "ORG_CONFIDENTIAL": 0.3
+    },
+    "secretCriticality": {
+      "PERSONAL_EMAIL": 0.0,
+      "PHONE_NUMBER": 0.0,
+      "PAN_LIKE_ID": 0.0,
+      "AADHAAR_LIKE_ID": 0.0,
+      "PAYMENT_CARD": 0.0,
+      "API_KEY": 0.8,
+      "PASSWORD_SECRET": 0.8,
+      "PRIVATE_KEY": 1.0,
+      "ORG_CONFIDENTIAL": 0.0
+    },
+    "injectionPerPhrase": 0.4,
+    "roleBaseline": {
+      "USER": 0.3,
+      "REVIEWER": 0.1,
+      "ADMIN": 0.0
+    },
+    "lengthShareCap": 0.3
+  },
+  "overrideRules": [
+    {
+      "rule": "CRITICAL_SECRET",
+      "floor": "BLOCK",
+      "description": "A private key or API key was detected, so the prompt is always blocked."
+    },
+    {
+      "rule": "INJECTION_SIGNAL",
+      "floor": "REVIEW",
+      "description": "An instruction-override or policy-bypass attempt was detected, so the prompt always goes to human review."
+    },
+    {
+      "rule": "DETECTED_ENTITY",
+      "floor": "MASK",
+      "description": "Sensitive data was detected, so the prompt is always masked at minimum."
+    }
+  ],
+  "defaults": {
+    "maxPromptLength": 2000,
+    "retentionDays": 90
+  },
   "examples": [
     {
       "id": "safe-1",
@@ -422,6 +474,213 @@
       "riskScore": 3.655,
       "entityTypes": [],
       "maskedText": "Email format examples for our style guide include user@ (incomplete) and info@@company.com (double at) - neither is a real address."
+    }
+  ],
+  "orgTermForExamples": "Project Bluefin",
+  "detectorExamples": [
+    {
+      "id": "email-caught",
+      "entityType": "PERSONAL_EMAIL",
+      "kind": "caught",
+      "text": "Send the report to alex.smith99@workplace.net when it is ready.",
+      "entityTypes": [
+        "PERSONAL_EMAIL"
+      ],
+      "maskedText": "Send the report to [EMAIL] when it is ready."
+    },
+    {
+      "id": "email-ignored",
+      "entityType": "PERSONAL_EMAIL",
+      "kind": "ignored",
+      "text": "Our style guide lists user@ and info@@company.com as broken addresses.",
+      "entityTypes": [],
+      "maskedText": "Our style guide lists user@ and info@@company.com as broken addresses."
+    },
+    {
+      "id": "phone-caught",
+      "entityType": "PHONE_NUMBER",
+      "kind": "caught",
+      "text": "You can call me on +91 98765 43210 after six.",
+      "entityTypes": [
+        "PHONE_NUMBER"
+      ],
+      "maskedText": "You can call me on [PHONE_NUMBER] after six."
+    },
+    {
+      "id": "phone-ignored",
+      "entityType": "PHONE_NUMBER",
+      "kind": "ignored",
+      "text": "Shipment 98765432109876 left the warehouse today.",
+      "entityTypes": [],
+      "maskedText": "Shipment 98765432109876 left the warehouse today."
+    },
+    {
+      "id": "phone-missed",
+      "entityType": "PHONE_NUMBER",
+      "kind": "missed",
+      "text": "Ring me on 98765.43210 tomorrow.",
+      "entityTypes": [],
+      "maskedText": "Ring me on 98765.43210 tomorrow."
+    },
+    {
+      "id": "pan-caught",
+      "entityType": "PAN_LIKE_ID",
+      "kind": "caught",
+      "text": "My PAN is ABCPE1234F for the tax filing.",
+      "entityTypes": [
+        "PAN_LIKE_ID"
+      ],
+      "maskedText": "My PAN is [GOVT_ID_REMOVED] for the tax filing."
+    },
+    {
+      "id": "pan-ignored",
+      "entityType": "PAN_LIKE_ID",
+      "kind": "ignored",
+      "text": "Part code ABCXE1234F is out of stock.",
+      "entityTypes": [],
+      "maskedText": "Part code ABCXE1234F is out of stock."
+    },
+    {
+      "id": "aadhaar-caught",
+      "entityType": "AADHAAR_LIKE_ID",
+      "kind": "caught",
+      "text": "My Aadhaar number is 2345 6789 0124.",
+      "entityTypes": [
+        "AADHAAR_LIKE_ID"
+      ],
+      "maskedText": "My Aadhaar number is [GOVT_ID_REMOVED]."
+    },
+    {
+      "id": "aadhaar-ignored",
+      "entityType": "AADHAAR_LIKE_ID",
+      "kind": "ignored",
+      "text": "Reference 2345 6789 0125 is on the form.",
+      "entityTypes": [],
+      "maskedText": "Reference 2345 6789 0125 is on the form."
+    },
+    {
+      "id": "card-caught",
+      "entityType": "PAYMENT_CARD",
+      "kind": "caught",
+      "text": "Charge it to 4111 1111 1111 1111, expiry next year.",
+      "entityTypes": [
+        "PAYMENT_CARD"
+      ],
+      "maskedText": "Charge it to [PAYMENT_CARD], expiry next year."
+    },
+    {
+      "id": "card-ignored",
+      "entityType": "PAYMENT_CARD",
+      "kind": "ignored",
+      "text": "The order confirmation number is 1234567890123456.",
+      "entityTypes": [],
+      "maskedText": "The order confirmation number is 1234567890123456."
+    },
+    {
+      "id": "card-imei",
+      "entityType": "PAYMENT_CARD",
+      "kind": "ignored",
+      "text": "The handset's IMEI is 356938035643809.",
+      "entityTypes": [],
+      "maskedText": "The handset's IMEI is 356938035643809."
+    },
+    {
+      "id": "apikey-caught",
+      "entityType": "API_KEY",
+      "kind": "caught",
+      "text": "Here is my api_key=Zx9pQ7rT2vLm4wN8sK1dJh6 for the integration.",
+      "entityTypes": [
+        "API_KEY"
+      ],
+      "maskedText": "Here is my api_key=[SECRET_REMOVED] for the integration."
+    },
+    {
+      "id": "apikey-ignored",
+      "entityType": "API_KEY",
+      "kind": "ignored",
+      "text": "Set api_key=aaaaaaaaaaaaaaaaaaaa in the template.",
+      "entityTypes": [],
+      "maskedText": "Set api_key=aaaaaaaaaaaaaaaaaaaa in the template."
+    },
+    {
+      "id": "apikey-base64",
+      "entityType": "API_KEY",
+      "kind": "caught",
+      "text": "aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+      "entityTypes": [
+        "API_KEY"
+      ],
+      "maskedText": "aws_secret_access_key = [SECRET_REMOVED]"
+    },
+    {
+      "id": "apikey-url",
+      "entityType": "API_KEY",
+      "kind": "ignored",
+      "text": "The auth token endpoint is api.example.com/users/profile",
+      "entityTypes": [],
+      "maskedText": "The auth token endpoint is api.example.com/users/profile"
+    },
+    {
+      "id": "apikey-sshrsa",
+      "entityType": "API_KEY",
+      "kind": "ignored",
+      "text": "My public key is ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7 for the server.",
+      "entityTypes": [],
+      "maskedText": "My public key is ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7 for the server."
+    },
+    {
+      "id": "password-caught",
+      "entityType": "PASSWORD_SECRET",
+      "kind": "caught",
+      "text": "My password is Winter235@ for the staging box.",
+      "entityTypes": [
+        "PASSWORD_SECRET"
+      ],
+      "maskedText": "My password is [SECRET_REMOVED] for the staging box."
+    },
+    {
+      "id": "password-ignored",
+      "entityType": "PASSWORD_SECRET",
+      "kind": "ignored",
+      "text": "Please reset your password before Friday.",
+      "entityTypes": [],
+      "maskedText": "Please reset your password before Friday."
+    },
+    {
+      "id": "privatekey-caught",
+      "entityType": "PRIVATE_KEY",
+      "kind": "caught",
+      "text": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASC\n-----END PRIVATE KEY-----",
+      "entityTypes": [
+        "PRIVATE_KEY"
+      ],
+      "maskedText": "[PRIVATE_KEY_REMOVED]"
+    },
+    {
+      "id": "privatekey-ignored",
+      "entityType": "PRIVATE_KEY",
+      "kind": "ignored",
+      "text": "Paste it between -----BEGIN PRIVATE KEY----- your key here -----END PRIVATE KEY-----",
+      "entityTypes": [],
+      "maskedText": "Paste it between -----BEGIN PRIVATE KEY----- your key here -----END PRIVATE KEY-----"
+    },
+    {
+      "id": "org-caught",
+      "entityType": "ORG_CONFIDENTIAL",
+      "kind": "caught",
+      "text": "The launch plan for Project Bluefin is ready.",
+      "entityTypes": [
+        "ORG_CONFIDENTIAL"
+      ],
+      "maskedText": "The launch plan for [INTERNAL_PROJECT] is ready."
+    },
+    {
+      "id": "org-ignored",
+      "entityType": "ORG_CONFIDENTIAL",
+      "kind": "ignored",
+      "text": "A bluefin tuna swam past the boat.",
+      "entityTypes": [],
+      "maskedText": "A bluefin tuna swam past the boat."
     }
   ]
 }

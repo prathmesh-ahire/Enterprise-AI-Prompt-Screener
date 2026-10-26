@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.screener.detection.DecisionResult;
 import com.screener.detection.DetectionEngine;
+import com.screener.detection.Detector;
+import com.screener.detection.OrgConfidentialDetector;
 import com.screener.detection.PolicyDecisionEngine;
 import com.screener.detection.RiskAnalysisEngine;
 import com.screener.detection.RiskScorer;
@@ -17,10 +19,14 @@ import com.screener.detection.RiskSubScores;
 import com.screener.detection.RiskThresholds;
 import com.screener.model.DetectionFinding;
 import com.screener.model.EntityType;
+import com.screener.model.OrgConfidentialTerm;
 import com.screener.model.OverrideRule;
 import com.screener.model.SignalType;
+import com.screener.repository.OrgConfidentialTermRepository;
+import com.screener.repository.SystemConfigRepository;
 import com.screener.service.MaskingService;
 import com.screener.service.PromptService;
+import com.screener.service.RetentionCleanupJob;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,6 +49,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Runs every prompt in {@code test-prompts.json} through the real screening pipeline and
@@ -55,6 +63,12 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * no detector is disabled, the thresholds and maximum length are the defaults, and the user id
  * has no audit events, so other tests' data cannot change the result.
  *
+ * <p>It also records, for each detector, short synthetic sentences from
+ * {@code detector-examples.json}: one it catches, one it correctly ignores, and the known misses.
+ * Each is checked as well as recorded, so a sentence labelled "caught" that the detector no longer
+ * catches fails the test outright. Organisation terms come from an admin list, so these examples
+ * run with one made-up term ({@code ORG_TERM}) in place of the database's list.
+ *
  * <p>To regenerate the file after an intended change, run
  * {@code ./mvnw test -Dtest=PipelineSnapshotTest -Dsnapshot.write=true} from {@code backend/}.
  * When the frontend folder is absent (the backend Docker build) the test is skipped.
@@ -64,6 +78,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 class PipelineSnapshotTest {
 
     private static final String DATASET_PATH = "test-prompts.json";
+    private static final String DETECTOR_EXAMPLES_PATH = "detector-examples.json";
+    private static final String ORG_TERM = "Project Bluefin";
     private static final Path CONTENT_DIR = Path.of("..", "frontend", "src", "content");
     private static final Path SNAPSHOT_FILE = CONTENT_DIR.resolve("pipeline-snapshot.json");
     private static final String WRITE_PROPERTY = "snapshot.write";
@@ -77,9 +93,14 @@ class PipelineSnapshotTest {
     @Autowired private RiskScorer riskScorer;
     @Autowired private PolicyDecisionEngine policyDecisionEngine;
     @Autowired private MaskingService maskingService;
+    @Autowired private List<Detector> detectors;
+    @Autowired private SystemConfigRepository systemConfigRepository;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record TestPromptCase(String id, String text) {
+    }
+
+    private record DetectorExampleCase(String id, String entityType, String kind, String text) {
     }
 
     @Test
@@ -118,7 +139,16 @@ class PipelineSnapshotTest {
         snapshot.put("thresholds", thresholds());
         snapshot.put("placeholders", placeholders());
         snapshot.put("signalTypes", Arrays.stream(SignalType.values()).map(Enum::name).toList());
+        snapshot.put("subScoreRules", subScoreRules());
+        snapshot.put("overrideRules", overrideRules());
+        // A LinkedHashMap, not Map.of: Map.of iterates in a different order on each run.
+        Map<String, Object> defaults = new LinkedHashMap<>();
+        defaults.put("maxPromptLength", PromptService.DEFAULT_MAX_LENGTH);
+        defaults.put("retentionDays", RetentionCleanupJob.DEFAULT_RETENTION_DAYS);
+        snapshot.put("defaults", defaults);
         snapshot.put("examples", examples());
+        snapshot.put("orgTermForExamples", ORG_TERM);
+        snapshot.put("detectorExamples", detectorExamples());
         return snapshot;
     }
 
@@ -140,6 +170,46 @@ class PipelineSnapshotTest {
         thresholds.put("review", defaults.review());
         thresholds.put("block", defaults.block());
         return thresholds;
+    }
+
+    // The sub-score constants are private to RiskSubScoreCalculator, so read them the way the
+    // pipeline produces them: one finding of each type, one injection phrase, each role at
+    // length 0, and a prompt far over the maximum length for the cap on the length share.
+    private Map<String, Object> subScoreRules() {
+        int max = PromptService.DEFAULT_MAX_LENGTH;
+        Map<String, Object> severity = new LinkedHashMap<>();
+        Map<String, Object> secret = new LinkedHashMap<>();
+        for (EntityType type : EntityType.values()) {
+            DetectionFinding finding = new DetectionFinding();
+            finding.setEntityType(type);
+            RiskSubScores one = riskSubScoreCalculator.compute(List.of(finding), List.of(), "ADMIN", 0, max);
+            severity.put(type.name(), one.sensitiveDataScore());
+            secret.put(type.name(), one.secretCriticalityScore());
+        }
+        Map<String, Object> roleBaseline = new LinkedHashMap<>();
+        for (String role : List.of("USER", "REVIEWER", "ADMIN")) {
+            roleBaseline.put(role, riskSubScoreCalculator.compute(List.of(), List.of(), role, 0, max).policyContextScore());
+        }
+        RiskSignalResult phrase = new RiskSignalResult("snapshot", SignalType.INSTRUCTION_OVERRIDE, "", 1.0, "");
+        Map<String, Object> rules = new LinkedHashMap<>();
+        rules.put("severityPerFinding", severity);
+        rules.put("secretCriticality", secret);
+        rules.put("injectionPerPhrase",
+                riskSubScoreCalculator.compute(List.of(), List.of(phrase), "ADMIN", 0, max).injectionScore());
+        rules.put("roleBaseline", roleBaseline);
+        rules.put("lengthShareCap",
+                riskSubScoreCalculator.compute(List.of(), List.of(), "ADMIN", max * 10, max).policyContextScore());
+        return rules;
+    }
+
+    private List<Map<String, Object>> overrideRules() {
+        return Arrays.stream(OverrideRule.values()).map(rule -> {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("rule", rule.name());
+            entry.put("floor", rule.floor().name());
+            entry.put("description", rule.description());
+            return entry;
+        }).toList();
     }
 
     // The placeholder map is private to MaskingService, so read it the way the pipeline does:
@@ -187,6 +257,47 @@ class PipelineSnapshotTest {
                     .map(f -> f.getEntityType().name()).distinct().sorted(Comparator.naturalOrder()).toList());
             example.put("maskedText", maskingService.getMaskedPreview(text, findings));
             examples.add(example);
+        }
+        return examples;
+    }
+
+    // "caught" must produce a finding of its entity type; "ignored" (a look-alike pass 2 rejects)
+    // and "missed" (a documented gap) must not.
+    private List<Map<String, Object>> detectorExamples() throws IOException {
+        OrgConfidentialTermRepository terms = mock(OrgConfidentialTermRepository.class);
+        OrgConfidentialTerm term = new OrgConfidentialTerm();
+        term.setTerm(ORG_TERM);
+        term.setActive(true);
+        when(terms.findByActiveTrue()).thenReturn(List.of(term));
+        List<Detector> withExampleTerm = detectors.stream()
+                .map(d -> d instanceof OrgConfidentialDetector ? new OrgConfidentialDetector(terms) : d)
+                .toList();
+        DetectionEngine engine = new DetectionEngine(withExampleTerm, systemConfigRepository);
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<DetectorExampleCase> cases;
+        try (InputStream in = new ClassPathResource(DETECTOR_EXAMPLES_PATH).getInputStream()) {
+            cases = mapper.readValue(in, mapper.getTypeFactory().constructCollectionType(List.class, DetectorExampleCase.class));
+        }
+
+        List<Map<String, Object>> examples = new ArrayList<>();
+        for (DetectorExampleCase example : cases) {
+            List<DetectionFinding> findings = engine.detectAll(example.text(), Set.of());
+            List<String> types = findings.stream()
+                    .map(f -> f.getEntityType().name()).distinct().sorted(Comparator.naturalOrder()).toList();
+            boolean found = types.contains(example.entityType());
+            if (found != "caught".equals(example.kind())) {
+                fail("detector example \"" + example.id() + "\" is labelled " + example.kind()
+                        + " but the detectors found " + types);
+            }
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("id", example.id());
+            entry.put("entityType", example.entityType());
+            entry.put("kind", example.kind());
+            entry.put("text", example.text());
+            entry.put("entityTypes", types);
+            entry.put("maskedText", maskingService.getMaskedPreview(example.text(), findings));
+            examples.add(entry);
         }
         return examples;
     }

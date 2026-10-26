@@ -2345,3 +2345,144 @@
 .ps-public .ps-svg-edge-label {
   fill: var(--text-secondary);
 }
+
+/* ==========================================================================
+   PUBLIC PAGES
+   The page-level layout the content pages share: sections space-16 apart, a section's
+   content space-9 below its header, and cards space-6 apart.
+   ========================================================================== */
+.ps-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.ps-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);
+  min-width: 0;
+}
+
+.ps-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* Two columns side by side, for a list beside a card. */
+.ps-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+/* Labelled groups: the group name as an eyebrow, the members as text. */
+.ps-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0;
+}
+
+.ps-groups dd {
+  margin: var(--space-1) 0 0;
+  font: var(--text-lead);
+  color: var(--text-primary);
+}
+
+/* A plain list of rows inside a card: no header line, a hairline between rows. */
+.ps-rows {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--text-body);
+  color: var(--text-secondary);
+}
+
+.ps-rows td {
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+  border-top: 1px solid var(--line-subtle);
+  vertical-align: middle;
+}
+
+.ps-rows tr:first-child td {
+  border-top: 0;
+}
+
+.ps-rows td:last-child {
+  padding-right: 0;
+}
+
+.ps-rows .ps-right {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* A row heading names the row: primary text, on one line, set apart from its description. */
+.ps-rows th {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-3) var(--space-6) var(--space-3) 0;
+  border-top: 1px solid var(--line-subtle);
+  font: var(--text-body);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.ps-rows tr:first-child th {
+  border-top: 0;
+}
+
+.ps-rows th + td {
+  vertical-align: top;
+}
+
+/* Larger cards two to a row, where three would squeeze their code boxes. */
+.ps-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+  align-items: start;
+}
+
+/* Short labelled facts inside a card. */
+.ps-facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+}
+
+.ps-facts dd {
+  margin: var(--space-1) 0 0;
+  font: var(--text-body);
+  color: var(--text-secondary);
+}
+
+/* The formula, kept on its own lines when it wraps. */
+.ps-formula {
+  white-space: pre-wrap;
+}
+
+/* An example inside a card: its label, the text in a code box, and its decision. */
+.ps-example {
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* The closing call to action at the foot of Home. */
+.ps-closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+  padding: var(--space-8) 0;
+}
+
+.ps-closing .ps-section-head__title {
+  margin: 0;
+}

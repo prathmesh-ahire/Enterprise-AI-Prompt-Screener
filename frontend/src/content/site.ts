@@ -175,6 +175,15 @@ export const FIGURES = {
     value: 8, label: 'of those failed, from 4 root causes, all fixed',
     source: 'Manual test results report, defects found', date: '2026-09-22', kind: 'recorded',
   },
+  // Why a payment card needs more than a valid check digit.
+  imeiRuns: {
+    value: '623 of 702', label: 'Luhn-valid card-length numbers in harmless text that were phone IMEIs',
+    source: 'Public dataset audit, 12,000 harmless rows', date: '2026-08-16', kind: 'recorded',
+  },
+  imeiRemoved: {
+    value: '677 of 702', label: 'of those numbers no longer flagged once a real card issuer prefix was required, with no loss of recall',
+    source: 'Public dataset audit, 12,000 harmless rows', date: '2026-08-16', kind: 'recorded',
+  },
 } as const satisfies Record<string, Figure>
 
 // Public synthetic PII dataset, English file, with values localised to this project's scope.
@@ -200,3 +209,7 @@ export const COMMISSIONED_CORPUS_AUDIT: readonly Figure[] = [
   { value: '0 of 100', label: 'False positives on harmless rows', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
   { value: '1,500 delivered, 731 usable', label: 'Rows after removing 769 exact duplicates (51%)', source: 'Commissioned corpus audit', date: '2026-08-16', kind: 'recorded' },
 ]
+
+// When repeated attempts count as a signal: this many blocked or reviewed prompts from one
+// user inside this many hours (read from RiskAnalysisEngine).
+export const REPEATED_ATTACK = { count: 3, hours: 24 }
