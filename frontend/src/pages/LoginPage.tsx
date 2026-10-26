@@ -51,6 +51,7 @@ export function LoginPage() {
         <>
           <Link to="/forgot-password" className="ps-link">Forgot password?</Link>
           <Link to="/register" className="ps-link">Create an account</Link>
+          <Link to="/how-it-works" className="ps-link">How it works</Link>
         </>
       )}
     >

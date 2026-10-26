@@ -1,14 +1,13 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { Button } from './Button'
 import { RoleBadge } from './RoleBadge'
 
 // The app navbar: the
 // wordmark · Prompt, History, Review queue · a separator · the admin links · then, on the
-// right, the RoleBadge, the user ID and a small ghost "Log out". Each role sees only the
-// links it can open, additive by role (ADMIN > REVIEWER > USER, as PromptService.resolveRole
-// orders them). The "About" link joins once the public site it points to exists,
-// and Audit log and Reports with their pages.
+// right, the "About" link to the public site, the RoleBadge, the user ID and a small ghost
+// "Log out". Each role sees only the links it can open, additive by role
+// (ADMIN > REVIEWER > USER, as PromptService.resolveRole orders them).
 //
 // Desktop only: one row at 1280px and up, so there is no collapsed menu any more. NavLink
 // sets aria-current="page" on the current link, which is what draws its bottom bar.
@@ -42,6 +41,7 @@ export function Navbar() {
         )}
       </nav>
       <div className="ps-appbar__user">
+        <Link to="/" className="ps-appbar__about">About</Link>
         {role && <RoleBadge role={role} />}
         <span>{username}</span>
         <Button variant="ghost" size="sm" onClick={handleLogout}>Log out</Button>

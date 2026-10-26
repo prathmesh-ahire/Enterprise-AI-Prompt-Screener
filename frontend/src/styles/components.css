@@ -1226,6 +1226,17 @@
   white-space: nowrap;
 }
 
+.ps-appbar__about {
+  font: var(--text-nav);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.ps-appbar__about:hover {
+  color: var(--text-primary);
+}
+
 /* --- Empty state ----------------------------------------------------------------- */
 .ps-empty {
   display: flex;
@@ -1406,4 +1417,162 @@
 /* A lone short number field, at the filter width rather than the card's. */
 .field-short {
   max-width: 280px;
+}
+
+/* ==========================================================================
+   PUBLIC SITE SHELL
+   Everything inside .ps-public uses the showcase style: the raised glow button, the
+   public header and footer. The pages inside it are added one by one.
+   ========================================================================== */
+.ps-public {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-page);
+  color: var(--text-primary);
+}
+
+.ps-public > main {
+  flex: 1;
+}
+
+/* Raised glow button: any primary button inside the public shell. */
+.ps-public .ps-btn--primary {
+  border: 0;
+  background-color: var(--brand-strong);
+  background-image: var(--gradient-brand);
+  background-size: 280% auto;
+  background-position: left center;
+  box-shadow: var(--glow-button);
+  transition:
+    background-position var(--duration-button) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.ps-public .ps-btn--primary:hover {
+  background-position: right top;
+}
+
+.ps-public .ps-btn--primary:active {
+  background-image: none;
+  background-color: var(--brand-deep);
+}
+
+.ps-public .ps-btn--secondary {
+  background: transparent;
+}
+
+.ps-site-head {
+  position: relative;
+  height: var(--height-nav);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 0 var(--space-6);
+  border-bottom: 1px solid var(--line-subtle);
+  background: color-mix(in srgb, var(--surface-page) 82%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.ps-site-nav {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.ps-site-nav a {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font: var(--text-nav);
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.ps-site-nav a:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.ps-site-nav a[aria-current='page'] {
+  color: var(--text-primary);
+  box-shadow: inset 0 -2px 0 var(--brand-base);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.ps-site-foot {
+  position: relative;
+  padding: var(--space-12) var(--space-6) var(--space-8);
+  display: grid;
+  gap: var(--space-8);
+  grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(140px, 1fr));
+}
+
+.ps-site-foot::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: var(--gradient-glow-line);
+}
+
+.ps-site-foot__lede {
+  font: var(--text-body-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-3);
+  max-width: 32ch;
+}
+
+.ps-site-foot__h {
+  font: var(--text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.ps-site-foot ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ps-site-foot li a {
+  font: var(--text-body-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.ps-site-foot li a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ps-site-foot__base {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line-subtle);
+  font: var(--text-caption);
+  color: var(--text-muted);
+}
+
+/* The frame of a public content page. */
+.public-page {
+  width: 100%;
+  max-width: var(--width-content);
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-8) var(--space-16);
 }

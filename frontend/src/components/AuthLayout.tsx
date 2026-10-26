@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { APP_NAME } from './AppShell'
+import { PRODUCT_NAME } from '../content/site'
 
 // The calm app style with no moving background, and one centred 400px solid card. The full
 // product name sits above it. The card holds the page's one h1, the form fields, one
@@ -20,7 +20,7 @@ export function AuthLayout({ title, subtitle, children, links }: AuthLayoutProps
   return (
     <div className="ps-app auth-shell">
       <main className="auth-column" id="main-content">
-        <Link to="/login" className="ps-wordmark auth-name">{APP_NAME}</Link>
+        <Link to="/" className="ps-wordmark auth-name">{PRODUCT_NAME}</Link>
         <div className="ps-card auth-card">
           <h1>{title}</h1>
           {subtitle && <p className="ps-card__text">{subtitle}</p>}
