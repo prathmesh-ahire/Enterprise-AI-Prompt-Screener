@@ -31,9 +31,44 @@ with masking, human review, and audit logging built in.
    docker exec screener-ollama ollama pull llama3.2
    ```
    (or whichever model name you set as `OLLAMA_MODEL` in `.env`)
-6. Open [http://localhost:5173](http://localhost:5173) - you should see the login page.
-   Log in with the `ADMIN_USERNAME`/`ADMIN_PASSWORD` from your `.env`. The seeded admin
+6. Open [http://localhost:5173](http://localhost:5173) - you should see the public Home page.
+   Choose "Open the app" and sign in with the `ADMIN_USERNAME`/`ADMIN_PASSWORD` from your `.env`. The seeded admin
    holds both the `ADMIN` and `USER` roles, so it can submit prompts as well as administer.
+
+## Pages
+
+The interface is dark only.
+
+**Public pages** (no sign-in, no API calls; they read a snapshot of the real screening pipeline that a
+backend test keeps in step with the code):
+
+| Page | Address |
+|---|---|
+| Home | `/` |
+| How it works | `/how-it-works` |
+| Detectors | `/detectors` |
+| Examples | `/examples` |
+| Evaluation | `/evaluation` |
+| Limitations | `/limitations` |
+| Architecture | `/architecture` |
+
+**Sign-in pages:** `/login`, `/register`, `/forgot-password`, `/reset-password`.
+
+**App pages** (sign in first; each role sees only the links it can open):
+
+| Page | Address | Roles |
+|---|---|---|
+| Prompt | `/prompt` | User |
+| History (prompts and audit trail) | `/history` | User |
+| Review queue | `/review` | Reviewer, Admin |
+| Admin dashboard | `/admin` | Admin |
+| Policy | `/admin/policy` | Admin |
+| Models | `/admin/models` | Admin |
+| Audit log | `/admin/audit` | Admin |
+| Reports | `/admin/reports` | Admin |
+
+An address that is not a page shows a Not Found page. Swagger is available on a running instance at
+[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
 
 ### Upgrading a database created before V1.1
 
@@ -69,5 +104,6 @@ screening and AI responses both happen locally.
 - `backend/` - Spring Boot app (`src/main/java/com/screener/`: `controller`, `service`,
   `repository`, `model`, `dto`, `detection`, `config`)
 - `frontend/` - React + TypeScript app (`src/pages/`, `src/components/`, `src/api/`)
+- `database/schema.sql` - the 13 tables, structure only, exported from the running MySQL database. Hibernate creates the same tables on start; this is the reference copy
 - `docker-compose.yml` - runs MySQL + Ollama + backend + frontend
 - `.github/workflows/` - CI pipeline
